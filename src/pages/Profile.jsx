@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db, useLiveCollection } from '../db';
 import { User, Key, Trash2, Camera, Activity, Eye } from 'lucide-react';
@@ -14,7 +14,8 @@ export default function Profile() {
     name: user.name || '',
     username: user.username || '',
     department: user.department || '',
-    email: user.email || ''
+    email: user.email || '',
+    bio: user.bio || ''
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -27,6 +28,12 @@ export default function Profile() {
   // Fetch real-time user data to get avatar
   const scientists = useLiveCollection('scientists');
   const currentUserData = scientists?.find(s => String(s.id) === String(user.id));
+  
+  useEffect(() => {
+    if (currentUserData && currentUserData.points > (currentUserData.lastSeenPoints || 0)) {
+      db.scientists.update(user.id, { lastSeenPoints: currentUserData.points }).catch(() => {});
+    }
+  }, [currentUserData?.points, currentUserData?.lastSeenPoints, user.id]);
   
   // History logs
   const usageLogsRaw = useLiveCollection('usage_logs');
@@ -166,6 +173,9 @@ export default function Profile() {
             {currentUserData?.email && (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.25rem' }}>📧 {currentUserData.email}</p>
             )}
+            {currentUserData?.bio && (
+              <p style={{ color: 'var(--text-main)', fontSize: '0.85rem', marginTop: '1rem', fontStyle: 'italic', padding: '0.5rem', backgroundColor: 'var(--bg-color)', borderRadius: '8px' }}>"{currentUserData.bio}"</p>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', marginTop: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
               <Eye size={14} /> {currentUserData?.profileViews || 0} profile views
             </div>
@@ -181,7 +191,11 @@ export default function Profile() {
               onClick={() => setActiveTab('security')}
             >🔐 Security</button>
             <button 
-              style={{ width: '100%', padding: '0.75rem 1.25rem', textAlign: 'left', background: activeTab === 'history' ? 'var(--secondary)' : 'transparent', border: 'none', borderLeft: activeTab === 'history' ? '4px solid var(--primary)' : '4px solid transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: activeTab === 'history' ? 600 : 400, color: 'var(--text)', fontSize: '0.9rem' }}
+              style={{ width: '100%', padding: '0.75rem 1.25rem', textAlign: 'left', background: activeTab === 'tags' ? 'var(--secondary)' : 'transparent', border: 'none', borderLeft: activeTab === 'tags' ? '4px solid var(--primary)' : '4px solid transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: activeTab === 'tags' ? 600 : 400, color: 'var(--text-main)', fontSize: '0.9rem' }}
+              onClick={() => setActiveTab('tags')}
+            >🏅 Tags & Ranks</button>
+            <button 
+              style={{ width: '100%', padding: '0.75rem 1.25rem', textAlign: 'left', background: activeTab === 'history' ? 'var(--secondary)' : 'transparent', border: 'none', borderLeft: activeTab === 'history' ? '4px solid var(--primary)' : '4px solid transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: activeTab === 'history' ? 600 : 400, color: 'var(--text-main)', fontSize: '0.9rem' }}
               onClick={() => setActiveTab('history')}
             >📊 Usage History</button>
             <button 
@@ -216,8 +230,71 @@ export default function Profile() {
                   <label className="form-label">Department \ Lab</label>
                   <input type="text" className="form-control" value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} />
                 </div>
+                <div className="form-group">
+                  <label className="form-label">Bio</label>
+                  <textarea className="form-control" rows="3" value={formData.bio} onChange={e => setFormData({...formData, bio: e.target.value})} placeholder="Tell your lab mates about yourself..." />
+                </div>
                 <button type="submit" className="btn btn-primary">💾 Save Changes</button>
               </form>
+            </div>
+          )}
+
+          {activeTab === 'tags' && (
+            <div className="card">
+              <div className="card-header">
+                <h2 className="card-title">🏅 Your Tags & Ranks</h2>
+              </div>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+                You unlock new tags automatically by earning points (registering chemicals, etc.). Here are all the tags you have unlocked!
+              </p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {[
+                  { name: 'Lab Legend', color: '#805AD5', emoji: '🏆', pointsRequired: 500 },
+                  { name: 'Mad Scientist', color: '#DD6B20', emoji: '🧑‍🔬', pointsRequired: 300 },
+                  { name: 'Chemical Warrior', color: '#3182CE', emoji: '⚔️', pointsRequired: 150 },
+                  { name: 'Beaker Breaker', color: '#38A169', emoji: '🧪', pointsRequired: 50 },
+                  { name: 'Lab Rat', color: '#718096', emoji: '🐀', pointsRequired: 10 },
+                  { name: 'Baby Chemist', color: '#A0AEC0', emoji: '🍼', pointsRequired: 0 }
+                ].map(rank => {
+                  const isUnlocked = user.role === 'master' || (currentUserData?.points || 0) >= rank.pointsRequired;
+                  const isSelected = currentUserData?.selectedRankTitle === rank.name || (!currentUserData?.selectedRankTitle && ((currentUserData?.points || 0) >= rank.pointsRequired && ((currentUserData?.points || 0) < [500,300,150,50,10,0].find(p => p > rank.pointsRequired) || rank.pointsRequired===500)));
+                  // (simplified: if they manually selected it)
+                  const isActivelySelected = currentUserData?.selectedRankTitle === rank.name;
+                  
+                  return (
+                    <div key={rank.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: isUnlocked ? 'var(--secondary)' : 'var(--bg-color)', borderRadius: '8px', border: isUnlocked ? `1px solid ${rank.color}` : '1px solid var(--border-color)', opacity: isUnlocked ? 1 : 0.5 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <span style={{ fontSize: '2rem' }}>{rank.emoji}</span>
+                        <div>
+                          <strong style={{ fontSize: '1.1rem', color: isUnlocked ? rank.color : 'var(--text-muted)' }}>{rank.name}</strong>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Requires {rank.pointsRequired} pts</div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        {isUnlocked ? (
+                          <>
+                            {isActivelySelected && <span className="badge" style={{ backgroundColor: 'var(--success)', color: 'white' }}>Equipped</span>}
+                            <button 
+                              className="btn btn-secondary" 
+                              style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
+                              onClick={() => {
+                                db.scientists.update(user.id, { selectedRankTitle: rank.name }).then(() => {
+                                  showMessage('success', `Equipped ${rank.name} tag!`);
+                                });
+                              }}
+                            >
+                              Equip Tag
+                            </button>
+                          </>
+                        ) : (
+                          <span className="badge" style={{ backgroundColor: 'var(--border-color)', color: 'var(--text-muted)' }}>Locked</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 

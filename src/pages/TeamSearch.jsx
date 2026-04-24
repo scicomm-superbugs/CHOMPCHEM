@@ -27,12 +27,21 @@ export default function TeamSearch() {
       )
     : activeScientists;
 
-  const getRank = (points) => {
-    if (points >= 500) return { name: 'Lab Legend', color: '#805AD5', emoji: '🏆' };
-    if (points >= 300) return { name: 'Expert', color: '#DD6B20', emoji: '🔥' };
-    if (points >= 150) return { name: 'Senior Scientist', color: '#3182CE', emoji: '⭐' };
-    if (points >= 50) return { name: 'Researcher', color: '#38A169', emoji: '🔬' };
-    return { name: 'Novice', color: '#A0AEC0', emoji: '🌱' };
+  const getRank = (points, customTitle) => {
+    const ranks = [
+      { name: 'Lab Legend', color: '#805AD5', emoji: '🏆', req: 500 },
+      { name: 'Mad Scientist', color: '#DD6B20', emoji: '🧑‍🔬', req: 300 },
+      { name: 'Chemical Warrior', color: '#3182CE', emoji: '⚔️', req: 150 },
+      { name: 'Beaker Breaker', color: '#38A169', emoji: '🧪', req: 50 },
+      { name: 'Lab Rat', color: '#718096', emoji: '🐀', req: 10 },
+      { name: 'Baby Chemist', color: '#A0AEC0', emoji: '🍼', req: 0 }
+    ];
+    let highestRank = ranks.find(r => points >= r.req);
+    if (customTitle) {
+      const customRank = ranks.find(r => r.name === customTitle && points >= r.req);
+      if (customRank) return customRank;
+    }
+    return highestRank || ranks[ranks.length - 1];
   };
 
   const getUserPoints = (userId) => {
@@ -94,7 +103,7 @@ export default function TeamSearch() {
             <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
               {filtered.map(s => {
                 const pts = s.role === 'master' ? '∞' : getUserPoints(s.id);
-                const rank = s.role === 'master' ? { name: 'Lab Master', color: '#D69E2E', emoji: '👑' } : getRank(pts);
+                const rank = s.role === 'master' ? { name: 'Lab Master', color: '#D69E2E', emoji: '👑' } : getRank(pts, s.selectedRankTitle);
                 const isSelected = selectedUser && String(selectedUser.id) === String(s.id);
 
                 return (
@@ -199,7 +208,7 @@ export default function TeamSearch() {
                   <span>
                     {(() => {
                       const pts = selectedUser.role === 'master' ? Infinity : getUserPoints(selectedUser.id);
-                      const rank = selectedUser.role === 'master' ? { name: 'Lab Master', color: '#D69E2E', emoji: '👑' } : getRank(pts);
+                      const rank = selectedUser.role === 'master' ? { name: 'Lab Master', color: '#D69E2E', emoji: '👑' } : getRank(pts, selectedUser.selectedRankTitle);
                       return <span style={{ color: rank.color, fontWeight: 600 }}>{rank.emoji} {rank.name}</span>;
                     })()}
                   </span>
@@ -208,6 +217,14 @@ export default function TeamSearch() {
                   <span style={{ color: 'var(--text-muted)' }}>🆔</span>
                   <span>{selectedUser.employeeId || '-'}</span>
                 </div>
+                {selectedUser.bio && (
+                  <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Bio</div>
+                    <div style={{ fontSize: '0.85rem', fontStyle: 'italic', backgroundColor: 'var(--bg-color)', padding: '0.75rem', borderRadius: '8px' }}>
+                      "{selectedUser.bio}"
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (

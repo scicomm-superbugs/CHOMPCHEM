@@ -35,7 +35,11 @@ export default function Chat() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [filteredMessages]);
+    // Update last read chat to clear notifications
+    if (user?.id) {
+      db.scientists.update(user.id, { lastReadChat: new Date().toISOString() }).catch(() => {});
+    }
+  }, [filteredMessages, user?.id]);
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];

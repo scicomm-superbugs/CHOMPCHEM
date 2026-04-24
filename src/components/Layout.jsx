@@ -22,6 +22,29 @@ export default function Layout() {
   
   const scientists = useLiveCollection('scientists');
   const currentUserData = scientists?.find(s => String(s.id) === String(user?.id));
+  const messages = useLiveCollection('messages');
+  const tasks = useLiveCollection('tasks');
+  const usageLogs = useLiveCollection('usage_logs');
+
+  // Calculate notifications
+  const hasUnreadChats = messages?.some(m => 
+    (String(m.receiverId) === String(user?.id) || m.receiverId === 'global') && 
+    new Date(m.timestamp) > new Date(currentUserData?.lastReadChat || 0) &&
+    String(m.senderId) !== String(user?.id)
+  );
+
+  const hasPendingTasks = tasks?.some(t => 
+    String(t.assignedTo) === String(user?.id) && 
+    (t.status === 'Pending' || t.status === 'In Progress')
+  );
+
+  const hasOverdueItems = usageLogs?.some(log => 
+    String(log.scientistId) === String(user?.id) && 
+    log.status === 'In Use' && 
+    new Date(log.expectedReturnDate) < new Date()
+  );
+
+  const hasProfileAlert = currentUserData?.points > (currentUserData?.lastSeenPoints || 0);
 
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
@@ -83,19 +106,22 @@ export default function Layout() {
               </>
             )}
             
-            <Link to="/tracking" className={`nav-link ${isActive('/tracking')}`} onClick={handleNavClick}>
+            <Link to="/tracking" className={`nav-link ${isActive('/tracking')}`} onClick={handleNavClick} style={{ position: 'relative' }}>
               <FilePlus2 size={20} />
               <span>Register</span>
+              {hasOverdueItems && <div style={{ position: 'absolute', top: '8px', left: '8px', width: '8px', height: '8px', backgroundColor: 'var(--accent)', borderRadius: '50%' }}></div>}
             </Link>
 
-            <Link to="/tasks" className={`nav-link ${isActive('/tasks')}`} onClick={handleNavClick}>
+            <Link to="/tasks" className={`nav-link ${isActive('/tasks')}`} onClick={handleNavClick} style={{ position: 'relative' }}>
               <ClipboardList size={20} />
               <span>Tasks</span>
+              {hasPendingTasks && <div style={{ position: 'absolute', top: '8px', left: '8px', width: '8px', height: '8px', backgroundColor: 'var(--accent)', borderRadius: '50%' }}></div>}
             </Link>
 
-            <Link to="/chat" className={`nav-link ${isActive('/chat')}`} onClick={handleNavClick}>
+            <Link to="/chat" className={`nav-link ${isActive('/chat')}`} onClick={handleNavClick} style={{ position: 'relative' }}>
               <MessageSquare size={20} />
               <span>Chat</span>
+              {hasUnreadChats && <div style={{ position: 'absolute', top: '8px', left: '8px', width: '8px', height: '8px', backgroundColor: 'var(--accent)', borderRadius: '50%' }}></div>}
             </Link>
 
             <Link to="/team" className={`nav-link ${isActive('/team')}`} onClick={handleNavClick}>
@@ -115,7 +141,8 @@ export default function Layout() {
             <div className="nav-divider" style={{ width: '1px', height: '24px', backgroundColor: 'var(--border-color)', margin: '0 0.25rem' }}></div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem' }}>
-              <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }} onClick={handleNavClick}>
+              <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit', position: 'relative' }} onClick={handleNavClick}>
+                {hasProfileAlert && <div style={{ position: 'absolute', top: '-2px', left: '-2px', width: '10px', height: '10px', backgroundColor: 'var(--accent)', borderRadius: '50%', border: '2px solid var(--surface)', zIndex: 10 }}></div>}
                 {currentUserData?.avatar ? (
                   <img src={currentUserData.avatar} alt="Avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)', flexShrink: 0 }} />
                 ) : (
@@ -153,19 +180,22 @@ export default function Layout() {
           <Home size={20} />
           <span>Home</span>
         </Link>
-        <Link to="/tracking" className={`bottom-tab ${isActive('/tracking')}`}>
+        <Link to="/tracking" className={`bottom-tab ${isActive('/tracking')}`} style={{ position: 'relative' }}>
           <FilePlus2 size={20} />
+          {hasOverdueItems && <div style={{ position: 'absolute', top: '4px', right: '12px', width: '8px', height: '8px', backgroundColor: 'var(--accent)', borderRadius: '50%' }}></div>}
           <span>Register</span>
         </Link>
-        <Link to="/chat" className={`bottom-tab ${isActive('/chat')}`}>
+        <Link to="/chat" className={`bottom-tab ${isActive('/chat')}`} style={{ position: 'relative' }}>
           <MessageSquare size={20} />
+          {hasUnreadChats && <div style={{ position: 'absolute', top: '4px', right: '12px', width: '8px', height: '8px', backgroundColor: 'var(--accent)', borderRadius: '50%' }}></div>}
           <span>Chat</span>
         </Link>
         <Link to="/team" className={`bottom-tab ${isActive('/team')}`}>
           <Search size={20} />
           <span>Team</span>
         </Link>
-        <Link to="/profile" className={`bottom-tab ${isActive('/profile')}`}>
+        <Link to="/profile" className={`bottom-tab ${isActive('/profile')}`} style={{ position: 'relative' }}>
+          {hasProfileAlert && <div style={{ position: 'absolute', top: '4px', right: '12px', width: '8px', height: '8px', backgroundColor: 'var(--accent)', borderRadius: '50%', border: '2px solid var(--surface)', zIndex: 10 }}></div>}
           {currentUserData?.avatar ? (
             <img src={currentUserData.avatar} alt="" style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }} />
           ) : (

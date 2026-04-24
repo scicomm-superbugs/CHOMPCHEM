@@ -18,13 +18,21 @@ export default function Dashboard() {
     return <div className="page-content container">Loading dashboard...</div>;
   }
 
-  const getRank = (points) => {
-    if (points >= 500) return { name: 'Lab Legend', color: '#805AD5', emoji: '🏆' };
-    if (points >= 300) return { name: 'Mad Scientist', color: '#DD6B20', emoji: '🧑‍🔬' };
-    if (points >= 150) return { name: 'Chemical Warrior', color: '#3182CE', emoji: '⚔️' };
-    if (points >= 50) return { name: 'Beaker Breaker', color: '#38A169', emoji: '🧪' };
-    if (points >= 10) return { name: 'Lab Rat', color: '#718096', emoji: '🐀' };
-    return { name: 'Baby Chemist', color: '#A0AEC0', emoji: '🍼' };
+  const getRank = (points, customTitle) => {
+    const ranks = [
+      { name: 'Lab Legend', color: '#805AD5', emoji: '🏆', req: 500 },
+      { name: 'Mad Scientist', color: '#DD6B20', emoji: '🧑‍🔬', req: 300 },
+      { name: 'Chemical Warrior', color: '#3182CE', emoji: '⚔️', req: 150 },
+      { name: 'Beaker Breaker', color: '#38A169', emoji: '🧪', req: 50 },
+      { name: 'Lab Rat', color: '#718096', emoji: '🐀', req: 10 },
+      { name: 'Baby Chemist', color: '#A0AEC0', emoji: '🍼', req: 0 }
+    ];
+    let highestRank = ranks.find(r => points >= r.req);
+    if (customTitle) {
+      const customRank = ranks.find(r => r.name === customTitle && points >= r.req);
+      if (customRank) return customRank;
+    }
+    return highestRank || ranks[ranks.length - 1];
   };
 
   const leaderboardRaw = scientistsData
@@ -35,7 +43,7 @@ export default function Dashboard() {
       const usagePoints = usageLogsData.filter(log => String(log.scientistId) === String(s.id)).length * 10;
       const taskPoints = tasksData.filter(t => String(t.assignedTo) === String(s.id) && t.status === 'Completed').length * 50;
       const totalPoints = usagePoints + taskPoints;
-      return { ...s, points: totalPoints, rank: getRank(totalPoints), numericPoints: totalPoints };
+      return { ...s, points: totalPoints, rank: getRank(totalPoints, s.selectedRankTitle), numericPoints: totalPoints };
     })
     .sort((a,b) => b.numericPoints - a.numericPoints);
 
