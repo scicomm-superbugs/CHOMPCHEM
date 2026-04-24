@@ -7,6 +7,7 @@ export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   
   const { login, user } = useAuth();
   const navigate = useNavigate();
@@ -19,11 +20,13 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoggingIn(true);
     try {
       await login(username, password);
       navigate('/');
     } catch (err) {
       setError(err.message);
+      setIsLoggingIn(false);
     }
   };
 
@@ -73,8 +76,8 @@ export default function Login() {
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '1rem' }}>
-            Login
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '1rem' }} disabled={isLoggingIn}>
+            {isLoggingIn ? 'Logging in...' : 'Login'}
           </button>
         </form>
         
