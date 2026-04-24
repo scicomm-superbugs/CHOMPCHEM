@@ -1,0 +1,87 @@
+import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
+import { Lock, User } from 'lucide-react';
+
+export default function Login() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  
+  const { login, user } = useAuth();
+  const navigate = useNavigate();
+
+  // If already logged in, redirect
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    try {
+      await login(username, password);
+      navigate('/');
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 150px)' }}>
+      <div className="card" style={{ maxWidth: '400px', width: '100%' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <img src="/logo.png" alt="COMPCHEM" style={{ height: '50px', marginBottom: '1rem' }} onError={e => e.target.style.display='none'}/>
+          <h2>Welcome Back</h2>
+          <p style={{ color: 'var(--text-muted)' }}>Login to your account</p>
+        </div>
+
+        {error && (
+          <div style={{ backgroundColor: '#FED7D7', color: '#822727', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.875rem' }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="form-label">Username</label>
+            <div style={{ position: 'relative' }}>
+              <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <input 
+                type="text" 
+                className="form-control" 
+                style={{ paddingLeft: '2.5rem' }}
+                required
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Password</label>
+            <div style={{ position: 'relative' }}>
+              <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <input 
+                type="password" 
+                className="form-control" 
+                style={{ paddingLeft: '2.5rem' }}
+                required
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '1rem' }}>
+            Login
+          </button>
+        </form>
+        
+        <div style={{ textAlign: 'center', fontSize: '0.875rem' }}>
+          Don't have an account? <Link to="/register" style={{ fontWeight: 600 }}>Register</Link>
+        </div>
+      </div>
+    </div>
+  );
+}
