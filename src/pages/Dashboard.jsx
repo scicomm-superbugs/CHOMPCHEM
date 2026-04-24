@@ -38,13 +38,30 @@ export default function Dashboard() {
     .sort((a,b) => b.numericPoints - a.numericPoints);
 
   const leaderboard = leaderboardRaw.map(s => {
-    if (s.hideFromLeaderboard && String(s.id) !== String(user.id) && s.role !== 'master') {
-      return { ...s, name: 'Anonymous Scientist', points: '***', avatar: null };
+    if (String(s.id) === String(user.id) || s.role === 'master') return s;
+    
+    let updated = { ...s };
+    if (s.privacySettings?.hideName) {
+      updated.name = 'Anonymous Scientist';
+      updated.avatar = null;
     }
-    return s;
+    if (s.privacySettings?.hideScore) {
+      updated.points = '***';
+    }
+    return updated;
   });
 
   const currentUserRank = leaderboardRaw.find(s => String(s.id) === String(user.id));
+
+  const handleTogglePrivacy = async (field) => {
+    const currentSettings = currentUserRank.privacySettings || { hideName: false, hideScore: false };
+    const newSettings = { ...currentSettings, [field]: !currentSettings[field] };
+    try {
+      await db.scientists.update(user.id, { privacySettings: newSettings });
+    } catch (err) {
+      console.error("Failed to update privacy", err);
+    }
+  };
 
   let filteredLogs = usageLogsData;
   if (!isAdmin) {
@@ -111,27 +128,41 @@ export default function Dashboard() {
             <h3 style={{ color: 'var(--accent)' }}>{stats.overdue}</h3>
           </div>
         </div>
-
-        <div className="stat-card" style={{ borderLeft: '4px solid #805AD5' }}>
-          <div className="stat-icon" style={{ color: '#805AD5' }}><Crown size={24} /></div>
-          <div className="stat-content">
-            <p>Total Team Points</p>
-            <h3 style={{ color: '#805AD5' }}>{stats.totalTeamScore.toLocaleString()}</h3>
-          </div>
-        </div>
       </div>
 
       <div className="two-col-grid" style={{ gridTemplateColumns: '1fr 2fr' }}>
         {/* Leaderboard Card */}
         <div className="card" style={{ alignSelf: 'start' }}>
-          <div className="card-header">
+          <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 className="card-title"><Users size={20} /> Top Scientists</h2>
+            <div style={{ fontSize: '0.75rem', backgroundColor: '#805AD5', color: 'white', padding: '0.25rem 0.5rem', borderRadius: '12px', fontWeight: 'bold' }}>
+              Team: {stats.totalTeamScore.toLocaleString()}
+            </div>
           </div>
+          
           <div style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '1rem' }}>
-            <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Your Rank</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Your Rank</div>
+              {user.role !== 'master' && (
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button 
+                    onClick={() => handleTogglePrivacy('hideName')}
+                    style={{ fontSize: '0.65rem', padding: '0.2rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: currentUserRank?.privacySettings?.hideName ? 'var(--primary)' : 'white', color: currentUserRank?.privacySettings?.hideName ? 'white' : 'var(--text)', cursor: 'pointer' }}
+                  >
+                    {currentUserRank?.privacySettings?.hideName ? 'Name Hidden' : 'Hide Name'}
+                  </button>
+                  <button 
+                    onClick={() => handleTogglePrivacy('hideScore')}
+                    style={{ fontSize: '0.65rem', padding: '0.2rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: currentUserRank?.privacySettings?.hideScore ? 'var(--primary)' : 'white', color: currentUserRank?.privacySettings?.hideScore ? 'white' : 'var(--text)', cursor: 'pointer' }}
+                  >
+                    {currentUserRank?.privacySettings?.hideScore ? 'Score Hidden' : 'Hide Score'}
+                  </button>
+                </div>
+              )}
+            </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
               <strong style={{ fontSize: '1.25rem' }}>{currentUserRank?.rank.name}</strong>
-              <span className="badge" style={{ backgroundColor: currentUserRank?.rank.color, color: 'white' }}>{currentUserRank?.points} pts</span>
+              <span className="badge" style={{ backgroundColor: currentUserRank?.rank.color, color: 'white' }}>{currentUserRank?.points} PTS</span>
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
