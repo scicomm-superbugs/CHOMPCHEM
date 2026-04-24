@@ -54,3 +54,16 @@ The app uses a custom `Layout.jsx` with:
 ## 🔑 Login for Debugging
 - **Master Admin**: `master` / `master123`
 - **System Admin**: `admin` / `admin123`
+
+## 🏢 Multi-Tenant Architecture (New)
+The platform now supports a multi-tenant environment (Science Communication & Research Hub). 
+- **Workspaces**: Currently supports `compchem` (COMPCHEM Laboratory) and `alamein` (Alamein International University, also aliased as `aiu`).
+- **Persistence**: The active workspace is stored in `localStorage` under `workspaceId`.
+- **Portal Page**: The root component `/portal` features an interactive, glassmorphism 3D-card interface to select the workspace.
+- **Direct Workspace URLs**: Users can bypass the portal using direct routing:
+  - `/#/compchem/login` or `/#/compchem/register`
+  - `/#/aiu/login` or `/#/aiu/register`
+- **Dynamic Theming & Branding**: 
+  - `Layout.jsx` dynamically loads the specific tenant's logo (`alamein_logo_2.png` or `compchem_logo_2.png`) and updates the footer.
+  - The browser tab title `document.title` dynamically updates to match the active workspace.
+  - The header layout (`.header-content`) utilizes a balanced flex design (`justify-content: flex-start`, `.nav-links` takes `flex: 1`, and `.user-controls` uses `margin-left: auto`) to ensure perfect alignment of navigation items and user controls regardless of user role.
