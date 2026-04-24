@@ -100,7 +100,7 @@ export default function Chat() {
   if (!rawMessages || !scientists) return <div className="page-content container">Loading chat...</div>;
 
   return (
-    <div style={{ height: 'calc(100vh - 180px)', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: 'calc(100dvh - 180px)', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h1>💬 Lab Communication</h1>
         <button 

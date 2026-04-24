@@ -256,7 +256,7 @@ export default function Portal() {
         }
 
         .portal-wrapper {
-          min-height: 100vh;
+          min-height: 100dvh;
           background: #020617; /* Ultra dark sci-fi background */
           background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 80%);
           position: relative;
