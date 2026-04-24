@@ -29,6 +29,9 @@ export function useLiveCollection(collectionName) {
     return () => unsubscribe();
   }, [collectionName]);
   
+  return data;
+}
+
 // Data Access Object (DAO) to minimize component refactoring
 export const db = {
   chemicals: {
