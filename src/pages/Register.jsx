@@ -3,6 +3,7 @@ import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { db } from '../db';
 import bcrypt from 'bcryptjs';
 import { useAuth } from '../context/AuthContext';
+import { Building2 } from 'lucide-react';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -133,6 +134,16 @@ export default function Register() {
         
         <div style={{ textAlign: 'center', fontSize: '0.875rem' }}>
           Already have an account? <Link to="/login" style={{ fontWeight: 600 }}>Login</Link>
+        </div>
+        
+        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+          <button 
+            className="btn btn-secondary" 
+            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+            onClick={() => { localStorage.removeItem('workspaceId'); window.location.href = '#/portal'; window.location.reload(); }}
+          >
+            <Building2 size={14} /> Switch Workspace
+          </button>
         </div>
       </div>
     </div>
