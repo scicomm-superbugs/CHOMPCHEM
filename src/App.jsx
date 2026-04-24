@@ -6,6 +6,7 @@ import Scientists from './pages/Scientists';
 import UsageTracking from './pages/UsageTracking';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="tracking" element={<UsageTracking />} />
+            <Route path="profile" element={<Profile />} />
             
             {/* Admin only routes */}
             <Route element={<ProtectedRoute requireAdmin={true} />}>

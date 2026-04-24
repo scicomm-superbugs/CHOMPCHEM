@@ -1,11 +1,15 @@
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Beaker, Users, Activity, Home, LogOut, Shield } from 'lucide-react';
+import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
+import { Beaker, Users, Activity, Home, LogOut, Shield, Settings, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLiveCollection } from '../db';
 
 export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  
+  const scientists = useLiveCollection('scientists');
+  const currentUserData = scientists?.find(s => String(s.id) === String(user?.id));
 
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
@@ -54,9 +58,18 @@ export default function Layout() {
             
             <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border-color)', margin: '0 0.5rem' }}></div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-              <span style={{ fontWeight: 600 }}>{user.name}</span>
-              {user.role === 'admin' && <Shield size={14} style={{ color: 'var(--accent)' }} title="Admin" />}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.875rem' }}>
+              <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}>
+                {currentUserData?.avatar ? (
+                  <img src={currentUserData.avatar} alt="Avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }} />
+                ) : (
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                    <User size={14} />
+                  </div>
+                )}
+                <span style={{ fontWeight: 600 }}>{user.name}</span>
+                {user.role === 'admin' && <Shield size={14} style={{ color: 'var(--accent)' }} title="Admin" />}
+              </Link>
             </div>
             
             <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.875rem' }}>

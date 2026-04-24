@@ -68,9 +68,14 @@ export const AuthProvider = ({ children }) => {
       if (!scientist) {
         throw new Error('Invalid username or password');
       }
+      
       const isMatch = await bcrypt.compare(password, scientist.passwordHash);
       if (!isMatch) {
         throw new Error('Invalid username or password');
+      }
+
+      if (scientist.accountStatus === 'pending') {
+        throw new Error('Your account is pending approval by an administrator.');
       }
     }
 

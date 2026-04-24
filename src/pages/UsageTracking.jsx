@@ -143,6 +143,7 @@ export default function UsageTracking() {
                   <th>Chemical</th>
                   <th>Scientist</th>
                   <th>Requested Due Date</th>
+                  <th>Notes</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -155,6 +156,7 @@ export default function UsageTracking() {
                     </td>
                     <td>{req.scientistName}</td>
                     <td>{new Date(req.dueDate).toLocaleDateString()}</td>
+                    <td style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{req.notes || '-'}</td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button className="btn btn-primary" style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center' }} onClick={() => handleApprove(req.id)} title="Approve">
@@ -218,6 +220,11 @@ export default function UsageTracking() {
                   <option key={c.formula} value={c.formula}>{c.formula} - {c.name}</option>
                 ))}
               </select>
+              {logEntry.chemicalFormula && usageLogsRaw.some(log => log.chemicalFormula === logEntry.chemicalFormula && log.status === 'In Use') && (
+                <div style={{ color: 'var(--accent)', fontSize: '0.875rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <X size={14} /> This chemical is currently in use by someone else.
+                </div>
+              )}
             </div>
 
             <div className="form-group">
@@ -252,7 +259,7 @@ export default function UsageTracking() {
               ></textarea>
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={logEntry.chemicalFormula && usageLogsRaw.some(log => log.chemicalFormula === logEntry.chemicalFormula && log.status === 'In Use')}>
               {isAdmin ? 'Assign Usage' : 'Submit Request'}
             </button>
           </form>
@@ -297,6 +304,7 @@ export default function UsageTracking() {
                   <th>Chemical</th>
                   {isAdmin && <th>Scientist</th>}
                   <th>Timeline</th>
+                  <th>Notes</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -320,6 +328,7 @@ export default function UsageTracking() {
                           Due: {new Date(log.dueDate).toLocaleDateString()}
                         </div>
                       </td>
+                      <td style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{log.notes || '-'}</td>
                       <td>
                         <span className={`badge ${
                           log.computedStatus === 'Overdue' ? 'badge-overdue' : 
@@ -346,7 +355,7 @@ export default function UsageTracking() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                    <td colSpan={isAdmin ? 6 : 5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
                       No tracking records found.
                     </td>
                   </tr>

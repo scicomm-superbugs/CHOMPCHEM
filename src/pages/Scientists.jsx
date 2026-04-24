@@ -46,6 +46,24 @@ export default function Scientists() {
     }
   };
 
+  const handleApproveAccount = async (id) => {
+    try {
+      await db.scientists.update(id, { accountStatus: 'active' });
+    } catch (err) {
+      console.error('Failed to approve:', err);
+    }
+  };
+
+  const handleMakeAdmin = async (id, name) => {
+    if (window.confirm(`Are you sure you want to promote ${name} to Admin?`)) {
+      try {
+        await db.scientists.update(id, { role: 'admin' });
+      } catch (err) {
+        console.error('Failed to promote:', err);
+      }
+    }
+  };
+
   return (
     <div>
       <h1 style={{ marginBottom: '2rem' }}>Scientist Directory</h1>
@@ -144,23 +162,47 @@ export default function Scientists() {
                       </td>
                       <td>{s.username || '-'}</td>
                       <td>
-                        <span className={`badge ${s.role === 'admin' ? 'badge-in-use' : 'badge-available'}`}>
-                          {s.role || 'scientist'}
-                        </span>
+                        {s.accountStatus === 'pending' ? (
+                          <span className="badge badge-warning">Pending</span>
+                        ) : (
+                          <span className={`badge ${s.role === 'admin' ? 'badge-in-use' : 'badge-available'}`}>
+                            {s.role || 'scientist'}
+                          </span>
+                        )}
                       </td>
                       <td>{s.department || '-'}</td>
                       <td>{s.employeeId || '-'}</td>
                       <td>
-                        {s.role !== 'admin' && (
-                          <button 
-                            className="btn btn-danger" 
-                            style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center' }} 
-                            onClick={() => handleDelete(s.id, s.name, s.role)} 
-                            title="Delete"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        )}
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          {s.accountStatus === 'pending' && (
+                            <button 
+                              className="btn btn-primary" 
+                              style={{ padding: '0.4rem 0.5rem', fontSize: '0.75rem' }} 
+                              onClick={() => handleApproveAccount(s.id)}
+                            >
+                              Approve
+                            </button>
+                          )}
+                          {s.role !== 'admin' && s.accountStatus !== 'pending' && (
+                            <button 
+                              className="btn btn-secondary" 
+                              style={{ padding: '0.4rem 0.5rem', fontSize: '0.75rem' }} 
+                              onClick={() => handleMakeAdmin(s.id, s.name)}
+                            >
+                              Make Admin
+                            </button>
+                          )}
+                          {s.role !== 'admin' && (
+                            <button 
+                              className="btn btn-danger" 
+                              style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center' }} 
+                              onClick={() => handleDelete(s.id, s.name, s.role)} 
+                              title="Delete"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))

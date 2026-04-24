@@ -13,6 +13,8 @@ export default function Register() {
     department: '',
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -28,9 +30,11 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsRegistering(true);
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      setIsRegistering(false);
       return;
     }
     
@@ -38,26 +42,32 @@ export default function Register() {
     const existing = await db.scientists.where('username').equals(formData.username).first();
     if (existing) {
       setError('Username already exists');
+      setIsRegistering(false);
       return;
     }
 
     try {
-      const salt = bcrypt.genSaltSync(10);
-      const hash = bcrypt.hashSync(formData.password, salt);
+      const salt = await bcrypt.genSalt(4);
+      const hash = await bcrypt.hash(formData.password, salt);
+
+      const generatedId = 'EMP-' + Math.floor(1000 + Math.random() * 9000);
 
       await db.scientists.add({
         username: formData.username,
         passwordHash: hash,
         name: formData.name,
         department: formData.department,
-        role: 'scientist', // New registrations are standard scientists
-        employeeId: ''
+        role: 'scientist',
+        accountStatus: 'pending', // Requires admin approval
+        employeeId: generatedId
       });
 
-      // Redirect to login
-      navigate('/login');
+      setSuccess('Registration submitted! An administrator must approve your account before you can log in.');
+      setFormData({ name: '', username: '', password: '', confirmPassword: '', department: '' });
+      setIsRegistering(false);
     } catch (err) {
       setError('Registration failed: ' + err.message);
+      setIsRegistering(false);
     }
   };
 
@@ -73,6 +83,12 @@ export default function Register() {
         {error && (
           <div style={{ backgroundColor: '#FED7D7', color: '#822727', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.875rem' }}>
             {error}
+          </div>
+        )}
+        
+        {success && (
+          <div style={{ backgroundColor: '#C6F6D5', color: '#22543D', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.875rem' }}>
+            {success}
           </div>
         )}
 
@@ -102,8 +118,8 @@ export default function Register() {
             <input type="password" className="form-control" name="confirmPassword" required value={formData.confirmPassword} onChange={handleChange} />
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '1rem' }}>
-            Create Account
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '1rem' }} disabled={isRegistering}>
+            {isRegistering ? 'Registering...' : 'Create Account'}
           </button>
         </form>
         
