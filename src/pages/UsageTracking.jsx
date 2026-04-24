@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
-import { Activity, Check, Search } from 'lucide-react';
+import { Activity, Check, Search, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function UsageTracking() {
@@ -10,7 +10,7 @@ export default function UsageTracking() {
 
   const [logEntry, setLogEntry] = useState({
     chemicalFormula: '',
-    scientistId: '',
+    scientistId: isAdmin ? '' : user.id,
     borrowDate: new Date().toISOString().split('T')[0],
     dueDate: '',
     notes: ''
@@ -46,12 +46,13 @@ export default function UsageTracking() {
     };
   });
 
-  // Filter logs
-  const filteredLogs = usageLogs.filter(log => {
-    // If not admin, only show logs belonging to the user
-    if (!isAdmin && log.scientistId !== user.id) {
-      return false;
-    }
+  // Filter logs for tracking table
+  const trackingLogs = usageLogs.filter(log => {
+    if (!isAdmin && log.scientistId !== user.id) return false;
+    
+    // Hide pending/rejected from the main tracking table for admins
+    // Scientists can see their pending/rejected requests in their table
+    if (isAdmin && (log.status === 'Pending' || log.status === 'Rejected')) return false;
 
     const matchesSearch = 
       log.chemicalFormula.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -65,20 +66,21 @@ export default function UsageTracking() {
     return log.status === statusFilter;
   });
 
-  const handleAssign = async (e) => {
+  const pendingRequests = usageLogs.filter(log => log.status === 'Pending');
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isAdmin) return; // extra protection
-    if (!logEntry.chemicalFormula || !logEntry.scientistId || !logEntry.dueDate) return;
+    if (!logEntry.chemicalFormula || !logEntry.dueDate) return;
 
     try {
       await db.usage_logs.add({
         ...logEntry,
-        scientistId: parseInt(logEntry.scientistId),
-        status: 'In Use',
+        scientistId: isAdmin ? parseInt(logEntry.scientistId) : user.id,
+        status: isAdmin ? 'In Use' : 'Pending',
         borrowDate: new Date(logEntry.borrowDate).toISOString(),
         dueDate: new Date(logEntry.dueDate).toISOString(),
       });
-      setSuccessMsg('Chemical assigned successfully!');
+      setSuccessMsg(isAdmin ? 'Chemical assigned successfully!' : 'Chemical requested successfully!');
       setLogEntry({ ...logEntry, chemicalFormula: '', notes: '' });
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (error) {
@@ -97,26 +99,91 @@ export default function UsageTracking() {
     }
   };
 
+  const handleApprove = async (id) => {
+    if (!isAdmin) return;
+    try {
+      await db.usage_logs.update(id, {
+        status: 'In Use',
+        borrowDate: new Date().toISOString() // Start usage from approval time
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleReject = async (id) => {
+    if (!isAdmin) return;
+    try {
+      await db.usage_logs.update(id, {
+        status: 'Rejected'
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div>
       <h1 style={{ marginBottom: '2rem' }}>{isAdmin ? 'Usage Tracking' : 'My Chemicals'}</h1>
 
-      <div className={isAdmin ? "two-col-grid" : ""} style={isAdmin ? { gridTemplateColumns: '1fr 2.5fr' } : {}}>
+      {isAdmin && pendingRequests.length > 0 && (
+        <div className="card" style={{ marginBottom: '2rem', borderLeft: '4px solid #F6E05E' }}>
+          <div className="card-header">
+            <h2 className="card-title">Pending Requests ({pendingRequests.length})</h2>
+          </div>
+          <div className="table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Chemical</th>
+                  <th>Scientist</th>
+                  <th>Requested Due Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingRequests.map(req => (
+                  <tr key={req.id}>
+                    <td>
+                      <strong>{req.chemicalFormula}</strong>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{req.chemicalName}</div>
+                    </td>
+                    <td>{req.scientistName}</td>
+                    <td>{new Date(req.dueDate).toLocaleDateString()}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="btn btn-primary" style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center' }} onClick={() => handleApprove(req.id)} title="Approve">
+                          <Check size={14} />
+                        </button>
+                        <button className="btn btn-danger" style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center' }} onClick={() => handleReject(req.id)} title="Reject">
+                          <X size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      <div className="two-col-grid" style={isAdmin ? { gridTemplateColumns: '1fr 2.5fr' } : { gridTemplateColumns: '1fr 2.5fr' }}>
         
-        {/* Assign Form - Admin Only */}
-        {isAdmin && (
-          <div className="card" style={{ alignSelf: 'start' }}>
-            <div className="card-header">
-              <h2 className="card-title"><Activity size={20} /> Assign Chemical</h2>
+        {/* Form - Shared but labels differ */}
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <div className="card-header">
+            <h2 className="card-title"><Activity size={20} /> {isAdmin ? 'Assign Chemical' : 'Request Chemical'}</h2>
+          </div>
+
+          {successMsg && (
+            <div style={{ backgroundColor: '#C6F6D5', color: '#22543D', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem' }}>
+              {successMsg}
             </div>
+          )}
 
-            {successMsg && (
-              <div style={{ backgroundColor: '#C6F6D5', color: '#22543D', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem' }}>
-                {successMsg}
-              </div>
-            )}
-
-            <form onSubmit={handleAssign}>
+          <form onSubmit={handleSubmit}>
+            {isAdmin && (
               <div className="form-group">
                 <label className="form-label">Scientist</label>
                 <select 
@@ -131,60 +198,60 @@ export default function UsageTracking() {
                   ))}
                 </select>
               </div>
+            )}
 
-              <div className="form-group">
-                <label className="form-label">Chemical</label>
-                <select 
-                  className="form-control" 
-                  required
-                  value={logEntry.chemicalFormula}
-                  onChange={e => setLogEntry({...logEntry, chemicalFormula: e.target.value})}
-                >
-                  <option value="">Select Chemical...</option>
-                  {chemicals.map(c => (
-                    <option key={c.formula} value={c.formula}>{c.formula} - {c.name}</option>
-                  ))}
-                </select>
-              </div>
+            <div className="form-group">
+              <label className="form-label">Chemical</label>
+              <select 
+                className="form-control" 
+                required
+                value={logEntry.chemicalFormula}
+                onChange={e => setLogEntry({...logEntry, chemicalFormula: e.target.value})}
+              >
+                <option value="">Select Chemical...</option>
+                {chemicals.map(c => (
+                  <option key={c.formula} value={c.formula}>{c.formula} - {c.name}</option>
+                ))}
+              </select>
+            </div>
 
-              <div className="form-group">
-                <label className="form-label">Borrow Date</label>
-                <input 
-                  type="date" 
-                  className="form-control" 
-                  required
-                  value={logEntry.borrowDate}
-                  onChange={e => setLogEntry({...logEntry, borrowDate: e.target.value})}
-                />
-              </div>
+            <div className="form-group">
+              <label className="form-label">Borrow Date</label>
+              <input 
+                type="date" 
+                className="form-control" 
+                required
+                value={logEntry.borrowDate}
+                onChange={e => setLogEntry({...logEntry, borrowDate: e.target.value})}
+              />
+            </div>
 
-              <div className="form-group">
-                <label className="form-label">Due Date</label>
-                <input 
-                  type="date" 
-                  className="form-control" 
-                  required
-                  value={logEntry.dueDate}
-                  onChange={e => setLogEntry({...logEntry, dueDate: e.target.value})}
-                />
-              </div>
+            <div className="form-group">
+              <label className="form-label">Due Date</label>
+              <input 
+                type="date" 
+                className="form-control" 
+                required
+                value={logEntry.dueDate}
+                onChange={e => setLogEntry({...logEntry, dueDate: e.target.value})}
+              />
+            </div>
 
-              <div className="form-group">
-                <label className="form-label">Notes (Optional)</label>
-                <textarea 
-                  className="form-control" 
-                  rows="2"
-                  value={logEntry.notes}
-                  onChange={e => setLogEntry({...logEntry, notes: e.target.value})}
-                ></textarea>
-              </div>
+            <div className="form-group">
+              <label className="form-label">Notes (Optional)</label>
+              <textarea 
+                className="form-control" 
+                rows="2"
+                value={logEntry.notes}
+                onChange={e => setLogEntry({...logEntry, notes: e.target.value})}
+              ></textarea>
+            </div>
 
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-                Assign Usage
-              </button>
-            </form>
-          </div>
-        )}
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+              {isAdmin ? 'Assign Usage' : 'Submit Request'}
+            </button>
+          </form>
+        </div>
 
         {/* Tracking List */}
         <div className="card">
@@ -210,8 +277,10 @@ export default function UsageTracking() {
               >
                 <option value="All">All Status</option>
                 <option value="In Use">In Use</option>
+                <option value="Pending">Pending</option>
                 <option value="Overdue">Overdue</option>
                 <option value="Returned">Returned</option>
+                {!isAdmin && <option value="Rejected">Rejected</option>}
               </select>
             </div>
           </div>
@@ -228,11 +297,12 @@ export default function UsageTracking() {
                 </tr>
               </thead>
               <tbody>
-                {filteredLogs.length > 0 ? (
-                  filteredLogs.map(log => (
+                {trackingLogs.length > 0 ? (
+                  trackingLogs.map(log => (
                     <tr key={log.id} style={{ 
                       backgroundColor: log.computedStatus === 'Overdue' ? 'rgba(254, 215, 215, 0.2)' : 
-                                       log.isApproaching ? 'rgba(254, 252, 191, 0.2)' : 'transparent'
+                                       log.isApproaching ? 'rgba(254, 252, 191, 0.2)' : 'transparent',
+                      opacity: (log.status === 'Pending' || log.status === 'Rejected') ? 0.7 : 1
                     }}>
                       <td>
                         <strong>{log.chemicalFormula}</strong>
@@ -249,6 +319,8 @@ export default function UsageTracking() {
                         <span className={`badge ${
                           log.computedStatus === 'Overdue' ? 'badge-overdue' : 
                           log.status === 'Returned' ? 'badge-available' : 
+                          log.status === 'Pending' ? 'badge-warning' :
+                          log.status === 'Rejected' ? 'badge-overdue' :
                           log.isApproaching ? 'badge-warning' : 'badge-in-use'
                         }`}>
                           {log.computedStatus === 'Overdue' ? 'Overdue' : log.isApproaching ? 'Due Soon' : log.status}

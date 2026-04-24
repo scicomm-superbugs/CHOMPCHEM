@@ -4,7 +4,7 @@ import { db } from '../db';
 import { chemicalDictionary } from '../utils/chemicalDictionary';
 import { calculateMolecularWeight } from '../utils/formulaParser';
 import SmilesViewer from '../components/SmilesViewer';
-import { Plus, Search, AlertCircle, CheckCircle } from 'lucide-react';
+import { Plus, Search, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
 
 export default function RegisterChemical() {
   const [formula, setFormula] = useState('');
@@ -110,6 +110,18 @@ export default function RegisterChemical() {
       setChemData({ name: '', mw: '', smiles: '', hazards: '', properties: '' });
     } catch (err) {
       setError('Failed to register chemical. ' + err.message);
+    }
+  };
+
+  const handleDelete = async (formula) => {
+    if (window.confirm(`Are you sure you want to delete ${formula}?`)) {
+      try {
+        await db.chemicals.delete(formula);
+        setSuccessMsg(`Deleted ${formula}`);
+        setTimeout(() => setSuccessMsg(''), 3000);
+      } catch (err) {
+        setError('Failed to delete chemical. ' + err.message);
+      }
     }
   };
 
@@ -242,6 +254,7 @@ export default function RegisterChemical() {
                   <th>Name</th>
                   <th>MW (g/mol)</th>
                   <th>Structure</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -263,11 +276,16 @@ export default function RegisterChemical() {
                           <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>N/A</span>
                         )}
                       </td>
+                      <td>
+                        <button className="btn btn-danger" style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center' }} onClick={() => handleDelete(c.formula)} title="Delete">
+                          <Trash2 size={14} />
+                        </button>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
                       No chemicals found.
                     </td>
                   </tr>

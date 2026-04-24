@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
-import { UserPlus, Search, User } from 'lucide-react';
+import { UserPlus, Search, User, Trash2 } from 'lucide-react';
 
 export default function Scientists() {
   const [scientist, setScientist] = useState({
@@ -28,6 +28,20 @@ export default function Scientists() {
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (error) {
       console.error("Error adding scientist:", error);
+    }
+  };
+
+  const handleDelete = async (id, name, role) => {
+    if (role === 'admin') {
+      alert("Cannot delete administrator accounts.");
+      return;
+    }
+    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
+      try {
+        await db.scientists.delete(id);
+      } catch (err) {
+        console.error('Failed to delete scientist:', err);
+      }
     }
   };
 
@@ -108,8 +122,11 @@ export default function Scientists() {
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Username</th>
+                  <th>Role</th>
                   <th>Department</th>
                   <th>ID</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -124,13 +141,31 @@ export default function Scientists() {
                           <strong>{s.name}</strong>
                         </div>
                       </td>
+                      <td>{s.username || '-'}</td>
+                      <td>
+                        <span className={`badge ${s.role === 'admin' ? 'badge-in-use' : 'badge-available'}`}>
+                          {s.role || 'scientist'}
+                        </span>
+                      </td>
                       <td>{s.department || '-'}</td>
                       <td>{s.employeeId || '-'}</td>
+                      <td>
+                        {s.role !== 'admin' && (
+                          <button 
+                            className="btn btn-danger" 
+                            style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center' }} 
+                            onClick={() => handleDelete(s.id, s.name, s.role)} 
+                            title="Delete"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
                       No scientists found.
                     </td>
                   </tr>
