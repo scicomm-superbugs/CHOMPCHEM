@@ -179,7 +179,8 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="app-footer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', padding: '2rem' }}>
+      {!location.pathname.includes('/chat') && (
+        <footer className="app-footer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', padding: '2rem' }}>
         {localStorage.getItem('workspaceId') === 'alamein' ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
             <img src="./alamein_logo_2.png" alt="Alamein" style={{ height: '40px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
@@ -196,6 +197,7 @@ export default function Layout() {
           <p>Made by Abdullah Amr Maged</p>
         </div>
       </footer>
+      )}
 
       {/* Mobile Bottom Tab Bar */}
       <nav className="mobile-bottom-bar">
