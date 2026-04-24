@@ -8,6 +8,7 @@ export default function Register() {
   const [formData, setFormData] = useState({
     name: '',
     username: '',
+    email: '',
     password: '',
     confirmPassword: '',
     department: '',
@@ -56,14 +57,16 @@ export default function Register() {
         username: formData.username,
         passwordHash: hash,
         name: formData.name,
+        email: formData.email || '',
         department: formData.department,
         role: 'scientist',
         accountStatus: 'pending', // Requires admin approval
-        employeeId: generatedId
+        employeeId: generatedId,
+        profileViews: 0
       });
 
       setSuccess('Registration submitted! An administrator must approve your account before you can log in.');
-      setFormData({ name: '', username: '', password: '', confirmPassword: '', department: '' });
+      setFormData({ name: '', username: '', email: '', password: '', confirmPassword: '', department: '' });
       setIsRegistering(false);
     } catch (err) {
       setError('Registration failed: ' + err.message);
@@ -72,40 +75,45 @@ export default function Register() {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 150px)', padding: '2rem 0' }}>
-      <div className="card" style={{ maxWidth: '400px', width: '100%' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 150px)', padding: '2rem 1rem' }}>
+      <div className="card" style={{ maxWidth: '420px', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <img src="/logo.png" alt="COMPCHEM" style={{ height: '50px', marginBottom: '1rem' }} onError={e => e.target.style.display='none'}/>
-          <h2>Scientist Registration</h2>
+          <h2>🔬 Scientist Registration</h2>
           <p style={{ color: 'var(--text-muted)' }}>Create a new account</p>
         </div>
 
         {error && (
           <div style={{ backgroundColor: '#FED7D7', color: '#822727', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.875rem' }}>
-            {error}
+            ❌ {error}
           </div>
         )}
         
         {success && (
           <div style={{ backgroundColor: '#C6F6D5', color: '#22543D', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.875rem' }}>
-            {success}
+            ✅ {success}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Full Name</label>
-            <input type="text" className="form-control" name="name" required value={formData.name} onChange={handleChange} />
+            <input type="text" className="form-control" name="name" required value={formData.name} onChange={handleChange} placeholder="e.g. John Smith" />
           </div>
 
           <div className="form-group">
             <label className="form-label">Username</label>
-            <input type="text" className="form-control" name="username" required value={formData.username} onChange={handleChange} />
+            <input type="text" className="form-control" name="username" required value={formData.username} onChange={handleChange} placeholder="e.g. jsmith" />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} placeholder="e.g. john@lab.edu" />
           </div>
           
           <div className="form-group">
             <label className="form-label">Department (Optional)</label>
-            <input type="text" className="form-control" name="department" value={formData.department} onChange={handleChange} />
+            <input type="text" className="form-control" name="department" value={formData.department} onChange={handleChange} placeholder="e.g. Biochemistry" />
           </div>
 
           <div className="form-group">
@@ -119,7 +127,7 @@ export default function Register() {
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '1rem' }} disabled={isRegistering}>
-            {isRegistering ? 'Registering...' : 'Create Account'}
+            {isRegistering ? 'Registering...' : '🚀 Create Account'}
           </button>
         </form>
         

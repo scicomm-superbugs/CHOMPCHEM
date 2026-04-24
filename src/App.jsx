@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import Devices from './pages/Devices';
 import Tasks from './pages/Tasks';
 import Chat from './pages/Chat';
+import TeamSearch from './pages/TeamSearch';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
             <Route path="profile" element={<Profile />} />
             <Route path="tasks" element={<Tasks />} />
             <Route path="chat" element={<Chat />} />
+            <Route path="team" element={<TeamSearch />} />
             
             {/* Admin/Master only routes */}
             <Route element={<ProtectedRoute requireAdmin={true} />}>

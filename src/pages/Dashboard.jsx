@@ -1,5 +1,5 @@
 import { db, useLiveCollection } from '../db';
-import { Beaker, Users, Activity, AlertTriangle, Crown, Check, ShieldOff } from 'lucide-react';
+import { Beaker, Users, Activity, AlertTriangle, Check, ShieldOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -19,16 +19,17 @@ export default function Dashboard() {
 
   // Calculate points and ranks for Leaderboard
   const getRank = (points) => {
-    if (points >= 300) return { name: 'Lab Legend', color: '#805AD5' };
-    if (points >= 150) return { name: 'Senior Scientist', color: '#3182CE' };
-    if (points >= 50) return { name: 'Researcher', color: '#38A169' };
-    return { name: 'Novice', color: '#A0AEC0' };
+    if (points >= 500) return { name: 'Lab Legend', color: '#805AD5', emoji: '🏆' };
+    if (points >= 300) return { name: 'Expert', color: '#DD6B20', emoji: '🔥' };
+    if (points >= 150) return { name: 'Senior Scientist', color: '#3182CE', emoji: '⭐' };
+    if (points >= 50) return { name: 'Researcher', color: '#38A169', emoji: '🔬' };
+    return { name: 'Novice', color: '#A0AEC0', emoji: '🌱' };
   };
 
   const leaderboardRaw = scientistsData
     .map(s => {
       if (s.role === 'master') {
-        return { ...s, points: '99999999999+', rank: { name: 'Lab Master', color: '#D69E2E' }, numericPoints: Infinity };
+        return { ...s, points: '99999999999+', rank: { name: 'Lab Master', color: '#D69E2E', emoji: '👑' }, numericPoints: Infinity };
       }
       const usagePoints = usageLogsData.filter(log => String(log.scientistId) === String(s.id)).length * 10;
       const taskPoints = tasksData.filter(t => String(t.assignedTo) === String(s.id) && t.status === 'Completed').length * 50;
@@ -107,9 +108,17 @@ export default function Dashboard() {
     totalTeamScore
   };
 
+  const getMedalStyle = (idx, role) => {
+    if (role === 'master') return { bg: 'linear-gradient(135deg, #F6E05E, #ECC94B)', color: '#744210', shadow: '0 2px 8px rgba(236,201,75,0.4)' };
+    if (idx === 0) return { bg: 'linear-gradient(135deg, #F6E05E, #D69E2E)', color: '#744210', shadow: '0 2px 8px rgba(214,158,46,0.4)' };
+    if (idx === 1) return { bg: 'linear-gradient(135deg, #E2E8F0, #CBD5E0)', color: '#4A5568', shadow: '0 2px 8px rgba(203,213,224,0.4)' };
+    if (idx === 2) return { bg: 'linear-gradient(135deg, #ED8936, #DD6B20)', color: 'white', shadow: '0 2px 8px rgba(237,137,54,0.4)' };
+    return { bg: 'var(--secondary)', color: 'var(--text-muted)', shadow: 'none' };
+  };
+
   return (
     <div>
-      <h1 style={{ marginBottom: '2rem' }}>{isAdmin ? 'Laboratory Dashboard' : 'My Dashboard'}</h1>
+      <h1 style={{ marginBottom: '1.5rem' }}>{isAdmin ? '📊 Laboratory Dashboard' : '📊 My Dashboard'}</h1>
       
       <div className="dashboard-grid">
         <div className="stat-card">
@@ -131,7 +140,7 @@ export default function Dashboard() {
         <div className="stat-card overdue">
           <div className="stat-icon" style={{ color: 'var(--accent)' }}><AlertTriangle size={24} /></div>
           <div className="stat-content">
-            <p>{isAdmin ? 'Overdue Chemicals' : 'My Overdue Chemicals'}</p>
+            <p>{isAdmin ? 'Overdue Chemicals' : 'My Overdue'}</p>
             <h3 style={{ color: 'var(--accent)' }}>{stats.overdue}</h3>
           </div>
         </div>
@@ -139,94 +148,101 @@ export default function Dashboard() {
 
       <div className="two-col-grid" style={{ gridTemplateColumns: '1fr 2fr' }}>
         {/* Leaderboard Card */}
-        <div className="card" style={{ alignSelf: 'start' }}>
-          <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="card-title"><Users size={20} /> Top Scientists</h2>
-            <div style={{ fontSize: '0.75rem', backgroundColor: '#805AD5', color: 'white', padding: '0.25rem 0.5rem', borderRadius: '12px', fontWeight: 'bold' }}>
-              Team: {stats.totalTeamScore.toLocaleString()}
-            </div>
-          </div>
-          
-          <div style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Your Rank</div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <style>{`
-                  .privacy-btn {
-                    font-size: 0.65rem;
-                    padding: 0.25rem 0.6rem;
-                    border-radius: 20px;
-                    border: 1.5px solid var(--border-color);
-                    cursor: pointer;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    font-weight: 600;
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                    background: white;
-                    color: var(--text);
-                    user-select: none;
-                  }
-                  .privacy-btn:hover {
-                    transform: translateY(-1px);
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-                    border-color: var(--primary);
-                  }
-                  .privacy-btn:active {
-                    transform: scale(0.92);
-                  }
-                  .privacy-btn.active {
-                    background: #F0FFF4 !important;
-                    color: #2F855A !important;
-                    border-color: #38A169 !important;
-                    box-shadow: 0 0 8px rgba(56, 161, 105, 0.25);
-                  }
-                  .privacy-btn.active:hover {
-                    background: #C6F6D5 !important;
-                  }
-                `}</style>
-                <button 
-                  onClick={() => handleTogglePrivacy('hideName')}
-                  className={`privacy-btn ${currentUserRank?.privacySettings?.hideName ? 'active' : ''}`}
-                >
-                  {currentUserRank?.privacySettings?.hideName ? <Check size={12} /> : <ShieldOff size={12} />}
-                  {currentUserRank?.privacySettings?.hideName ? 'Name Hidden' : 'Hide Name'}
-                </button>
-                <button 
-                  onClick={() => handleTogglePrivacy('hideScore')}
-                  className={`privacy-btn ${currentUserRank?.privacySettings?.hideScore ? 'active' : ''}`}
-                >
-                  {currentUserRank?.privacySettings?.hideScore ? <Check size={12} /> : <ShieldOff size={12} />}
-                  {currentUserRank?.privacySettings?.hideScore ? 'Score Hidden' : 'Hide Score'}
-                </button>
+        <div className="card" style={{ alignSelf: 'start', padding: 0, overflow: 'hidden' }}>
+          {/* Header with gradient */}
+          <div style={{ background: 'linear-gradient(135deg, #1A365D, #2A4365)', padding: '1.25rem 1.5rem', color: 'white' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <h2 style={{ color: 'white', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                🏅 Top Scientists
+              </h2>
+              <div style={{ fontSize: '0.7rem', backgroundColor: 'rgba(128,90,213,0.9)', color: 'white', padding: '0.25rem 0.6rem', borderRadius: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                🤝 Team: {stats.totalTeamScore.toLocaleString()}
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-              <strong style={{ fontSize: '1.25rem' }}>{currentUserRank?.rank.name}</strong>
-              <span className="badge" style={{ backgroundColor: currentUserRank?.rank.color, color: 'white' }}>{currentUserRank?.points} PTS</span>
+
+            {/* Your rank section */}
+            <div style={{ backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: '8px', padding: '0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>🎯 Your Rank</span>
+                <div style={{ display: 'flex', gap: '0.35rem' }}>
+                  <button 
+                    onClick={() => handleTogglePrivacy('hideName')}
+                    className={`privacy-btn ${currentUserRank?.privacySettings?.hideName ? 'active' : ''}`}
+                    style={!currentUserRank?.privacySettings?.hideName ? { background: 'rgba(255,255,255,0.15)', color: 'white', borderColor: 'rgba(255,255,255,0.3)' } : {}}
+                  >
+                    {currentUserRank?.privacySettings?.hideName ? <Check size={10} /> : <ShieldOff size={10} />}
+                    {currentUserRank?.privacySettings?.hideName ? '✅ Name Hidden' : 'Hide Name'}
+                  </button>
+                  <button 
+                    onClick={() => handleTogglePrivacy('hideScore')}
+                    className={`privacy-btn ${currentUserRank?.privacySettings?.hideScore ? 'active' : ''}`}
+                    style={!currentUserRank?.privacySettings?.hideScore ? { background: 'rgba(255,255,255,0.15)', color: 'white', borderColor: 'rgba(255,255,255,0.3)' } : {}}
+                  >
+                    {currentUserRank?.privacySettings?.hideScore ? <Check size={10} /> : <ShieldOff size={10} />}
+                    {currentUserRank?.privacySettings?.hideScore ? '✅ Score Hidden' : 'Hide Score'}
+                  </button>
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong style={{ fontSize: '1.1rem' }}>{currentUserRank?.rank.emoji} {currentUserRank?.rank.name}</strong>
+                <span style={{ backgroundColor: currentUserRank?.rank.color, color: 'white', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                  {currentUserRank?.points} PTS
+                </span>
+              </div>
             </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {leaderboard.slice(0, 5).map((s, idx) => {
-              const displayIdx = s.role === 'master' ? '👑' : idx + (leaderboard[0]?.role === 'master' ? 0 : 1);
+
+          {/* Leaderboard List */}
+          <div style={{ padding: '0.75rem 0' }}>
+            {leaderboard.slice(0, 6).map((s, idx) => {
+              const medal = getMedalStyle(idx, s.role);
+              const displayIdx = s.role === 'master' ? '👑' : (idx + (leaderboard[0]?.role === 'master' ? 0 : 1));
+              const isAnon = s.name === 'Anonymous Scientist';
+              
               return (
-              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: s.role === 'master' ? '#F6E05E' : idx === 0 ? '#F6E05E' : idx === 1 ? '#E2E8F0' : idx === 2 ? '#ED8936' : 'var(--secondary)', color: s.role === 'master' || idx < 3 ? 'black' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.875rem' }}>
-                  {displayIdx}
+                <div key={s.id} style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.75rem', 
+                  padding: '0.6rem 1.25rem',
+                  transition: 'background 0.2s',
+                  cursor: 'default',
+                  borderBottom: '1px solid #f7f7f7'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#f7fafc'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <div style={{ 
+                    width: '30px', height: '30px', borderRadius: '50%', 
+                    background: medal.bg, 
+                    color: medal.color, 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                    fontWeight: 'bold', fontSize: '0.8rem',
+                    boxShadow: medal.shadow,
+                    flexShrink: 0
+                  }}>
+                    {displayIdx}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem', fontStyle: isAnon ? 'italic' : 'normal', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {s.name}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: s.rank.color, fontWeight: 500 }}>
+                      {s.rank.emoji} {s.rank.name}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: s.role === 'master' ? '#D69E2E' : 'var(--text-main)', flexShrink: 0 }}>
+                    {s.points}
+                  </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.875rem', fontStyle: s.name === 'Anonymous Scientist' ? 'italic' : 'normal' }}>{s.name}</div>
-                  <div style={{ fontSize: '0.75rem', color: s.rank.color, fontWeight: 500 }}>{s.rank.name}</div>
-                </div>
-                <div style={{ fontSize: '0.875rem', fontWeight: 'bold' }}>{s.points}</div>
-              </div>
-            )})}
+              );
+            })}
           </div>
         </div>
 
         <div className="card">
           <div className="card-header">
-            <h2 className="card-title"><Activity size={20} /> {isAdmin ? 'Recently Used Items' : 'My Recent Activity'}</h2>
+            <h2 className="card-title"><Activity size={20} /> {isAdmin ? '📋 Recently Used Items' : '📋 My Recent Activity'}</h2>
             <Link to="/tracking" className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>View All</Link>
           </div>
         

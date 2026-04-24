@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
-import { Beaker, Users, Activity, Home, LogOut, Shield, Settings, User, Monitor, ClipboardList, MessageSquare, Crown } from 'lucide-react';
+import { Beaker, Users, Activity, Home, LogOut, Shield, Settings, User, Monitor, ClipboardList, MessageSquare, Crown, Menu, X, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection } from '../db';
 
@@ -7,6 +8,7 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   
   const scientists = useLiveCollection('scientists');
   const currentUserData = scientists?.find(s => String(s.id) === String(user?.id));
@@ -18,6 +20,10 @@ export default function Layout() {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleNavClick = () => {
+    setMobileNavOpen(false);
   };
 
   // Ensure user exists before rendering
@@ -32,48 +38,59 @@ export default function Layout() {
             <span className="logo-text">COMPCHEM</span>
           </div>
           
-          <nav className="nav-links">
-            <Link to="/" className={`nav-link ${isActive('/')}`}>
+          <button className="hamburger-btn" onClick={() => setMobileNavOpen(!mobileNavOpen)}>
+            {mobileNavOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          {mobileNavOpen && <div className="mobile-nav-overlay open" onClick={() => setMobileNavOpen(false)} />}
+          
+          <nav className={`nav-links ${mobileNavOpen ? 'mobile-open' : ''}`}>
+            <Link to="/" className={`nav-link ${isActive('/')}`} onClick={handleNavClick}>
               <Home size={20} />
               <span>Dashboard</span>
             </Link>
             
             {(user.role === 'admin' || user.role === 'master') && (
               <>
-                <Link to="/devices" className={`nav-link ${isActive('/devices')}`}>
+                <Link to="/devices" className={`nav-link ${isActive('/devices')}`} onClick={handleNavClick}>
                   <Monitor size={20} />
                   <span>Devices</span>
                 </Link>
-                <Link to="/chemicals" className={`nav-link ${isActive('/chemicals')}`}>
+                <Link to="/chemicals" className={`nav-link ${isActive('/chemicals')}`} onClick={handleNavClick}>
                   <Beaker size={20} />
                   <span>Chemicals</span>
                 </Link>
-                <Link to="/scientists" className={`nav-link ${isActive('/scientists')}`}>
+                <Link to="/scientists" className={`nav-link ${isActive('/scientists')}`} onClick={handleNavClick}>
                   <Users size={20} />
                   <span>Scientists</span>
                 </Link>
               </>
             )}
             
-            <Link to="/tracking" className={`nav-link ${isActive('/tracking')}`}>
+            <Link to="/tracking" className={`nav-link ${isActive('/tracking')}`} onClick={handleNavClick}>
               <Activity size={20} />
-              <span className="hide-mobile">Usage Registration</span>
+              <span>Usage</span>
             </Link>
 
-            <Link to="/tasks" className={`nav-link ${isActive('/tasks')}`}>
+            <Link to="/tasks" className={`nav-link ${isActive('/tasks')}`} onClick={handleNavClick}>
               <ClipboardList size={20} />
-              <span className="hide-mobile">Tasks</span>
+              <span>Tasks</span>
             </Link>
 
-            <Link to="/chat" className={`nav-link ${isActive('/chat')}`}>
+            <Link to="/chat" className={`nav-link ${isActive('/chat')}`} onClick={handleNavClick}>
               <MessageSquare size={20} />
-              <span className="hide-mobile">Chat</span>
+              <span>Chat</span>
+            </Link>
+
+            <Link to="/team" className={`nav-link ${isActive('/team')}`} onClick={handleNavClick}>
+              <Search size={20} />
+              <span>Team</span>
             </Link>
             
-            <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border-color)', margin: '0 0.5rem' }}></div>
+            <div className="nav-divider" style={{ width: '1px', height: '24px', backgroundColor: 'var(--border-color)', margin: '0 0.25rem' }}></div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.875rem' }}>
-              <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem' }}>
+              <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }} onClick={handleNavClick}>
                 {currentUserData?.avatar ? (
                   <img src={currentUserData.avatar} alt="Avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }} />
                 ) : (
@@ -89,7 +106,7 @@ export default function Layout() {
               </Link>
             </div>
             
-            <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.875rem' }}>
+            <button onClick={() => { handleLogout(); handleNavClick(); }} className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.875rem' }}>
               <LogOut size={16} /> Logout
             </button>
           </nav>
