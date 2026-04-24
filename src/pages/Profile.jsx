@@ -213,7 +213,7 @@ export default function Profile() {
                   <input type="email" className="form-control" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="e.g. john@lab.edu" />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Department</label>
+                  <label className="form-label">Department \ Lab</label>
                   <input type="text" className="form-control" value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} />
                 </div>
                 <button type="submit" className="btn btn-primary">💾 Save Changes</button>

@@ -128,7 +128,7 @@ export default function Scientists() {
             </div>
             
             <div className="form-group">
-              <label className="form-label">Department (Optional)</label>
+              <label className="form-label">Department \ Lab (Optional)</label>
               <input 
                 type="text" 
                 className="form-control" 
@@ -177,7 +177,7 @@ export default function Scientists() {
                   <th>Name</th>
                   <th>Username</th>
                   <th>Role</th>
-                  <th>Department</th>
+                  <th>Department \ Lab</th>
                   <th>ID</th>
                   <th>Actions</th>
                 </tr>

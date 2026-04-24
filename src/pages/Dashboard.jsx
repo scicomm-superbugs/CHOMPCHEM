@@ -12,8 +12,9 @@ export default function Dashboard() {
   const scientistsData = useLiveCollection('scientists');
   const tasksData = useLiveCollection('tasks');
   const devicesData = useLiveCollection('devices');
+  const equipmentData = useLiveCollection('equipment');
 
-  if (!chemicalsData || !usageLogsData || !scientistsData || !tasksData || !devicesData) {
+  if (!chemicalsData || !usageLogsData || !scientistsData || !tasksData || !devicesData || !equipmentData) {
     return <div className="page-content container">Loading dashboard...</div>;
   }
 
@@ -98,7 +99,7 @@ export default function Dashboard() {
           <div className="stat-icon"><Layers size={22} /></div>
           <div className="stat-content">
             <p>Registered Items</p>
-            <h3>{stats.chemicals + devicesData.length}</h3>
+            <h3>{stats.chemicals + devicesData.length + equipmentData.length}</h3>
           </div>
         </div>
         <div className="stat-card active">

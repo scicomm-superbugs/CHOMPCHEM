@@ -112,7 +112,7 @@ export default function Register() {
           </div>
           
           <div className="form-group">
-            <label className="form-label">Department (Optional)</label>
+            <label className="form-label">Department \ Lab (Optional)</label>
             <input type="text" className="form-control" name="department" value={formData.department} onChange={handleChange} placeholder="e.g. Biochemistry" />
           </div>
 

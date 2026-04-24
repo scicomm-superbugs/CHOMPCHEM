@@ -18,7 +18,8 @@ export default function RegisterChemical() {
     mw: '',
     smiles: '',
     hazards: '',
-    properties: ''
+    properties: '',
+    department: ''
   });
 
   // Load all registered chemicals
@@ -52,7 +53,8 @@ export default function RegisterChemical() {
           mw: exactMatch.mw,
           smiles: exactMatch.smiles || '',
           hazards: exactMatch.hazards || '',
-          properties: exactMatch.properties || ''
+          properties: exactMatch.properties || '',
+          department: ''
         });
       } else {
         // Try to calculate MW for unknown formula
@@ -62,12 +64,13 @@ export default function RegisterChemical() {
           mw: calculatedMw || '',
           smiles: '',
           hazards: '',
-          properties: ''
+          properties: '',
+          department: ''
         });
       }
     } else {
       setSuggestions([]);
-      setChemData({ name: '', mw: '', smiles: '', hazards: '', properties: '' });
+      setChemData({ name: '', mw: '', smiles: '', hazards: '', properties: '', department: '' });
     }
   };
 
@@ -78,7 +81,8 @@ export default function RegisterChemical() {
       mw: suggestion.mw,
       smiles: suggestion.smiles || '',
       hazards: suggestion.hazards || '',
-      properties: suggestion.properties || ''
+      properties: suggestion.properties || '',
+      department: ''
     });
     setSuggestions([]);
   };
@@ -104,11 +108,12 @@ export default function RegisterChemical() {
         mw: chemData.mw || 0,
         smiles: chemData.smiles,
         hazards: chemData.hazards,
-        properties: chemData.properties
+        properties: chemData.properties,
+        department: chemData.department || ''
       });
       setSuccessMsg(`Successfully registered ${formula}`);
       setFormula('');
-      setChemData({ name: '', mw: '', smiles: '', hazards: '', properties: '' });
+      setChemData({ name: '', mw: '', smiles: '', hazards: '', properties: '', department: '' });
     } catch (err) {
       setError('Failed to register chemical. ' + err.message);
     }
@@ -205,6 +210,17 @@ export default function RegisterChemical() {
             </div>
 
             <div className="form-group">
+              <label className="form-label">Department \ Lab (Optional)</label>
+              <input 
+                type="text" 
+                className="form-control" 
+                value={chemData.department}
+                onChange={e => setChemData({...chemData, department: e.target.value})}
+                placeholder="e.g. Analytical Chemistry"
+              />
+            </div>
+
+            <div className="form-group">
               <label className="form-label">Structure (SMILES)</label>
               <input 
                 type="text" 
@@ -236,7 +252,7 @@ export default function RegisterChemical() {
             <h2 className="card-title">Registered Compounds ({filteredChemicals.length})</h2>
             <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
               <button className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }} onClick={() => {
-                const data = chemicals.map(c => ({ formula: c.formula, name: c.name, mw: c.mw, hazards: c.hazards || '', smiles: c.smiles || '', properties: c.properties || '' }));
+                const data = chemicals.map(c => ({ formula: c.formula, name: c.name, mw: c.mw, hazards: c.hazards || '', smiles: c.smiles || '', properties: c.properties || '', department: c.department || '' }));
                 exportToCSV(data, 'chemicals');
               }}><Download size={14} /> Export</button>
               <button className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }} onClick={() => csvInputRef.current.click()}><Upload size={14} /> Import</button>
@@ -250,7 +266,7 @@ export default function RegisterChemical() {
                   for (const row of rows) {
                     if (!row.formula || !row.name) continue;
                     if (chemicals.some(c => c.formula === row.formula)) continue;
-                    await db.chemicals.add({ formula: row.formula, name: row.name, mw: row.mw || '', hazards: row.hazards || '', smiles: row.smiles || '', properties: row.properties || '' });
+                    await db.chemicals.add({ formula: row.formula, name: row.name, mw: row.mw || '', hazards: row.hazards || '', smiles: row.smiles || '', properties: row.properties || '', department: row.department || '' });
                     count++;
                   }
                   alert(`✅ Imported ${count} chemicals`);
@@ -285,6 +301,7 @@ export default function RegisterChemical() {
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.3rem', flexWrap: 'wrap' }}>
                       <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>MW {c.mw}</span>
                       {c.hazards && <span style={{ fontSize: '0.68rem', color: '#822727', backgroundColor: '#FFF5F5', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #FED7D7' }}>{c.hazards}</span>}
+                      {c.department && <span style={{ fontSize: '0.68rem', color: 'var(--primary)', backgroundColor: 'var(--secondary)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>{c.department}</span>}
                     </div>
                   </div>
                 </div>

@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Devices from './pages/Devices';
+import Equipment from './pages/Equipment';
 import Tasks from './pages/Tasks';
 import Chat from './pages/Chat';
 import TeamSearch from './pages/TeamSearch';
@@ -33,6 +34,7 @@ function App() {
             <Route element={<ProtectedRoute requireAdmin={true} />}>
               <Route path="chemicals" element={<RegisterChemical />} />
               <Route path="devices" element={<Devices />} />
+              <Route path="equipment" element={<Equipment />} />
               <Route path="scientists" element={<Scientists />} />
             </Route>
           </Route>

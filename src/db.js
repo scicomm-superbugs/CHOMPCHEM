@@ -101,6 +101,14 @@ export const db = {
       await deleteDoc(doc(firestore, 'devices', id));
     }
   },
+  equipment: {
+    add: async (item) => {
+      await setDoc(doc(firestore, 'equipment', item.id), item);
+    },
+    delete: async (id) => {
+      await deleteDoc(doc(firestore, 'equipment', id));
+    }
+  },
   tasks: {
     add: async (task) => {
       await addDoc(collection(firestore, 'tasks'), task);

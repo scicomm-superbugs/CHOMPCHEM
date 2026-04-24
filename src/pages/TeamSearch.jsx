@@ -77,7 +77,7 @@ export default function TeamSearch() {
         <input 
           type="text"
           className="form-control"
-          placeholder="🔍 Search by name, username, email, or department..."
+          placeholder="🔍 Search by name, username, email, or department \ lab..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           style={{ paddingLeft: '2.75rem', height: '44px' }}

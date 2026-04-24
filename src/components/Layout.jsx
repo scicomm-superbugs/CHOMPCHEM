@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
-import { Beaker, Users, Home, LogOut, Shield, User, Monitor, ClipboardList, MessageSquare, Crown, Menu, X, Search, FilePlus2, Settings } from 'lucide-react';
+import { Beaker, Users, Home, LogOut, Shield, User, Monitor, ClipboardList, MessageSquare, Crown, Menu, X, Search, FilePlus2, Settings, Package } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection } from '../db';
 
@@ -57,6 +57,10 @@ export default function Layout() {
                 <Link to="/devices" className={`nav-link ${isActive('/devices')}`} onClick={handleNavClick}>
                   <Monitor size={20} />
                   <span>Devices</span>
+                </Link>
+                <Link to="/equipment" className={`nav-link ${isActive('/equipment')}`} onClick={handleNavClick}>
+                  <Package size={20} />
+                  <span>Equipment</span>
                 </Link>
                 <Link to="/chemicals" className={`nav-link ${isActive('/chemicals')}`} onClick={handleNavClick}>
                   <Beaker size={20} />
