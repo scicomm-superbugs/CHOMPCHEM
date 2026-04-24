@@ -63,11 +63,10 @@ export default function Dashboard() {
     const newSettings = { ...currentSettings, [field]: !currentSettings[field] };
     
     try {
-      // Optimistic update would be nice, but let's just make sure the DB call is correct
       await db.scientists.update(user.id, { privacySettings: newSettings });
     } catch (err) {
       console.error("Privacy update failed:", err);
-      alert("Failed to update privacy settings. Please try again.");
+      alert(`Update Failed: ${err.message}\nUser ID: ${user.id}`);
     }
   };
 

@@ -56,7 +56,8 @@ export const db = {
       return ref.id;
     },
     update: async (id, data) => {
-      await updateDoc(doc(firestore, 'scientists', String(id)), data);
+      if (!id) throw new Error("No ID provided for update");
+      await setDoc(doc(firestore, 'scientists', String(id)), data, { merge: true });
     },
     delete: async (id) => {
       await deleteDoc(doc(firestore, 'scientists', String(id)));
