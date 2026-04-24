@@ -25,17 +25,20 @@ export default function Dashboard() {
     return { name: 'Novice', color: '#A0AEC0' };
   };
 
-  const leaderboard = scientistsData.map(s => {
-    if (s.role === 'master') {
-      return { ...s, points: '∞', rank: { name: 'Lab Master', color: '#D69E2E' }, numericPoints: Infinity };
-    }
-    const usagePoints = usageLogsData.filter(log => String(log.scientistId) === String(s.id)).length * 10;
-    const taskPoints = tasksData.filter(t => String(t.assignedTo) === String(s.id) && t.status === 'Completed').length * 50;
-    const totalPoints = usagePoints + taskPoints;
-    return { ...s, points: totalPoints, rank: getRank(totalPoints), numericPoints: totalPoints };
-  }).sort((a,b) => b.numericPoints - a.numericPoints);
+  const leaderboard = scientistsData
+    .filter(s => s.role !== 'master')
+    .map(s => {
+      const usagePoints = usageLogsData.filter(log => String(log.scientistId) === String(s.id)).length * 10;
+      const taskPoints = tasksData.filter(t => String(t.assignedTo) === String(s.id) && t.status === 'Completed').length * 50;
+      const totalPoints = usagePoints + taskPoints;
+      return { ...s, points: totalPoints, rank: getRank(totalPoints), numericPoints: totalPoints };
+    })
+    .sort((a,b) => b.numericPoints - a.numericPoints);
 
-  const currentUserRank = leaderboard.find(s => String(s.id) === String(user.id));
+  const currentUserData = scientistsData.find(s => String(s.id) === String(user.id));
+  const currentUserRank = currentUserData?.role === 'master' 
+    ? { ...currentUserData, points: '999999999+∞', rank: { name: 'Lab Master', color: '#D69E2E' } } 
+    : leaderboard.find(s => String(s.id) === String(user.id));
 
   let filteredLogs = usageLogsData;
   if (!isAdmin) {
