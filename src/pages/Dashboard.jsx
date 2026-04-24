@@ -18,11 +18,12 @@ export default function Dashboard() {
   }
 
   const getRank = (points) => {
-    if (points >= 500) return { name: 'Lab Legend', color: '#805AD5', icon: '★' };
-    if (points >= 300) return { name: 'Expert', color: '#DD6B20', icon: '◆' };
-    if (points >= 150) return { name: 'Senior Scientist', color: '#3182CE', icon: '▲' };
-    if (points >= 50) return { name: 'Researcher', color: '#38A169', icon: '●' };
-    return { name: 'Novice', color: '#A0AEC0', icon: '○' };
+    if (points >= 500) return { name: 'Lab Legend', color: '#805AD5', emoji: '🏆' };
+    if (points >= 300) return { name: 'Mad Scientist', color: '#DD6B20', emoji: '🧑‍🔬' };
+    if (points >= 150) return { name: 'Chemical Warrior', color: '#3182CE', emoji: '⚔️' };
+    if (points >= 50) return { name: 'Beaker Breaker', color: '#38A169', emoji: '🧪' };
+    if (points >= 10) return { name: 'Lab Rat', color: '#718096', emoji: '🐀' };
+    return { name: 'Baby Chemist', color: '#A0AEC0', emoji: '🍼' };
   };
 
   const leaderboardRaw = scientistsData
@@ -141,7 +142,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong style={{ fontSize: '1rem' }}>{currentUserRank?.rank.icon} {currentUserRank?.rank.name}</strong>
+                <strong style={{ fontSize: '1rem' }}>{currentUserRank?.rank.emoji} {currentUserRank?.rank.name}</strong>
                 <span style={{ backgroundColor: currentUserRank?.rank.color, color: 'white', padding: '0.15rem 0.5rem', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 700 }}>
                   {currentUserRank?.points} pts
                 </span>
@@ -151,17 +152,19 @@ export default function Dashboard() {
 
           <div style={{ padding: '0.25rem 0' }}>
             {leaderboard.slice(0, 6).map((s, idx) => {
-              const pos = s.role === 'master' ? '♛' : (idx + (leaderboard[0]?.role === 'master' ? 0 : 1));
+              const pos = s.role === 'master' ? '👑' : (idx + (leaderboard[0]?.role === 'master' ? 0 : 1));
               const isTop3 = idx < 3 || s.role === 'master';
+              const isFirst = idx === 0 && s.role !== 'master';
               return (
-                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.55rem 1.25rem', borderBottom: '1px solid #f0f0f0', transition: 'background 0.15s' }}
+                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.55rem 1.25rem', borderBottom: '1px solid #f0f0f0', transition: 'background 0.15s', position: 'relative' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
+                  {isFirst && <div style={{ position: 'absolute', right: '10px', top: '5px', fontSize: '0.8rem' }}>🔥</div>}
                   <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: isTop3 ? s.rank.color : '#EDF2F7', color: isTop3 ? 'white' : '#718096', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.7rem', flexShrink: 0 }}>{pos}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontStyle: s.name === 'Anonymous' ? 'italic' : 'normal', color: 'var(--text-main)' }}>{s.name}</div>
-                    <div style={{ fontSize: '0.65rem', color: s.rank.color, fontWeight: 600, letterSpacing: '0.2px' }}>{s.rank.name}</div>
+                    <div style={{ fontSize: '0.65rem', color: s.rank.color, fontWeight: 600, letterSpacing: '0.2px' }}>{s.rank.emoji} {s.rank.name}</div>
                   </div>
                   <span style={{ fontSize: '0.8rem', fontWeight: 700, color: s.role === 'master' ? s.rank.color : '#2D3748', fontFamily: 'monospace', flexShrink: 0 }}>{s.points}</span>
                 </div>
