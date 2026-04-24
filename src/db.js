@@ -32,37 +32,47 @@ export function useLiveCollection(collectionName) {
   return data;
 }
 
+const withTimeout = (promise, ms = 5000) => {
+  let timeoutId;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error('Database request timed out. Ensure your internet is stable and your Firebase Firestore Database is created in Test Mode.'));
+    }, ms);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+};
+
 // Data Access Object (DAO) to minimize component refactoring
 export const db = {
   chemicals: {
     add: async (chemical) => {
-      await setDoc(doc(firestore, 'chemicals', chemical.formula), chemical);
+      await withTimeout(setDoc(doc(firestore, 'chemicals', chemical.formula), chemical));
     },
     delete: async (formula) => {
-      await deleteDoc(doc(firestore, 'chemicals', formula));
+      await withTimeout(deleteDoc(doc(firestore, 'chemicals', formula)));
     },
     get: async (formula) => {
-      const d = await getDoc(doc(firestore, 'chemicals', formula));
+      const d = await withTimeout(getDoc(doc(firestore, 'chemicals', formula)));
       return d.exists() ? d.data() : null;
     },
     count: async () => {
-      const snap = await getDocs(collection(firestore, 'chemicals'));
+      const snap = await withTimeout(getDocs(collection(firestore, 'chemicals')));
       return snap.size;
     }
   },
   scientists: {
     add: async (scientist) => {
-      const ref = await addDoc(collection(firestore, 'scientists'), scientist);
+      const ref = await withTimeout(addDoc(collection(firestore, 'scientists'), scientist));
       return ref.id;
     },
     update: async (id, data) => {
-      await updateDoc(doc(firestore, 'scientists', String(id)), data);
+      await withTimeout(updateDoc(doc(firestore, 'scientists', String(id)), data));
     },
     delete: async (id) => {
-      await deleteDoc(doc(firestore, 'scientists', String(id)));
+      await withTimeout(deleteDoc(doc(firestore, 'scientists', String(id))));
     },
     get: async (id) => {
-      const d = await getDoc(doc(firestore, 'scientists', String(id)));
+      const d = await withTimeout(getDoc(doc(firestore, 'scientists', String(id))));
       return d.exists() ? { id: d.id, ...d.data() } : null;
     },
     where: (field) => {
@@ -71,7 +81,7 @@ export const db = {
           return {
             first: async () => {
               const q = query(collection(firestore, 'scientists'), where(field, '==', value));
-              const snap = await getDocs(q);
+              const snap = await withTimeout(getDocs(q));
               if (snap.empty) return null;
               return { id: snap.docs[0].id, ...snap.docs[0].data() };
             }
@@ -80,16 +90,16 @@ export const db = {
       }
     },
     count: async () => {
-      const snap = await getDocs(collection(firestore, 'scientists'));
+      const snap = await withTimeout(getDocs(collection(firestore, 'scientists')));
       return snap.size;
     }
   },
   usage_logs: {
     add: async (log) => {
-      await addDoc(collection(firestore, 'usage_logs'), log);
+      await withTimeout(addDoc(collection(firestore, 'usage_logs'), log));
     },
     update: async (id, data) => {
-      await updateDoc(doc(firestore, 'usage_logs', String(id)), data);
+      await withTimeout(updateDoc(doc(firestore, 'usage_logs', String(id)), data));
     }
   }
 };
