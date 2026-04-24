@@ -1,17 +1,17 @@
 :root {
-  --primary: #2b2d42;      /* Logo Navy */
-  --primary-light: #3d405b;
-  --primary-dark: #1a1b28;
-  --secondary: #edf2f7;
-  --accent: #9c1c20;       /* Logo Dark Red */
-  --accent-hover: #7a0217;
-  --warning: #e07a5f;
+  --primary: #212845;      /* Logo Deep Navy */
+  --primary-light: #40455c; /* Logo Slate Blue ('COMP') */
+  --primary-dark: #121626;
+  --secondary: #e6e8f0;
+  --accent: #a11119;       /* Logo Deep Red */
+  --accent-hover: #7d0d13;
+  --warning: #dd6b20;
   --success: #38a169;
-  --bg-color: #f8f9fa;
+  --bg-color: #f4f6f9;
   --surface: #ffffff;
-  --text-main: #2d3748;
-  --text-muted: #718096;
-  --border-color: #e2e8f0;
+  --text-main: #1a202c;
+  --text-muted: #64748b;
+  --border-color: #cbd5e1;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
