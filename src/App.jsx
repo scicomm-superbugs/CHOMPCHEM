@@ -12,12 +12,14 @@ import Equipment from './pages/Equipment';
 import Tasks from './pages/Tasks';
 import Chat from './pages/Chat';
 import TeamSearch from './pages/TeamSearch';
+import Portal from './pages/Portal';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/portal" element={<Portal />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         

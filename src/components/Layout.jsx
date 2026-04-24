@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
-import { Beaker, Users, Home, LogOut, Shield, User, Monitor, ClipboardList, MessageSquare, Crown, Menu, X, Search, FilePlus2, Settings, Package, Moon, Sun } from 'lucide-react';
+import { Beaker, Users, Home, LogOut, Shield, User, Monitor, ClipboardList, MessageSquare, Crown, Menu, X, Search, FilePlus2, Settings, Package, Moon, Sun, Building2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection } from '../db';
 
@@ -69,9 +69,17 @@ export default function Layout() {
       <header className="app-header">
         <div className="container header-content">
           <div className="logo-container">
-            <img src="./logo.png" alt="COMPCHEM Logo" className="logo-image" onError={(e) => { e.target.style.display = 'none'; }} />
+            {localStorage.getItem('workspaceId') === 'alamein' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Building2 size={32} color="#805AD5" />
+                <div className="logo-text" style={{ color: '#805AD5', lineHeight: 1.1 }}>
+                  Alamein<br/><span style={{ fontSize: '0.65rem', fontWeight: 'bold' }}>Faculty of Science</span>
+                </div>
+              </div>
+            ) : (
+              <img src="./logo.png" alt="COMPCHEM Logo" className="logo-image" onError={(e) => { e.target.style.display = 'none'; }} />
+            )}
           </div>
-          
           <button className="hamburger-btn" onClick={() => setMobileNavOpen(!mobileNavOpen)}>
             {mobileNavOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -158,7 +166,10 @@ export default function Layout() {
               </Link>
             </div>
             
-            <button onClick={() => { handleLogout(); handleNavClick(); }} className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.875rem' }}>
+            <button onClick={() => { localStorage.removeItem('workspaceId'); window.location.href = '#/portal'; window.location.reload(); }} className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <Building2 size={16} /> Workspace
+            </button>
+            <button onClick={() => { handleLogout(); handleNavClick(); }} className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
               <LogOut size={16} /> Logout
             </button>
           </nav>

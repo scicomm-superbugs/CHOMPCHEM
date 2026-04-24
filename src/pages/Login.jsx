@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, Navigate } from 'react-router-dom';
-import { Lock, User } from 'lucide-react';
+import { Lock, User, Building2 } from 'lucide-react';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -11,6 +11,11 @@ export default function Login() {
   
   const { login, user } = useAuth();
   const navigate = useNavigate();
+
+  const workspaceId = localStorage.getItem('workspaceId');
+  if (!workspaceId) {
+    return <Navigate to="/portal" replace />;
+  }
 
   // If already logged in, redirect
   if (user) {
@@ -34,8 +39,20 @@ export default function Login() {
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 150px)' }}>
       <div className="card" style={{ maxWidth: '400px', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img src="./logo.png" alt="COMPCHEM" style={{ height: '140px', marginBottom: '1.5rem' }} onError={e => e.target.style.display='none'}/>
-          <h2 style={{ fontSize: '1.25rem', color: 'var(--primary)', marginTop: '0.5rem' }}>Laboratory Management</h2>
+          {workspaceId === 'alamein' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'rgba(128, 90, 213, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#805AD5', marginBottom: '1rem' }}>
+                <Building2 size={40} />
+              </div>
+              <h2 style={{ fontSize: '1.5rem', color: '#805AD5', marginBottom: '0.25rem' }}>Alamein University</h2>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Faculty of Science</div>
+            </div>
+          ) : (
+            <>
+              <img src="./logo.png" alt="COMPCHEM" style={{ height: '140px', marginBottom: '1.5rem' }} onError={e => e.target.style.display='none'}/>
+              <h2 style={{ fontSize: '1.25rem', color: 'var(--primary)', marginTop: '0.5rem' }}>Laboratory Management</h2>
+            </>
+          )}
         </div>
 
         {error && (

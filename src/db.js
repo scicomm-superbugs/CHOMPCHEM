@@ -17,17 +17,25 @@ export const firestore = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
 });
 
+export const getCollectionName = (baseName) => {
+  const ws = localStorage.getItem('workspaceId');
+  if (!ws || ws === 'compchem') return baseName;
+  return `${ws}_${baseName}`;
+};
+
 // React Hook for Real-time listeners
 export function useLiveCollection(collectionName) {
   const [data, setData] = useState(null);
   
   useEffect(() => {
-    const q = query(collection(firestore, collectionName));
+    // We listen to changes on the localized collection
+    const actualCollection = getCollectionName(collectionName);
+    const q = query(collection(firestore, actualCollection));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
     return () => unsubscribe();
-  }, [collectionName]);
+  }, [collectionName]); // Could add localStorage listener if workspace changes without reload, but app will likely reload
   
   return data;
 }
@@ -36,34 +44,34 @@ export function useLiveCollection(collectionName) {
 export const db = {
   chemicals: {
     add: async (chemical) => {
-      await setDoc(doc(firestore, 'chemicals', chemical.formula), chemical);
+      await setDoc(doc(firestore, getCollectionName('chemicals'), chemical.formula), chemical);
     },
     delete: async (formula) => {
-      await deleteDoc(doc(firestore, 'chemicals', formula));
+      await deleteDoc(doc(firestore, getCollectionName('chemicals'), formula));
     },
     get: async (formula) => {
-      const d = await getDoc(doc(firestore, 'chemicals', formula));
+      const d = await getDoc(doc(firestore, getCollectionName('chemicals'), formula));
       return d.exists() ? d.data() : null;
     },
     count: async () => {
-      const snap = await getDocs(collection(firestore, 'chemicals'));
+      const snap = await getDocs(collection(firestore, getCollectionName('chemicals')));
       return snap.size;
     }
   },
   scientists: {
     add: async (scientist) => {
-      const ref = await addDoc(collection(firestore, 'scientists'), scientist);
+      const ref = await addDoc(collection(firestore, getCollectionName('scientists')), scientist);
       return ref.id;
     },
     update: async (id, data) => {
       if (!id) throw new Error("No ID provided for update");
-      await setDoc(doc(firestore, 'scientists', String(id)), data, { merge: true });
+      await setDoc(doc(firestore, getCollectionName('scientists'), String(id)), data, { merge: true });
     },
     delete: async (id) => {
-      await deleteDoc(doc(firestore, 'scientists', String(id)));
+      await deleteDoc(doc(firestore, getCollectionName('scientists'), String(id)));
     },
     get: async (id) => {
-      const d = await getDoc(doc(firestore, 'scientists', String(id)));
+      const d = await getDoc(doc(firestore, getCollectionName('scientists'), String(id)));
       return d.exists() ? { id: d.id, ...d.data() } : null;
     },
     where: (field) => {
@@ -71,7 +79,7 @@ export const db = {
         equals: (value) => {
           return {
             first: async () => {
-              const q = query(collection(firestore, 'scientists'), where(field, '==', value));
+              const q = query(collection(firestore, getCollectionName('scientists')), where(field, '==', value));
               const snap = await getDocs(q);
               if (snap.empty) return null;
               return { id: snap.docs[0].id, ...snap.docs[0].data() };
@@ -81,48 +89,48 @@ export const db = {
       }
     },
     count: async () => {
-      const snap = await getDocs(collection(firestore, 'scientists'));
+      const snap = await getDocs(collection(firestore, getCollectionName('scientists')));
       return snap.size;
     }
   },
   usage_logs: {
     add: async (log) => {
-      await addDoc(collection(firestore, 'usage_logs'), log);
+      await addDoc(collection(firestore, getCollectionName('usage_logs')), log);
     },
     update: async (id, data) => {
-      await updateDoc(doc(firestore, 'usage_logs', String(id)), data);
+      await updateDoc(doc(firestore, getCollectionName('usage_logs'), String(id)), data);
     }
   },
   devices: {
     add: async (device) => {
-      await setDoc(doc(firestore, 'devices', device.id), device);
+      await setDoc(doc(firestore, getCollectionName('devices'), device.id), device);
     },
     delete: async (id) => {
-      await deleteDoc(doc(firestore, 'devices', id));
+      await deleteDoc(doc(firestore, getCollectionName('devices'), id));
     }
   },
   equipment: {
     add: async (item) => {
-      await setDoc(doc(firestore, 'equipment', item.id), item);
+      await setDoc(doc(firestore, getCollectionName('equipment'), item.id), item);
     },
     delete: async (id) => {
-      await deleteDoc(doc(firestore, 'equipment', id));
+      await deleteDoc(doc(firestore, getCollectionName('equipment'), id));
     }
   },
   tasks: {
     add: async (task) => {
-      await addDoc(collection(firestore, 'tasks'), task);
+      await addDoc(collection(firestore, getCollectionName('tasks')), task);
     },
     update: async (id, data) => {
-      await updateDoc(doc(firestore, 'tasks', String(id)), data);
+      await updateDoc(doc(firestore, getCollectionName('tasks'), String(id)), data);
     },
     delete: async (id) => {
-      await deleteDoc(doc(firestore, 'tasks', String(id)));
+      await deleteDoc(doc(firestore, getCollectionName('tasks'), String(id)));
     }
   },
   messages: {
     add: async (msg) => {
-      await addDoc(collection(firestore, 'messages'), msg);
+      await addDoc(collection(firestore, getCollectionName('messages')), msg);
     }
   }
 };
