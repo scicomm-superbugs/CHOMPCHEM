@@ -1,5 +1,4 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db';
+import { useLiveCollection } from '../db';
 import { Beaker, Users, Activity, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -8,47 +7,45 @@ export default function Dashboard() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
 
-  const stats = useLiveQuery(async () => {
-    const chemicals = await db.chemicals.count();
-    
-    // Filter by user if not admin
-    let usageLogsQuery = db.usage_logs;
-    if (!isAdmin) {
-      usageLogsQuery = db.usage_logs.where('scientistId').equals(user.id);
-    }
+  const chemicalsData = useLiveCollection('chemicals');
+  const usageLogsData = useLiveCollection('usage_logs');
+  const scientistsData = useLiveCollection('scientists');
 
-    const activeLogs = await usageLogsQuery.filter(log => log.status === 'In Use').toArray();
-    const activeUsage = activeLogs.length;
-    
-    const now = new Date().toISOString();
-    const overdueLogs = activeLogs.filter(log => log.dueDate < now);
-    const overdue = overdueLogs.length;
+  if (!chemicalsData || !usageLogsData || !scientistsData) {
+    return <div className="page-content container">Loading dashboard...</div>;
+  }
 
-    let recentLogsQuery = db.usage_logs.orderBy('borrowDate').reverse();
-    const allRecentLogs = await recentLogsQuery.toArray();
-    
-    // Filter for scientist manually since we ordered by borrowDate
-    const recentLogs = isAdmin 
-      ? allRecentLogs.slice(0, 5)
-      : allRecentLogs.filter(log => log.scientistId === user.id).slice(0, 5);
+  let filteredLogs = usageLogsData;
+  if (!isAdmin) {
+    filteredLogs = usageLogsData.filter(log => String(log.scientistId) === String(user.id));
+  }
 
-    // Map chemical details for recent logs
-    const recentWithDetails = await Promise.all(
-      recentLogs.map(async (log) => {
-        const chem = await db.chemicals.get(log.chemicalFormula);
-        const scientist = await db.scientists.get(log.scientistId);
-        return {
-          ...log,
-          chemicalName: chem?.name || log.chemicalFormula,
-          scientistName: scientist?.name || 'Unknown'
-        };
-      })
-    );
+  const activeLogs = filteredLogs.filter(log => log.status === 'In Use');
+  const activeUsage = activeLogs.length;
+  
+  const now = new Date().toISOString();
+  const overdueLogs = activeLogs.filter(log => log.dueDate < now);
+  const overdue = overdueLogs.length;
 
-    return { chemicals, activeUsage, overdue, recentLogs: recentWithDetails };
-  }, [user]);
+  const sortedLogs = [...filteredLogs].sort((a,b) => new Date(b.borrowDate).getTime() - new Date(a.borrowDate).getTime()).reverse();
+  const recentLogsRaw = sortedLogs.slice(0, 5);
 
-  if (!stats) return <div className="page-content container">Loading dashboard...</div>;
+  const recentWithDetails = recentLogsRaw.map(log => {
+    const chem = chemicalsData.find(c => c.formula === log.chemicalFormula);
+    const scientist = scientistsData.find(s => String(s.id) === String(log.scientistId));
+    return {
+      ...log,
+      chemicalName: chem?.name || log.chemicalFormula,
+      scientistName: scientist?.name || 'Unknown'
+    };
+  });
+
+  const stats = {
+    chemicals: chemicalsData.length,
+    activeUsage,
+    overdue,
+    recentLogs: recentWithDetails
+  };
 
   return (
     <div>

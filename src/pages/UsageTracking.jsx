@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db';
+import { db, useLiveCollection } from '../db';
 import { Activity, Check, Search, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -21,14 +20,20 @@ export default function UsageTracking() {
   const [successMsg, setSuccessMsg] = useState('');
 
   // Fetch data
-  const chemicals = useLiveQuery(() => db.chemicals.toArray()) || [];
-  const scientists = useLiveQuery(() => db.scientists.toArray()) || [];
-  const usageLogsRaw = useLiveQuery(() => db.usage_logs.reverse().toArray()) || [];
+  const chemicals = useLiveCollection('chemicals');
+  const scientists = useLiveCollection('scientists');
+  const usageLogsRawData = useLiveCollection('usage_logs');
+
+  if (!chemicals || !scientists || !usageLogsRawData) {
+    return <div className="page-content container">Loading...</div>;
+  }
 
   // Map related data to logs
+  const usageLogsRaw = [...usageLogsRawData].sort((a,b) => new Date(b.borrowDate).getTime() - new Date(a.borrowDate).getTime());
+  
   const usageLogs = usageLogsRaw.map(log => {
     const chem = chemicals.find(c => c.formula === log.chemicalFormula);
-    const scientist = scientists.find(s => s.id === parseInt(log.scientistId));
+    const scientist = scientists.find(s => String(s.id) === String(log.scientistId));
     
     // Determine if overdue dynamically
     const isOverdue = log.status === 'In Use' && log.dueDate && new Date(log.dueDate) < new Date();
@@ -48,7 +53,7 @@ export default function UsageTracking() {
 
   // Filter logs for tracking table
   const trackingLogs = usageLogs.filter(log => {
-    if (!isAdmin && log.scientistId !== user.id) return false;
+    if (!isAdmin && String(log.scientistId) !== String(user.id)) return false;
     
     // Hide pending/rejected from the main tracking table for admins
     // Scientists can see their pending/rejected requests in their table
@@ -75,7 +80,7 @@ export default function UsageTracking() {
     try {
       await db.usage_logs.add({
         ...logEntry,
-        scientistId: isAdmin ? parseInt(logEntry.scientistId) : user.id,
+        scientistId: isAdmin ? String(logEntry.scientistId) : String(user.id),
         status: isAdmin ? 'In Use' : 'Pending',
         borrowDate: new Date(logEntry.borrowDate).toISOString(),
         dueDate: new Date(logEntry.dueDate).toISOString(),

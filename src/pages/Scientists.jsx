@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db';
+import { db, useLiveCollection } from '../db';
 import { UserPlus, Search, User, Trash2 } from 'lucide-react';
 
 export default function Scientists() {
@@ -12,7 +11,9 @@ export default function Scientists() {
   const [searchTerm, setSearchTerm] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const scientists = useLiveQuery(() => db.scientists.toArray()) || [];
+  const scientists = useLiveCollection('scientists');
+  
+  if (!scientists) return <div className="page-content container">Loading scientists...</div>;
   
   const filteredScientists = scientists.filter(s => 
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 

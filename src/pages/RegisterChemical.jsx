@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db';
+import { useState } from 'react';
+import { db, useLiveCollection } from '../db';
 import { chemicalDictionary } from '../utils/chemicalDictionary';
 import { calculateMolecularWeight } from '../utils/formulaParser';
 import SmilesViewer from '../components/SmilesViewer';
@@ -22,10 +21,10 @@ export default function RegisterChemical() {
   });
 
   // Load all registered chemicals
-  const registeredChemicals = useLiveQuery(() => db.chemicals.toArray()) || [];
+  const chemicals = useLiveCollection('chemicals') || [];
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredChemicals = registeredChemicals.filter(c => 
+  const filteredChemicals = chemicals.filter(c => 
     c.formula.toLowerCase().includes(searchTerm.toLowerCase()) || 
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
