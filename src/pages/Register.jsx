@@ -87,7 +87,7 @@ export default function Register() {
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           {workspaceId === 'alamein' ? (
             <>
-              <img src="./alamein_logo.png" alt="Alamein University" style={{ height: '50px', marginBottom: '1rem', objectFit: 'contain' }} onError={e => e.target.style.display='none'}/>
+              <img src="./alamein_logo_2.png" alt="Alamein University" style={{ height: '50px', marginBottom: '1rem', objectFit: 'contain' }} onError={e => e.target.style.display='none'}/>
               <h2>🎓 Faculty Registration</h2>
               <p style={{ color: 'var(--text-muted)' }}>Create a new account</p>
             </>

@@ -75,7 +75,7 @@ export default function Layout() {
           <div className="logo-container">
             {localStorage.getItem('workspaceId') === 'alamein' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <img src="./alamein_logo.png" alt="Alamein Logo" style={{ height: '32px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                <img src="./alamein_logo_2.png" alt="Alamein Logo" style={{ height: '32px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
                 <div className="logo-text" style={{ color: '#805AD5', lineHeight: 1.1 }}>
                   Alamein<br/><span style={{ fontSize: '0.65rem', fontWeight: 'bold' }}>Faculty of Science</span>
                 </div>
