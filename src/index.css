@@ -97,7 +97,7 @@ input, select, textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 64px;
+  min-height: 72px;
 }
 
 .logo-container {
@@ -108,8 +108,9 @@ input, select, textarea {
 }
 
 .logo-image {
-  height: 44px;
+  height: 130px;
   width: auto;
+  margin: -40px 0 -40px -15px; /* Trims transparent whitespace */
 }
 
 .logo-text {
@@ -539,7 +540,8 @@ input, select, textarea {
   }
 
   .logo-image {
-    height: 32px;
+    height: 90px;
+    margin: -30px 0 -30px -10px;
   }
 
   .hamburger-btn {
