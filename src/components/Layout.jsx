@@ -14,6 +14,10 @@ export default function Layout() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
+    
+    // Set proper document title
+    const workspaceId = localStorage.getItem('workspaceId');
+    document.title = workspaceId === 'alamein' ? 'Alamein International University' : 'COMPCHEM Laboratory';
   }, [theme]);
   
   const toggleTheme = () => {

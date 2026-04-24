@@ -94,6 +94,10 @@ export default function Portal() {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
 
+  useEffect(() => {
+    document.title = 'Science Communication & Research Hub';
+  }, []);
+
   const handleSelectWorkspace = (workspaceId) => {
     localStorage.setItem('workspaceId', workspaceId);
     sessionStorage.removeItem('userId'); 

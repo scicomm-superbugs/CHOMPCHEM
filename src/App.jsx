@@ -17,17 +17,6 @@ import Portal from './pages/Portal';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  useEffect(() => {
-    const workspaceId = localStorage.getItem('workspaceId');
-    if (workspaceId === 'alamein') {
-      document.title = 'Alamein International University';
-    } else if (workspaceId === 'compchem') {
-      document.title = 'COMPCHEM Laboratory';
-    } else {
-      document.title = 'Science Communication & Research Hub';
-    }
-  }, []);
-
   return (
     <Router>
       <Routes>

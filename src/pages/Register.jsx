@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { db } from '../db';
 import bcrypt from 'bcryptjs';
@@ -19,6 +19,12 @@ export default function Register() {
   const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const workspaceId = localStorage.getItem('workspaceId') || 'compchem';
+
+  useEffect(() => {
+    document.title = workspaceId === 'alamein' ? 'Alamein International University' : 'COMPCHEM Laboratory';
+  }, [workspaceId]);
 
   // If already logged in, redirect
   if (user) {
@@ -74,8 +80,6 @@ export default function Register() {
       setIsRegistering(false);
     }
   };
-
-  const workspaceId = localStorage.getItem('workspaceId') || 'compchem';
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 150px)', padding: '2rem 1rem' }}>

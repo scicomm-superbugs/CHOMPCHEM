@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { Lock, User, Building2 } from 'lucide-react';
@@ -21,6 +21,10 @@ export default function Login() {
   if (user) {
     return <Navigate to="/" replace />;
   }
+
+  useEffect(() => {
+    document.title = workspaceId === 'alamein' ? 'Alamein International University' : 'COMPCHEM Laboratory';
+  }, [workspaceId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
