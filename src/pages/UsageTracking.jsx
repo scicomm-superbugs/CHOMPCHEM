@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
 import { db, useLiveCollection } from '../db';
-import { Activity, Check, Search, X } from 'lucide-react';
+import { Activity, Check, Search, X, Download, Upload } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { exportToCSV, parseCSV, readFileAsText } from '../utils/csvUtils';
 
 export default function UsageTracking() {
   const { user } = useAuth();
@@ -366,101 +367,73 @@ export default function UsageTracking() {
 
         {/* Tracking List */}
         <div className="card">
-          <div className="card-header">
+          <div className="card-header" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
             <h2 className="card-title">{isAdmin ? 'Tracking Records' : 'My Records'}</h2>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <div className="search-box" style={{ marginBottom: 0 }}>
-                <Search size={16} />
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  placeholder="Search..." 
-                  style={{ padding: '0.4rem 1rem 0.4rem 2rem', fontSize: '0.875rem' }}
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <select 
-                className="form-control" 
-                style={{ width: 'auto', padding: '0.4rem 1rem', fontSize: '0.875rem' }}
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-              >
-                <option value="All">All Status</option>
-                <option value="In Use">In Use</option>
-                <option value="Pending">Pending</option>
-                <option value="Overdue">Overdue</option>
-                <option value="Returned">Returned</option>
-                {!isAdmin && <option value="Rejected">Rejected</option>}
-              </select>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              <button className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }} onClick={() => {
+                const data = trackingLogs.map(l => ({
+                  item: l.chemicalFormula,
+                  itemName: l.chemicalName,
+                  scientist: l.scientistName,
+                  borrowDate: l.borrowDate ? new Date(l.borrowDate).toLocaleDateString() : '',
+                  dueDate: l.dueDate ? new Date(l.dueDate).toLocaleDateString() : '',
+                  status: l.computedStatus || l.status,
+                  notes: l.notes || ''
+                }));
+                exportToCSV(data, 'registrations');
+              }}><Download size={14} /> Export</button>
             </div>
           </div>
 
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  {isAdmin && <th>Scientist</th>}
-                  <th>Timeline</th>
-                  <th>Notes</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {trackingLogs.length > 0 ? (
-                  trackingLogs.map(log => (
-                    <tr key={log.id} style={{ 
-                      backgroundColor: log.computedStatus === 'Overdue' ? 'rgba(254, 215, 215, 0.2)' : 
-                                       log.isApproaching ? 'rgba(254, 252, 191, 0.2)' : 'transparent',
-                      opacity: (log.status === 'Pending' || log.status === 'Rejected') ? 0.7 : 1
-                    }}>
-                      <td>
-                        <strong>{log.chemicalFormula}</strong>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{log.chemicalName}</div>
-                      </td>
-                      {isAdmin && <td>{log.scientistName}</td>}
-                      <td>
-                        <div style={{ fontSize: '0.875rem' }}>Out: {new Date(log.borrowDate).toLocaleDateString()}</div>
-                        <div style={{ fontSize: '0.875rem', color: log.computedStatus === 'Overdue' ? 'var(--accent)' : 'inherit', fontWeight: log.computedStatus === 'Overdue' ? 600 : 'normal' }}>
-                          Due: {new Date(log.dueDate).toLocaleDateString()}
-                        </div>
-                      </td>
-                      <td style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{log.notes || '-'}</td>
-                      <td>
-                        <span className={`badge ${
-                          log.computedStatus === 'Overdue' ? 'badge-overdue' : 
-                          log.status === 'Returned' ? 'badge-available' : 
-                          log.status === 'Pending' ? 'badge-warning' :
-                          log.status === 'Rejected' ? 'badge-overdue' :
-                          log.isApproaching ? 'badge-warning' : 'badge-in-use'
-                        }`}>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+            <div className="search-box" style={{ marginBottom: 0, flex: 1, minWidth: '140px' }}>
+              <Search size={16} />
+              <input type="text" className="form-control" placeholder="Search..." style={{ padding: '0.4rem 1rem 0.4rem 2rem', fontSize: '0.85rem' }} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+            </div>
+            <select className="form-control" style={{ width: 'auto', padding: '0.4rem 0.75rem', fontSize: '0.85rem', flex: '0 0 auto' }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+              <option value="All">All</option>
+              <option value="In Use">In Use</option>
+              <option value="Pending">Pending</option>
+              <option value="Overdue">Overdue</option>
+              <option value="Returned">Returned</option>
+              {!isAdmin && <option value="Rejected">Rejected</option>}
+            </select>
+          </div>
+
+          <div className="mobile-card-list">
+            {trackingLogs.length > 0 ? (
+              trackingLogs.map(log => (
+                <div key={log.id} className="mobile-list-item" style={{
+                  borderLeft: `3px solid ${log.computedStatus === 'Overdue' ? 'var(--accent)' : log.isApproaching ? 'var(--warning)' : log.status === 'Returned' ? 'var(--success)' : log.status === 'Pending' ? '#D69E2E' : 'var(--primary)'}`,
+                  opacity: (log.status === 'Pending' || log.status === 'Rejected') ? 0.75 : 1
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                        <strong style={{ fontSize: '0.88rem' }}>{log.chemicalFormula}</strong>
+                        <span className={`badge ${log.computedStatus === 'Overdue' ? 'badge-overdue' : log.status === 'Returned' ? 'badge-available' : log.status === 'Pending' ? 'badge-warning' : log.status === 'Rejected' ? 'badge-overdue' : log.isApproaching ? 'badge-warning' : 'badge-in-use'}`} style={{ fontSize: '0.6rem' }}>
                           {log.computedStatus === 'Overdue' ? 'Overdue' : log.isApproaching ? 'Due Soon' : log.status}
                         </span>
-                      </td>
-                      <td>
-                        {log.status === 'In Use' && (
-                          <button 
-                            className="btn btn-secondary" 
-                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem' }}
-                            onClick={() => markReturned(log.id)}
-                          >
-                            <Check size={14} /> Return
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={isAdmin ? 6 : 5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                      No tracking records found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                      </div>
+                      <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)' }}>{log.chemicalName}</div>
+                      {isAdmin && <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)' }}>👤 {log.scientistName}</div>}
+                      <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                        <span>📤 {new Date(log.borrowDate).toLocaleDateString()}</span>
+                        <span style={{ color: log.computedStatus === 'Overdue' ? 'var(--accent)' : 'inherit', fontWeight: log.computedStatus === 'Overdue' ? 600 : 400 }}>📅 {new Date(log.dueDate).toLocaleDateString()}</span>
+                      </div>
+                      {log.notes && <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.15rem', fontStyle: 'italic' }}>📝 {log.notes}</div>}
+                    </div>
+                    {log.status === 'In Use' && (
+                      <button className="btn btn-secondary" style={{ padding: '0.3rem 0.5rem', fontSize: '0.7rem', flexShrink: 0, marginTop: '0.25rem' }} onClick={() => markReturned(log.id)}>
+                        <Check size={12} /> Return
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No records found.</div>
+            )}
           </div>
         </div>
       </div>

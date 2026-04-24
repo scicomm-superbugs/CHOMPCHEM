@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { db, useLiveCollection } from '../db';
-import { Monitor, Search, Trash2, Plus } from 'lucide-react';
+import { Monitor, Search, Trash2, Plus, Download, Upload } from 'lucide-react';
+import { exportToCSV, parseCSV, readFileAsText } from '../utils/csvUtils';
 
 export default function Devices() {
   const [device, setDevice] = useState({
@@ -12,6 +13,7 @@ export default function Devices() {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const fileInputRef = useRef(null);
 
   const devices = useLiveCollection('devices');
 
@@ -34,7 +36,7 @@ export default function Devices() {
         id: device.serialNumber || `DEV-${Date.now()}`
       };
       await db.devices.add(newDevice);
-      setSuccessMsg(`Registered ${newDevice.name}`);
+      setSuccessMsg(`✅ Registered ${newDevice.name}`);
       setDevice({ name: '', model: '', serialNumber: '', status: 'Available' });
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (error) {
@@ -52,9 +54,46 @@ export default function Devices() {
     }
   };
 
+  const handleExport = () => {
+    const data = devices.map(d => ({
+      name: d.name,
+      model: d.model || '',
+      serialNumber: d.serialNumber,
+      status: d.status
+    }));
+    exportToCSV(data, 'devices');
+  };
+
+  const handleImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await readFileAsText(file);
+      const rows = parseCSV(text);
+      let count = 0;
+      for (const row of rows) {
+        if (!row.name || !row.serialNumber) continue;
+        if (devices.some(d => d.serialNumber === row.serialNumber)) continue;
+        await db.devices.add({
+          name: row.name,
+          model: row.model || '',
+          serialNumber: row.serialNumber,
+          status: row.status || 'Available',
+          id: row.serialNumber || `DEV-${Date.now()}-${count}`
+        });
+        count++;
+      }
+      setSuccessMsg(`✅ Imported ${count} devices`);
+      setTimeout(() => setSuccessMsg(''), 4000);
+    } catch (err) {
+      alert('Import failed: ' + err.message);
+    }
+    e.target.value = '';
+  };
+
   return (
     <div>
-      <h1 style={{ marginBottom: '2rem' }}>Lab Devices</h1>
+      <h1 style={{ marginBottom: '1.5rem' }}>🖥️ Lab Devices</h1>
 
       <div className="two-col-grid">
         <div className="card" style={{ alignSelf: 'start' }}>
@@ -62,7 +101,7 @@ export default function Devices() {
             <h2 className="card-title"><Plus size={20} /> Register Device</h2>
           </div>
           {successMsg && (
-            <div style={{ backgroundColor: '#C6F6D5', color: '#22543D', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem' }}>
+            <div style={{ backgroundColor: '#C6F6D5', color: '#22543D', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem' }}>
               {successMsg}
             </div>
           )}
@@ -86,47 +125,38 @@ export default function Devices() {
         <div className="card">
           <div className="card-header">
             <h2 className="card-title">Device Directory ({filteredDevices.length})</h2>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              <button className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }} onClick={handleExport}><Download size={14} /> Export</button>
+              <button className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }} onClick={() => fileInputRef.current.click()}><Upload size={14} /> Import</button>
+              <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept=".csv" onChange={handleImport} />
+            </div>
           </div>
           <div className="search-box">
             <Search size={18} />
             <input type="text" className="form-control" placeholder="Search devices..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Device</th>
-                  <th>Model</th>
-                  <th>Serial Number</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredDevices.length > 0 ? filteredDevices.map(d => (
-                  <tr key={d.id}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div style={{ backgroundColor: 'var(--secondary)', padding: '0.5rem', borderRadius: '50%', color: 'var(--primary)' }}>
-                          <Monitor size={16} />
-                        </div>
-                        <strong>{d.name}</strong>
-                      </div>
-                    </td>
-                    <td>{d.model || '-'}</td>
-                    <td>{d.serialNumber}</td>
-                    <td><span className={`badge ${d.status === 'Available' ? 'badge-available' : 'badge-in-use'}`}>{d.status}</span></td>
-                    <td>
-                      <button className="btn btn-danger" style={{ padding: '0.4rem 0.5rem' }} onClick={() => handleDelete(d.id)}><Trash2 size={14} /></button>
-                    </td>
-                  </tr>
-                )) : (
-                  <tr>
-                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No devices found.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+
+          {/* Mobile-friendly card list */}
+          <div className="mobile-card-list">
+            {filteredDevices.length > 0 ? filteredDevices.map(d => (
+              <div key={d.id} className="mobile-list-item">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ backgroundColor: 'var(--secondary)', padding: '0.5rem', borderRadius: '8px', color: 'var(--primary)', flexShrink: 0 }}>
+                    <Monitor size={18} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{d.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{d.model || 'No model'} • SN: {d.serialNumber}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                    <span className={`badge ${d.status === 'Available' ? 'badge-available' : 'badge-in-use'}`}>{d.status}</span>
+                    <button className="btn btn-danger" style={{ padding: '0.3rem 0.4rem' }} onClick={() => handleDelete(d.id)}><Trash2 size={14} /></button>
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No devices found.</div>
+            )}
           </div>
         </div>
       </div>

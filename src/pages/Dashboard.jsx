@@ -146,7 +146,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="two-col-grid" style={{ gridTemplateColumns: '1fr 2fr' }}>
+      <div className="two-col-grid">
         {/* Leaderboard Card */}
         <div className="card" style={{ alignSelf: 'start', padding: 0, overflow: 'hidden' }}>
           {/* Header with gradient */}
@@ -242,42 +242,32 @@ export default function Dashboard() {
 
         <div className="card">
           <div className="card-header">
-            <h2 className="card-title"><Activity size={20} /> {isAdmin ? '📋 Recently Used Items' : '📋 My Recent Activity'}</h2>
-            <Link to="/tracking" className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>View All</Link>
+            <h2 className="card-title"><Activity size={20} /> {isAdmin ? '📋 Recent Items' : '📋 My Activity'}</h2>
+            <Link to="/tracking" className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}>View All</Link>
           </div>
         
         {stats.recentLogs.length > 0 ? (
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Chemical</th>
-                  {isAdmin && <th>Scientist</th>}
-                  <th>Borrow Date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.recentLogs.map(log => (
-                  <tr key={log.id}>
-                    <td>
-                      <span style={{ fontWeight: 600 }}>{log.chemicalFormula}</span>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{log.chemicalName}</div>
-                    </td>
-                    {isAdmin && <td>{log.scientistName}</td>}
-                    <td>{new Date(log.borrowDate).toLocaleDateString()}</td>
-                    <td>
-                      <span className={`badge ${log.status === 'In Use' ? 'badge-in-use' : 'badge-available'}`}>
-                        {log.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {stats.recentLogs.map(log => (
+              <div key={log.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', backgroundColor: '#f7fafc', borderRadius: '8px', border: '1px solid #edf2f7' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: log.status === 'In Use' ? '#BEE3F8' : '#C6F6D5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1rem' }}>
+                  🧪
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.chemicalFormula}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                    {log.chemicalName} {isAdmin && `• ${log.scientistName}`}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <span className={`badge ${log.status === 'In Use' ? 'badge-in-use' : 'badge-available'}`} style={{ fontSize: '0.6rem' }}>{log.status}</span>
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '2px' }}>{new Date(log.borrowDate).toLocaleDateString()}</div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
-          <p style={{ color: 'var(--text-muted)' }}>No usage records found. {isAdmin ? 'Start tracking item usage' : 'You have no assigned items'}.</p>
+          <p style={{ color: 'var(--text-muted)' }}>No records found.</p>
         )}
         </div>
       </div>

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { db, useLiveCollection } from '../db';
 import { chemicalDictionary } from '../utils/chemicalDictionary';
 import { calculateMolecularWeight } from '../utils/formulaParser';
 import SmilesViewer from '../components/SmilesViewer';
-import { Plus, Search, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
+import { Plus, Search, AlertCircle, CheckCircle, Trash2, Download, Upload } from 'lucide-react';
+import { exportToCSV, parseCSV, readFileAsText } from '../utils/csvUtils';
 
 export default function RegisterChemical() {
   const [formula, setFormula] = useState('');
@@ -23,6 +24,7 @@ export default function RegisterChemical() {
   // Load all registered chemicals
   const chemicals = useLiveCollection('chemicals') || [];
   const [searchTerm, setSearchTerm] = useState('');
+  const csvInputRef = useRef(null);
 
   const filteredChemicals = chemicals.filter(c => 
     c.formula.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -232,65 +234,53 @@ export default function RegisterChemical() {
         <div className="card">
           <div className="card-header">
             <h2 className="card-title">Registered Compounds ({filteredChemicals.length})</h2>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              <button className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }} onClick={() => {
+                const data = chemicals.map(c => ({ formula: c.formula, name: c.name, mw: c.mw, hazards: c.hazards || '', smiles: c.smiles || '', properties: c.properties || '' }));
+                exportToCSV(data, 'chemicals');
+              }}><Download size={14} /> Export</button>
+              <button className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }} onClick={() => csvInputRef.current.click()}><Upload size={14} /> Import</button>
+              <input type="file" ref={csvInputRef} style={{ display: 'none' }} accept=".csv" onChange={async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                  const text = await readFileAsText(file);
+                  const rows = parseCSV(text);
+                  let count = 0;
+                  for (const row of rows) {
+                    if (!row.formula || !row.name) continue;
+                    if (chemicals.some(c => c.formula === row.formula)) continue;
+                    await db.chemicals.add({ formula: row.formula, name: row.name, mw: row.mw || '', hazards: row.hazards || '', smiles: row.smiles || '', properties: row.properties || '' });
+                    count++;
+                  }
+                  alert(`✅ Imported ${count} chemicals`);
+                } catch (err) { alert('Import failed: ' + err.message); }
+                e.target.value = '';
+              }} />
+            </div>
           </div>
 
           <div className="search-box">
             <Search size={18} />
-            <input 
-              type="text" 
-              className="form-control" 
-              placeholder="Search by formula or name..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
+            <input type="text" className="form-control" placeholder="Search by formula or name..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
 
-          <div className="table-container" style={{ maxHeight: '600px', overflowY: 'auto' }}>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Formula</th>
-                  <th>Name</th>
-                  <th>MW (g/mol)</th>
-                  <th>Structure</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredChemicals.length > 0 ? (
-                  filteredChemicals.map(c => (
-                    <tr key={c.formula}>
-                      <td><strong style={{ color: 'var(--primary)' }}>{c.formula}</strong></td>
-                      <td>
-                        <div>{c.name}</div>
-                        {c.hazards && <div style={{ fontSize: '0.75rem', color: 'var(--accent)' }}>{c.hazards}</div>}
-                      </td>
-                      <td>{c.mw}</td>
-                      <td>
-                        {c.smiles ? (
-                          <div style={{ transform: 'scale(0.8)', transformOrigin: 'left center' }}>
-                            <SmilesViewer smiles={c.smiles} width={100} height={80} />
-                          </div>
-                        ) : (
-                          <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>N/A</span>
-                        )}
-                      </td>
-                      <td>
-                        <button className="btn btn-danger" style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center' }} onClick={() => handleDelete(c.formula)} title="Delete">
-                          <Trash2 size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                      No chemicals found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div className="mobile-card-list" style={{ maxHeight: '600px', overflowY: 'auto' }}>
+            {filteredChemicals.length > 0 ? filteredChemicals.map(c => (
+              <div key={c.formula} className="mobile-list-item">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#EBF8FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.1rem' }}>🧪</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--primary)' }}>{c.formula}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-main)' }}>{c.name}</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>MW: {c.mw} {c.hazards && <span style={{ color: 'var(--accent)' }}>• {c.hazards}</span>}</div>
+                  </div>
+                  <button className="btn btn-danger" style={{ padding: '0.3rem 0.4rem', flexShrink: 0 }} onClick={() => handleDelete(c.formula)}><Trash2 size={14} /></button>
+                </div>
+              </div>
+            )) : (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No chemicals found.</div>
+            )}
           </div>
         </div>
       </div>

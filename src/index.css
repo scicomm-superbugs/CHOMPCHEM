@@ -337,6 +337,25 @@ input, select, textarea {
 .badge-overdue { background-color: #FED7D7; color: #822727; }
 .badge-warning { background-color: #FEFCBF; color: #744210; }
 
+/* ===== MOBILE-FRIENDLY LIST ===== */
+.mobile-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mobile-list-item {
+  padding: 0.65rem 0.75rem;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #edf2f7;
+  transition: background 0.15s;
+}
+
+.mobile-list-item:hover {
+  background-color: #edf2f7;
+}
+
 /* ===== DASHBOARD GRID ===== */
 .dashboard-grid {
   display: grid;
