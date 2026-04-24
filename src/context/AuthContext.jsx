@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     // Check if user is logged in
     const storedUserId = sessionStorage.getItem('userId');
     if (storedUserId) {
-      db.scientists.get(parseInt(storedUserId)).then(scientist => {
+      db.scientists.get(String(storedUserId)).then(scientist => {
         if (scientist) {
           setUser({
             id: scientist.id,
@@ -21,6 +21,10 @@ export const AuthProvider = ({ children }) => {
             role: scientist.role
           });
         }
+        setLoading(false);
+      }).catch(err => {
+        console.error('Failed to restore session:', err);
+        sessionStorage.removeItem('userId');
         setLoading(false);
       });
     } else {
