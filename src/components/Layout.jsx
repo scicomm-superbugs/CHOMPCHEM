@@ -37,7 +37,6 @@ export default function Layout() {
         <div className="container header-content">
           <div className="logo-container">
             <img src="/logo.png" alt="COMPCHEM Logo" className="logo-image" onError={(e) => { e.target.style.display = 'none'; }} />
-            <span className="logo-text">COMPCHEM</span>
           </div>
           
           <button className="hamburger-btn" onClick={() => setMobileNavOpen(!mobileNavOpen)}>

@@ -34,9 +34,8 @@ export default function Login() {
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 150px)' }}>
       <div className="card" style={{ maxWidth: '400px', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img src="/logo.png" alt="COMPCHEM" style={{ height: '50px', marginBottom: '1rem' }} onError={e => e.target.style.display='none'}/>
-          <h2>Welcome Back</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Login to your account</p>
+          <img src="/logo.png" alt="COMPCHEM" style={{ height: '70px', marginBottom: '1rem' }} onError={e => e.target.style.display='none'}/>
+          <h2 style={{ fontSize: '1.25rem', color: 'var(--primary)', marginTop: '0.5rem' }}>Laboratory Management</h2>
         </div>
 
         {error && (

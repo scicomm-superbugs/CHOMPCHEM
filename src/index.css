@@ -1,17 +1,17 @@
 :root {
-  --primary: #1A365D;
-  --primary-light: #2A4365;
-  --primary-dark: #0F172A;
-  --secondary: #E2E8F0;
-  --accent: #E53E3E;
-  --accent-hover: #C53030;
-  --warning: #D69E2E;
-  --success: #38A169;
-  --bg-color: #F7FAFC;
-  --surface: #FFFFFF;
-  --text-main: #2D3748;
+  --primary: #2b2d42;      /* Logo Navy */
+  --primary-light: #3d405b;
+  --primary-dark: #1a1b28;
+  --secondary: #edf2f7;
+  --accent: #9c1c20;       /* Logo Dark Red */
+  --accent-hover: #7a0217;
+  --warning: #e07a5f;
+  --success: #38a169;
+  --bg-color: #f8f9fa;
+  --surface: #ffffff;
+  --text-main: #2d3748;
   --text-muted: #718096;
-  --border-color: #E2E8F0;
+  --border-color: #e2e8f0;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -108,7 +108,7 @@ input, select, textarea {
 }
 
 .logo-image {
-  height: 36px;
+  height: 52px;
   width: auto;
 }
 
@@ -539,7 +539,7 @@ input, select, textarea {
   }
 
   .logo-image {
-    height: 28px;
+    height: 40px;
   }
 
   .hamburger-btn {
