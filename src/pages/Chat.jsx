@@ -122,7 +122,7 @@ export default function Chat() {
           borderRight: '1px solid var(--border-color)', 
           display: 'flex', 
           flexDirection: 'column', 
-          backgroundColor: 'white',
+          backgroundColor: 'var(--surface)',
           flexShrink: 0
         }}
         className="chat-sidebar"
@@ -155,7 +155,7 @@ export default function Chat() {
           </div>
           <div style={{ flex: 1, overflowY: 'auto' }}>
             <div 
-              style={{ padding: '0.75rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: recipient === 'global' ? 'var(--secondary)' : 'transparent', borderBottom: '1px solid #f0f0f0', transition: 'background 0.2s' }}
+              style={{ padding: '0.75rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: recipient === 'global' ? 'var(--secondary)' : 'transparent', borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}
               onClick={() => { setRecipient('global'); setShowContacts(false); }}
             >
               <MessageSquare size={16} style={{ color: 'var(--primary)' }} />
@@ -164,7 +164,7 @@ export default function Chat() {
             {scientists.filter(s => String(s.id) !== String(user.id)).map(s => (
               <div 
                 key={s.id}
-                style={{ padding: '0.75rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: recipient === String(s.id) ? 'var(--secondary)' : 'transparent', borderBottom: '1px solid #f0f0f0', transition: 'background 0.2s' }}
+                style={{ padding: '0.75rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: recipient === String(s.id) ? 'var(--secondary)' : 'transparent', borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}
                 onClick={() => { setRecipient(String(s.id)); setShowContacts(false); }}
               >
                 {s.avatar ? <img src={s.avatar} alt="Avatar" style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} /> : <User size={16} />}
@@ -180,7 +180,7 @@ export default function Chat() {
             <h2 className="card-title" style={{ margin: 0, fontSize: '1rem' }}>{getRecipientName()}</h2>
           </div>
           
-          <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#fafafa' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: 'var(--bg-color)' }}>
             {filteredMessages.length === 0 ? (
               <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '2rem' }}>
                 <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>💬</div>
@@ -202,8 +202,8 @@ export default function Chat() {
                       </div>
                     )}
                     <div style={{ 
-                      backgroundColor: isMine ? 'var(--primary)' : 'white', 
-                      color: isMine ? 'white' : 'var(--text)', 
+                      backgroundColor: isMine ? 'var(--primary)' : 'var(--surface)', 
+                      color: isMine ? 'white' : 'var(--text-main)', 
                       padding: '0.65rem 0.9rem', 
                       borderRadius: isMine ? '16px 16px 0 16px' : '16px 16px 16px 0',
                       boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
@@ -224,7 +224,7 @@ export default function Chat() {
                             <a 
                               href={msg.attachment.data} 
                               download={msg.attachment.name}
-                              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem', backgroundColor: isMine ? 'rgba(255,255,255,0.15)' : '#f7f7f7', borderRadius: '6px', color: 'inherit', textDecoration: 'none', fontSize: '0.8rem' }}
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem', backgroundColor: isMine ? 'rgba(255,255,255,0.15)' : 'var(--secondary)', borderRadius: '6px', color: 'inherit', textDecoration: 'none', fontSize: '0.8rem' }}
                             >
                               <FileText size={16} />
                               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{msg.attachment.name}</span>
@@ -264,12 +264,12 @@ export default function Chat() {
             </div>
           )}
 
-          <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--border-color)', backgroundColor: 'white', position: 'relative' }}>
+          <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--surface)', position: 'relative' }}>
             {showEmojis && (
-              <div style={{ position: 'absolute', bottom: '100%', left: '1rem', marginBottom: '0.5rem', backgroundColor: 'white', padding: '0.5rem', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', display: 'flex', gap: '0.25rem', border: '1px solid var(--border-color)', flexWrap: 'wrap', maxWidth: '280px' }}>
+              <div style={{ position: 'absolute', bottom: '100%', left: '1rem', marginBottom: '0.5rem', backgroundColor: 'var(--surface)', padding: '0.5rem', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', display: 'flex', gap: '0.25rem', border: '1px solid var(--border-color)', flexWrap: 'wrap', maxWidth: '280px' }}>
                 {emojis.map(e => (
                   <span key={e} style={{ cursor: 'pointer', fontSize: '1.25rem', padding: '4px', borderRadius: '4px', transition: 'background 0.2s' }} 
-                    onMouseEnter={ev => ev.target.style.background = '#f0f0f0'}
+                    onMouseEnter={ev => ev.target.style.background = 'var(--secondary)'}
                     onMouseLeave={ev => ev.target.style.background = 'transparent'}
                     onClick={() => setText(prev => prev + e)}>{e}</span>
                 ))}

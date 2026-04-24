@@ -20,7 +20,7 @@ export default function SmilesViewer({ smiles, width = 200, height = 200 }) {
 
   if (!smiles) {
     return (
-      <div style={{ width, height, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
+      <div style={{ width, height, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--secondary)', borderRadius: '8px' }}>
         <span style={{ color: '#888' }}>No Structure Available</span>
       </div>
     );
