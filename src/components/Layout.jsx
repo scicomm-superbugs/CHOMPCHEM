@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
-import { Beaker, Users, Activity, Home, LogOut, Shield, Settings, User, Monitor, ClipboardList, MessageSquare, Crown, Menu, X, Search } from 'lucide-react';
+import { Beaker, Users, Home, LogOut, Shield, User, Monitor, ClipboardList, MessageSquare, Crown, Menu, X, Search, FilePlus2, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection } from '../db';
 
@@ -29,6 +29,8 @@ export default function Layout() {
   // Ensure user exists before rendering
   if (!user) return null;
 
+  const isAdminUser = user.role === 'admin' || user.role === 'master';
+
   return (
     <>
       <header className="app-header">
@@ -44,13 +46,14 @@ export default function Layout() {
 
           {mobileNavOpen && <div className="mobile-nav-overlay open" onClick={() => setMobileNavOpen(false)} />}
           
+          {/* Desktop Navigation */}
           <nav className={`nav-links ${mobileNavOpen ? 'mobile-open' : ''}`}>
             <Link to="/" className={`nav-link ${isActive('/')}`} onClick={handleNavClick}>
               <Home size={20} />
               <span>Dashboard</span>
             </Link>
             
-            {(user.role === 'admin' || user.role === 'master') && (
+            {isAdminUser && (
               <>
                 <Link to="/devices" className={`nav-link ${isActive('/devices')}`} onClick={handleNavClick}>
                   <Monitor size={20} />
@@ -68,8 +71,8 @@ export default function Layout() {
             )}
             
             <Link to="/tracking" className={`nav-link ${isActive('/tracking')}`} onClick={handleNavClick}>
-              <Activity size={20} />
-              <span>Usage</span>
+              <FilePlus2 size={20} />
+              <span>Register</span>
             </Link>
 
             <Link to="/tasks" className={`nav-link ${isActive('/tasks')}`} onClick={handleNavClick}>
@@ -121,6 +124,34 @@ export default function Layout() {
         <p>COMPCHEM Laboratory Management System &copy; {new Date().getFullYear()}</p>
         <p>Made by Abdullah Amr Maged</p>
       </footer>
+
+      {/* Mobile Bottom Tab Bar */}
+      <nav className="mobile-bottom-bar">
+        <Link to="/" className={`bottom-tab ${isActive('/')}`}>
+          <Home size={20} />
+          <span>Home</span>
+        </Link>
+        <Link to="/tracking" className={`bottom-tab ${isActive('/tracking')}`}>
+          <FilePlus2 size={20} />
+          <span>Register</span>
+        </Link>
+        <Link to="/chat" className={`bottom-tab ${isActive('/chat')}`}>
+          <MessageSquare size={20} />
+          <span>Chat</span>
+        </Link>
+        <Link to="/team" className={`bottom-tab ${isActive('/team')}`}>
+          <Search size={20} />
+          <span>Team</span>
+        </Link>
+        <Link to="/profile" className={`bottom-tab ${isActive('/profile')}`}>
+          {currentUserData?.avatar ? (
+            <img src={currentUserData.avatar} alt="" style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }} />
+          ) : (
+            <User size={20} />
+          )}
+          <span>Profile</span>
+        </Link>
+      </nav>
     </>
   );
 }
