@@ -1,5 +1,5 @@
 import { useLiveCollection } from '../db';
-import { Beaker, Users, Activity, AlertTriangle, Crown } from 'lucide-react';
+import { Beaker, Users, Activity, AlertTriangle, Crown, Check, ShieldOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -56,7 +56,6 @@ export default function Dashboard() {
   const handleTogglePrivacy = async (field) => {
     if (!user?.id || !scientistsData) return;
     
-    // Find latest data from the live collection
     const currentData = scientistsData.find(s => String(s.id) === String(user.id));
     if (!currentData) return;
 
@@ -64,9 +63,11 @@ export default function Dashboard() {
     const newSettings = { ...currentSettings, [field]: !currentSettings[field] };
     
     try {
+      // Optimistic update would be nice, but let's just make sure the DB call is correct
       await db.scientists.update(user.id, { privacySettings: newSettings });
     } catch (err) {
       console.error("Privacy update failed:", err);
+      alert("Failed to update privacy settings. Please try again.");
     }
   };
 
@@ -176,22 +177,24 @@ export default function Dashboard() {
                       transform: scale(0.95);
                     }
                     .privacy-btn.active {
-                      background: var(--primary);
-                      color: white;
-                      border-color: var(--primary);
-                      box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+                      background: #F0FFF4 !important;
+                      color: #2F855A !important;
+                      border-color: #38A169 !important;
+                      box-shadow: 0 0 8px rgba(56, 161, 105, 0.2);
                     }
                   `}</style>
                   <button 
                     onClick={() => handleTogglePrivacy('hideName')}
                     className={`privacy-btn ${currentUserRank?.privacySettings?.hideName ? 'active' : ''}`}
                   >
+                    {currentUserRank?.privacySettings?.hideName ? <Check size={12} /> : <ShieldOff size={12} />}
                     {currentUserRank?.privacySettings?.hideName ? 'Name Hidden' : 'Hide Name'}
                   </button>
                   <button 
                     onClick={() => handleTogglePrivacy('hideScore')}
                     className={`privacy-btn ${currentUserRank?.privacySettings?.hideScore ? 'active' : ''}`}
                   >
+                    {currentUserRank?.privacySettings?.hideScore ? <Check size={12} /> : <ShieldOff size={12} />}
                     {currentUserRank?.privacySettings?.hideScore ? 'Score Hidden' : 'Hide Score'}
                   </button>
                 </div>
