@@ -230,9 +230,29 @@ export default function TeamSearch() {
                 )}
                 
                 <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-                  <button className="btn btn-secondary" onClick={() => setShowAllTagsModal(true)} style={{ width: '100%', fontSize: '0.8rem' }}>
-                    🏅 View All Unlocked Tags
-                  </button>
+                  {selectedUser.role === 'master' ? (
+                    <div style={{
+                      padding: '1.25rem',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, rgba(214, 158, 46, 0.1), rgba(128, 90, 213, 0.15))',
+                      border: '1px dashed var(--primary)',
+                      animation: 'vaultGlow 3s ease-in-out infinite',
+                      color: 'var(--text-main)',
+                      cursor: 'default'
+                    }}>
+                      <div style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>✨ 🔒 ✨</div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.35rem', letterSpacing: '0.5px' }}>
+                        The Master's Vault is Sealed
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                        The full tag progression curve is hidden to prevent spoilers! Keep earning points and discovering ranks for yourself.
+                      </div>
+                    </div>
+                  ) : (
+                    <button className="btn btn-secondary" onClick={() => setShowAllTagsModal(true)} style={{ width: '100%', fontSize: '0.8rem' }}>
+                      🏅 View All Unlocked Tags
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

@@ -97,6 +97,11 @@ input, select, textarea {
   font-family: inherit;
   font-size: 1rem;
 }
+@keyframes vaultGlow {
+  0% { box-shadow: 0 0 5px rgba(214, 158, 46, 0.2); transform: scale(1); }
+  50% { box-shadow: 0 0 20px rgba(128, 90, 213, 0.4); transform: scale(1.02); }
+  100% { box-shadow: 0 0 5px rgba(214, 158, 46, 0.2); transform: scale(1); }
+}
 
 /* ===== LAYOUT ===== */
 .container {
