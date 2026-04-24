@@ -138,37 +138,39 @@ export default function Layout() {
               <span>Team</span>
             </Link>
             
-            <button 
-              onClick={toggleTheme} 
-              className="btn btn-secondary" 
-              style={{ padding: '0.4rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
-              title="Toggle Dark Mode"
-            >
-              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-            </button>
-            
-            <div className="nav-divider" style={{ width: '1px', height: '24px', backgroundColor: 'var(--border-color)', margin: '0 0.25rem' }}></div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem' }}>
-              <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit', position: 'relative' }} onClick={handleNavClick}>
-                {hasProfileAlert && <div style={{ position: 'absolute', top: '-2px', left: '-2px', width: '10px', height: '10px', backgroundColor: 'var(--accent)', borderRadius: '50%', border: '2px solid var(--surface)', zIndex: 10 }}></div>}
-                {currentUserData?.avatar ? (
-                  <img src={currentUserData.avatar} alt="Avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)', flexShrink: 0 }} />
-                ) : (
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', flexShrink: 0 }}>
-                    <User size={14} />
-                  </div>
-                )}
-                <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.name}</span>
-                  {user.role === 'admin' && <Shield size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} title="Admin" />}
-                  {user.role === 'master' && <Crown size={14} style={{ color: '#F6E05E', flexShrink: 0 }} title="Lab Master" />}
-                </span>
-              </Link>
+            <div className="user-controls" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: 'auto', flexShrink: 0 }}>
+              <button 
+                onClick={toggleTheme} 
+                className="btn btn-secondary" 
+                style={{ padding: '0.4rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
+                title="Toggle Dark Mode"
+              >
+                {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+              </button>
+              
+              <div className="nav-divider" style={{ width: '1px', height: '24px', backgroundColor: 'var(--border-color)', margin: '0 0.25rem' }}></div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem' }}>
+                <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit', position: 'relative' }} onClick={handleNavClick}>
+                  {hasProfileAlert && <div style={{ position: 'absolute', top: '-2px', left: '-2px', width: '10px', height: '10px', backgroundColor: 'var(--accent)', borderRadius: '50%', border: '2px solid var(--surface)', zIndex: 10 }}></div>}
+                  {currentUserData?.avatar ? (
+                    <img src={currentUserData.avatar} alt="Avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)', flexShrink: 0 }} />
+                  ) : (
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', flexShrink: 0 }}>
+                      <User size={14} />
+                    </div>
+                  )}
+                  <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.name}</span>
+                    {user.role === 'admin' && <Shield size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} title="Admin" />}
+                    {user.role === 'master' && <Crown size={14} style={{ color: '#F6E05E', flexShrink: 0 }} title="Lab Master" />}
+                  </span>
+                </Link>
+              </div>
+              <button onClick={() => { handleLogout(); handleNavClick(); }} className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <LogOut size={16} /> Logout
+              </button>
             </div>
-            <button onClick={() => { handleLogout(); handleNavClick(); }} className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-              <LogOut size={16} /> Logout
-            </button>
           </nav>
         </div>
       </header>
@@ -177,9 +179,22 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="app-footer">
-        <p>COMPCHEM Laboratory Management System &copy; {new Date().getFullYear()}</p>
-        <p>Made by Abdullah Amr Maged</p>
+      <footer className="app-footer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', padding: '2rem' }}>
+        {localStorage.getItem('workspaceId') === 'alamein' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+            <img src="./alamein_logo_2.png" alt="Alamein" style={{ height: '40px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
+            <div style={{ fontWeight: 'bold', color: 'var(--text)' }}>Alamein International University</div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+            <img src="./compchem_logo.jpeg" alt="COMPCHEM" style={{ height: '40px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
+            <div style={{ fontWeight: 'bold', color: 'var(--text)' }}>COMPCHEM Laboratory</div>
+          </div>
+        )}
+        <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+          <p>Management System &copy; {new Date().getFullYear()}</p>
+          <p>Made by Abdullah Amr Maged</p>
+        </div>
       </footer>
 
       {/* Mobile Bottom Tab Bar */}

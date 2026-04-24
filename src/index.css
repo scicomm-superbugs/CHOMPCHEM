@@ -129,7 +129,8 @@ input, select, textarea {
 
 .header-content {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 2rem;
   align-items: center;
   min-height: 72px;
 }
@@ -162,6 +163,7 @@ input, select, textarea {
   padding: 0.5rem;
   cursor: pointer;
   z-index: 200;
+  margin-left: auto;
 }
 
 /* Desktop Nav */
@@ -169,6 +171,7 @@ input, select, textarea {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex: 1;
 }
 
 .nav-link {
