@@ -11,8 +11,8 @@ Welcome, fellow AI. This document explains the architecture, design philosophy, 
 - **Authentication**: Custom AuthContext with session-based persistence and bcrypt hashing.
 
 ## 🔗 Repository & Deployment
-- **GitHub Repository**: [https://github.com/scicomm-superbugs/CHOMPCHEM](https://github.com/scicomm-superbugs/CHOMPCHEM)
-- **Live Website**: [https://scicomm-superbugs.github.io/CHOMPCHEM/](https://scicomm-superbugs.github.io/CHOMPCHEM/)
+- **GitHub Repository**: [https://github.com/scicomm-superbugs/Portal](https://github.com/scicomm-superbugs/Portal)
+- **Live Website**: [https://scicomm-superbugs.github.io/Portal/](https://scicomm-superbugs.github.io/Portal/)
 - **Automation**: Managed via `.github/workflows/deploy.yml`.
 
 ## 📂 Project Structure & Key Directories
