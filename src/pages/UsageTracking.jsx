@@ -8,7 +8,8 @@ export default function UsageTracking() {
   const isAdmin = user?.role === 'admin';
 
   const [logEntry, setLogEntry] = useState({
-    chemicalFormula: '',
+    itemType: 'chemical',
+    itemId: '',
     scientistId: isAdmin ? '' : user.id,
     borrowDate: new Date().toISOString().split('T')[0],
     dueDate: '',
@@ -21,10 +22,11 @@ export default function UsageTracking() {
 
   // Fetch data
   const chemicals = useLiveCollection('chemicals');
+  const devices = useLiveCollection('devices');
   const scientists = useLiveCollection('scientists');
   const usageLogsRawData = useLiveCollection('usage_logs');
 
-  if (!chemicals || !scientists || !usageLogsRawData) {
+  if (!chemicals || !devices || !scientists || !usageLogsRawData) {
     return <div className="page-content container">Loading...</div>;
   }
 
@@ -32,7 +34,13 @@ export default function UsageTracking() {
   const usageLogsRaw = [...usageLogsRawData].sort((a,b) => new Date(b.borrowDate).getTime() - new Date(a.borrowDate).getTime());
   
   const usageLogs = usageLogsRaw.map(log => {
-    const chem = chemicals.find(c => c.formula === log.chemicalFormula);
+    const isDevice = log.itemType === 'device';
+    const chem = chemicals.find(c => c.formula === log.chemicalFormula || c.formula === log.itemId);
+    const dev = devices.find(d => String(d.id) === String(log.itemId));
+    
+    const itemName = isDevice ? (dev ? dev.name : 'Unknown Device') : (chem ? chem.name : 'Unknown Chemical');
+    const itemIdentifier = isDevice ? (dev ? dev.serialNumber : log.itemId) : (log.chemicalFormula || log.itemId);
+    
     const scientist = scientists.find(s => String(s.id) === String(log.scientistId));
     
     // Determine if overdue dynamically
@@ -44,7 +52,8 @@ export default function UsageTracking() {
 
     return {
       ...log,
-      chemicalName: chem ? chem.name : 'Unknown',
+      chemicalName: itemName,
+      chemicalFormula: itemIdentifier,
       scientistName: scientist ? scientist.name : 'Unknown',
       computedStatus: isOverdue ? 'Overdue' : log.status,
       isApproaching
@@ -75,18 +84,20 @@ export default function UsageTracking() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!logEntry.chemicalFormula || !logEntry.dueDate) return;
+    if (!logEntry.itemId || !logEntry.dueDate) return;
 
     try {
       await db.usage_logs.add({
         ...logEntry,
+        // Keep chemicalFormula for backward compatibility
+        chemicalFormula: logEntry.itemType === 'chemical' ? logEntry.itemId : '',
         scientistId: isAdmin ? String(logEntry.scientistId) : String(user.id),
         status: isAdmin ? 'In Use' : 'Pending',
         borrowDate: new Date(logEntry.borrowDate).toISOString(),
         dueDate: new Date(logEntry.dueDate).toISOString(),
       });
-      setSuccessMsg(isAdmin ? 'Chemical assigned successfully!' : 'Chemical requested successfully!');
-      setLogEntry({ ...logEntry, chemicalFormula: '', notes: '' });
+      setSuccessMsg(isAdmin ? 'Registration assigned successfully!' : 'Registration requested successfully!');
+      setLogEntry({ ...logEntry, itemId: '', notes: '' });
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (error) {
       console.error(error);
@@ -129,7 +140,7 @@ export default function UsageTracking() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '2rem' }}>{isAdmin ? 'Lab Equipment & Chemicals Tracking' : 'My Lab Equipment & Chemicals'}</h1>
+      <h1 style={{ marginBottom: '2rem' }}>{isAdmin ? 'Usage Registration' : 'My Usage Registrations'}</h1>
 
       {isAdmin && pendingRequests.length > 0 && (
         <div className="card" style={{ marginBottom: '2rem', borderLeft: '4px solid #F6E05E' }}>
@@ -140,7 +151,7 @@ export default function UsageTracking() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Chemical</th>
+                  <th>Item Registered</th>
                   <th>Scientist</th>
                   <th>Requested Due Date</th>
                   <th>Notes</th>
@@ -180,7 +191,7 @@ export default function UsageTracking() {
         {/* Form - Shared but labels differ */}
         <div className="card" style={{ alignSelf: 'start' }}>
           <div className="card-header">
-            <h2 className="card-title"><Activity size={20} /> {isAdmin ? 'Assign Chemical' : 'Request Chemical'}</h2>
+            <h2 className="card-title"><Activity size={20} /> {isAdmin ? 'Assign Registration' : 'Submit Registration'}</h2>
           </div>
 
           {successMsg && (
@@ -207,22 +218,34 @@ export default function UsageTracking() {
               </div>
             )}
 
+            <div className="form-group" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input type="radio" name="itemType" checked={logEntry.itemType === 'chemical'} onChange={() => setLogEntry({...logEntry, itemType: 'chemical', itemId: ''})} /> Chemical
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input type="radio" name="itemType" checked={logEntry.itemType === 'device'} onChange={() => setLogEntry({...logEntry, itemType: 'device', itemId: ''})} /> Device
+              </label>
+            </div>
+
             <div className="form-group">
-              <label className="form-label">Chemical</label>
+              <label className="form-label">{logEntry.itemType === 'chemical' ? 'Select Chemical' : 'Select Device'}</label>
               <select 
                 className="form-control" 
                 required
-                value={logEntry.chemicalFormula}
-                onChange={e => setLogEntry({...logEntry, chemicalFormula: e.target.value})}
+                value={logEntry.itemId}
+                onChange={e => setLogEntry({...logEntry, itemId: e.target.value})}
               >
-                <option value="">Select Chemical...</option>
-                {chemicals.map(c => (
+                <option value="">Choose...</option>
+                {logEntry.itemType === 'chemical' && chemicals.map(c => (
                   <option key={c.formula} value={c.formula}>{c.formula} - {c.name}</option>
                 ))}
+                {logEntry.itemType === 'device' && devices.map(d => (
+                  <option key={d.id} value={d.id}>{d.name} ({d.serialNumber})</option>
+                ))}
               </select>
-              {logEntry.chemicalFormula && usageLogsRaw.some(log => log.chemicalFormula === logEntry.chemicalFormula && log.status === 'In Use') && (
+              {logEntry.itemId && usageLogsRaw.some(log => (log.itemId === logEntry.itemId || log.chemicalFormula === logEntry.itemId) && log.status === 'In Use') && (
                 <div style={{ color: 'var(--accent)', fontSize: '0.875rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  <X size={14} /> This chemical is currently in use by someone else.
+                  <X size={14} /> This item is currently in use by someone else.
                 </div>
               )}
             </div>
@@ -259,8 +282,8 @@ export default function UsageTracking() {
               ></textarea>
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={logEntry.chemicalFormula && usageLogsRaw.some(log => log.chemicalFormula === logEntry.chemicalFormula && log.status === 'In Use')}>
-              {isAdmin ? 'Assign Usage' : 'Submit Request'}
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={logEntry.itemId && usageLogsRaw.some(log => (log.itemId === logEntry.itemId || log.chemicalFormula === logEntry.itemId) && log.status === 'In Use')}>
+              {isAdmin ? 'Assign Registration' : 'Submit Registration'}
             </button>
           </form>
         </div>
@@ -301,7 +324,7 @@ export default function UsageTracking() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Chemical</th>
+                  <th>Item</th>
                   {isAdmin && <th>Scientist</th>}
                   <th>Timeline</th>
                   <th>Notes</th>

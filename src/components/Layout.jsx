@@ -57,7 +57,7 @@ export default function Layout() {
             
             <Link to="/tracking" className={`nav-link ${isActive('/tracking')}`}>
               <Activity size={20} />
-              <span className="hide-mobile">Lab Equipment</span>
+              <span className="hide-mobile">Usage Registration</span>
             </Link>
 
             <Link to="/tasks" className={`nav-link ${isActive('/tasks')}`}>
