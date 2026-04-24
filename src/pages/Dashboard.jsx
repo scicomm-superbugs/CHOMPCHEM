@@ -30,7 +30,7 @@ export default function Dashboard() {
   const leaderboardRaw = scientistsData
     .map(s => {
       if (s.role === 'master') {
-        return { ...s, points: '∞', rank: { name: 'Lab Master', color: '#D69E2E', icon: '♛' }, numericPoints: Infinity };
+        return { ...s, points: '99999999999999999+', rank: { name: 'Lab Master', color: '#D69E2E', icon: '♛' }, numericPoints: Infinity };
       }
       const usagePoints = usageLogsData.filter(log => String(log.scientistId) === String(s.id)).length * 10;
       const taskPoints = tasksData.filter(t => String(t.assignedTo) === String(s.id) && t.status === 'Completed').length * 50;
