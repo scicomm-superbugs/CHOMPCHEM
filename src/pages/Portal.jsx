@@ -1,11 +1,12 @@
 import { useNavigate } from 'react-router-dom';
+import { Microscope, Users, BookOpen, GraduationCap, Atom, Network } from 'lucide-react';
 
 export default function Portal() {
   const navigate = useNavigate();
 
   const handleSelectWorkspace = (workspaceId) => {
     localStorage.setItem('workspaceId', workspaceId);
-    sessionStorage.removeItem('userId'); // Force fresh login when changing workspace
+    sessionStorage.removeItem('userId'); 
     window.location.href = '#/login';
     window.location.reload();
   };
@@ -13,175 +14,297 @@ export default function Portal() {
   return (
     <>
       <style>{`
-        @keyframes float {
-          0% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(5deg); }
-          100% { transform: translateY(0px) rotate(0deg); }
+        @keyframes drift {
+          0% { transform: translate(0, 0) rotate(0deg); }
+          33% { transform: translate(30px, -50px) rotate(10deg); }
+          66% { transform: translate(-20px, 20px) rotate(-5deg); }
+          100% { transform: translate(0, 0) rotate(0deg); }
         }
-        @keyframes floatReverse {
-          0% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(20px) rotate(-5deg); }
-          100% { transform: translateY(0px) rotate(0deg); }
+        @keyframes pulse-ring {
+          0% { transform: scale(0.8); opacity: 0.5; }
+          100% { transform: scale(1.5); opacity: 0; }
         }
-        @keyframes pulseGlow {
-          0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
-          70% { box-shadow: 0 0 0 20px rgba(102, 126, 234, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
-        }
-        @keyframes slideUpFade {
-          0% { opacity: 0; transform: translateY(30px); }
+        @keyframes float-up {
+          0% { opacity: 0; transform: translateY(40px); }
           100% { opacity: 1; transform: translateY(0); }
         }
-        .portal-container {
+        @keyframes float-icon {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+          100% { transform: translateY(0px); }
+        }
+        .portal-wrapper {
           min-height: 100vh;
+          background: #f0fdf4; /* Very soft mint green, feels lively and organic */
+          background-image: 
+            radial-gradient(circle at 0% 0%, #dcfce7 0%, transparent 40%),
+            radial-gradient(circle at 100% 100%, #e0e7ff 0%, transparent 40%),
+            radial-gradient(circle at 50% 50%, #fefce8 0%, transparent 60%);
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          background: #f8fafc;
-          background-image: 
-            radial-gradient(circle at 15% 50%, rgba(102, 126, 234, 0.1), transparent 25%),
-            radial-gradient(circle at 85% 30%, rgba(118, 75, 162, 0.1), transparent 25%);
           padding: 2rem;
           position: relative;
           overflow: hidden;
           font-family: 'Inter', system-ui, sans-serif;
         }
-        .floating-shape-1 {
-          position: absolute; top: 10%; left: 5%; width: 300px; height: 300px; 
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 50%; filter: blur(60px); opacity: 0.15;
-          animation: float 15s ease-in-out infinite; z-index: 0;
+        
+        /* Animated Science Background Elements */
+        .science-bg-item {
+          position: absolute;
+          opacity: 0.08;
+          color: #16a34a;
+          animation: drift 20s ease-in-out infinite;
+          z-index: 0;
         }
-        .floating-shape-2 {
-          position: absolute; bottom: 10%; right: 5%; width: 400px; height: 400px; 
-          background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-          border-radius: 50%; filter: blur(70px); opacity: 0.12;
-          animation: floatReverse 18s ease-in-out infinite; z-index: 0;
-        }
+        
         .portal-header {
-          text-align: center; margin-bottom: 4rem; z-index: 1;
-          animation: slideUpFade 0.8s ease-out forwards;
+          text-align: center;
+          z-index: 10;
+          margin-bottom: 3.5rem;
+          animation: float-up 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
-        .workspace-card {
-          flex: 1; min-width: 320px; max-width: 480px;
-          background: rgba(255, 255, 255, 0.8);
-          backdrop-filter: blur(20px);
-          border-radius: 30px;
-          padding: 3.5rem 2.5rem;
-          box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
+        
+        .role-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: white;
+          color: #059669;
+          padding: 0.6rem 1.5rem;
+          border-radius: 50px;
+          font-weight: 700;
+          font-size: 0.9rem;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.1);
+          margin-bottom: 1.5rem;
+          border: 2px solid #34d399;
+        }
+
+        .role-badge svg {
+          animation: float-icon 3s ease-in-out infinite;
+        }
+
+        .cards-container {
+          display: flex;
+          gap: 3rem;
+          flex-wrap: wrap;
+          justify-content: center;
+          max-width: 1200px;
+          width: 100%;
+          z-index: 10;
+        }
+
+        .lab-card {
+          flex: 1;
+          min-width: 320px;
+          max-width: 480px;
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(10px);
+          border-radius: 32px;
+          padding: 3rem 2.5rem;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05), 0 0 0 4px white inset;
           cursor: pointer;
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          display: flex; flex-direction: column; align-items: center; text-align: center;
-          position: relative; overflow: hidden;
-          animation: slideUpFade 0.8s ease-out forwards;
-          animation-delay: 0.2s;
+          transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          position: relative;
+          opacity: 0;
+          animation: float-up 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
-        .workspace-card::before {
-          content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
-          background: var(--card-gradient); opacity: 0.8; transition: opacity 0.3s;
+
+        .lab-card:hover {
+          transform: translateY(-15px) scale(1.03);
+          box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.1), 0 0 0 4px white inset;
         }
-        .workspace-card:hover {
-          transform: translateY(-15px) scale(1.02);
-          box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+
+        .card-accent-line {
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 8px;
+          background: var(--brand-color);
+          transition: height 0.3s;
         }
-        .workspace-card:hover::before { opacity: 1; }
-        .workspace-card:hover .action-text {
-          transform: translateX(10px); color: var(--accent-color);
+
+        .lab-card:hover .card-accent-line {
+          height: 12px;
         }
-        .workspace-card:hover .action-icon {
-          animation: pulseGlow 1.5s infinite;
+
+        .logo-wrapper {
+          position: relative;
+          width: 180px;
+          height: 180px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 1.5rem;
         }
-        .logo-img {
-          height: 180px; width: auto; object-fit: contain; margin-bottom: 2.5rem;
-          filter: drop-shadow(0 15px 25px rgba(0,0,0,0.08));
-          transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+        .logo-wrapper::before {
+          content: '';
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100%; height: 100%;
+          background: radial-gradient(circle, var(--brand-color-light) 0%, transparent 70%);
+          opacity: 0.15;
+          border-radius: 50%;
+          z-index: 0;
+          transition: opacity 0.5s, transform 0.5s;
         }
-        .workspace-card:hover .logo-img { transform: scale(1.08); }
-        .action-text {
-          margin-top: auto; display: inline-flex; align-items: center; gap: 0.75rem;
-          color: #64748b; font-weight: 700; font-size: 1.1rem; transition: all 0.3s;
+
+        .lab-card:hover .logo-wrapper::before {
+          opacity: 0.3;
+          transform: translate(-50%, -50%) scale(1.2);
         }
-        .action-icon {
-          width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9;
-          display: flex; align-items: center; justify-content: center; transition: all 0.3s;
+
+        .lab-logo {
+          height: 140px;
+          width: auto;
+          object-fit: contain;
+          z-index: 1;
+          filter: drop-shadow(0 15px 20px rgba(0,0,0,0.06));
+          transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .lab-card:hover .lab-logo {
+          transform: scale(1.1);
+        }
+
+        .card-tags {
+          display: flex;
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .tag {
+          font-size: 0.75rem;
+          font-weight: 700;
+          padding: 0.3rem 0.8rem;
+          border-radius: 12px;
+          background: #f1f5f9;
+          color: #475569;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+
+        .action-button {
+          margin-top: auto;
+          background: white;
+          color: var(--brand-color);
+          border: 2px solid var(--brand-color-light);
+          padding: 0.8rem 2rem;
+          border-radius: 50px;
+          font-weight: 700;
+          font-size: 1.1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          transition: all 0.3s;
+        }
+
+        .lab-card:hover .action-button {
+          background: var(--brand-color);
+          color: white;
+          border-color: var(--brand-color);
+          box-shadow: 0 10px 20px var(--brand-color-light);
         }
       `}</style>
 
-      <div className="portal-container">
-        <div className="floating-shape-1"></div>
-        <div className="floating-shape-2"></div>
+      <div className="portal-wrapper">
+        
+        {/* Animated Background Icons representing Science Communication & Research */}
+        <Atom className="science-bg-item" size={120} style={{ top: '10%', left: '10%', animationDelay: '0s' }} />
+        <Network className="science-bg-item" size={150} style={{ top: '60%', right: '5%', animationDelay: '-5s', color: '#4f46e5' }} />
+        <BookOpen className="science-bg-item" size={100} style={{ top: '20%', right: '15%', animationDelay: '-10s', color: '#ea580c' }} />
+        <Microscope className="science-bg-item" size={140} style={{ bottom: '10%', left: '15%', animationDelay: '-15s', color: '#0ea5e9' }} />
 
         <div className="portal-header">
-          <div style={{ display: 'inline-block', padding: '0.5rem 1.5rem', background: 'white', borderRadius: '30px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginBottom: '1.5rem', color: '#475569', fontSize: '0.85rem', letterSpacing: '2px', textTransform: 'uppercase', fontWeight: 700 }}>
-            Secure Access Gateway
+          <div className="role-badge">
+            <Users size={18} />
+            Science Communication & Research Hub
           </div>
-          <h1 style={{ fontSize: '4rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-1.5px', color: '#0f172a' }}>
-            Choose Environment
+          <h1 style={{ fontSize: '3.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '1rem', letterSpacing: '-1px' }}>
+            Inspiring Minds, Advancing Science.
           </h1>
-          <p style={{ color: '#64748b', fontSize: '1.25rem', maxWidth: '650px', margin: '0 auto', lineHeight: 1.6, fontWeight: 500 }}>
-            Select your designated institutional network to access specialized computational tools, inventory management, and research data.
+          <p style={{ color: '#475569', fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto', lineHeight: 1.6, fontWeight: 500 }}>
+            Welcome to the centralized platform where cutting-edge research meets accessible education. Choose your workspace to begin exploring, teaching, and managing data.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '1200px', width: '100%', zIndex: 1 }}>
+        <div className="cards-container">
           
           {/* Workspace 1: CompChem */}
           <div 
-            className="workspace-card"
+            className="lab-card"
             onClick={() => handleSelectWorkspace('compchem')}
-            style={{ '--card-gradient': 'linear-gradient(90deg, #ed8936, #dd6b20)', '--accent-color': '#dd6b20' }}
+            style={{ '--brand-color': '#ea580c', '--brand-color-light': '#ffedd5', animationDelay: '0.2s' }}
           >
-            <img src="./compchem_logo.png" alt="CompChem Logo" className="logo-img" onError={e => e.target.style.display = 'none'} />
+            <div className="card-accent-line"></div>
             
-            <h2 style={{ fontSize: '2.2rem', color: '#0f172a', marginBottom: '0.5rem', fontWeight: 800, letterSpacing: '-0.5px' }}>
+            <div className="logo-wrapper">
+              <img src="./compchem_logo.png" alt="CompChem Logo" className="lab-logo" onError={e => e.target.style.display = 'none'} />
+            </div>
+            
+            <h2 style={{ fontSize: '2rem', color: '#0f172a', marginBottom: '1rem', fontWeight: 800 }}>
               CompChem Laboratory
             </h2>
-            <div style={{ display: 'inline-block', padding: '0.4rem 1rem', background: 'rgba(221, 107, 32, 0.1)', color: '#dd6b20', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 700, marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              Advanced Analytics Node
+            
+            <div className="card-tags">
+              <span className="tag"><Microscope size={12}/> Research</span>
+              <span className="tag"><Atom size={12}/> Computation</span>
+              <span className="tag"><Network size={12}/> Analytics</span>
             </div>
             
-            <p style={{ color: '#475569', fontSize: '1.1rem', lineHeight: '1.7', marginBottom: '2.5rem', fontWeight: 500 }}>
-              The primary computational chemistry engine. Connect to the global directory, access immense compound libraries, and execute high-tier research tasks.
+            <p style={{ color: '#64748b', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2.5rem', fontWeight: 500 }}>
+              Dive into the core computational engine. A dedicated space for intensive chemical research, data analysis, and driving scientific breakthroughs.
             </p>
             
-            <div className="action-text">
-              Enter Workspace 
-              <div className="action-icon" style={{ color: '#dd6b20', background: 'rgba(221, 107, 32, 0.1)' }}>→</div>
-            </div>
+            <button className="action-button">
+              Access Laboratory →
+            </button>
           </div>
 
           {/* Workspace 2: Alamein University */}
           <div 
-            className="workspace-card"
+            className="lab-card"
             onClick={() => handleSelectWorkspace('alamein')}
-            style={{ '--card-gradient': 'linear-gradient(90deg, #9f7aea, #805ad5)', '--accent-color': '#805ad5', animationDelay: '0.4s' }}
+            style={{ '--brand-color': '#4f46e5', '--brand-color-light': '#e0e7ff', animationDelay: '0.4s' }}
           >
-            <img src="./alamein_logo.png" alt="Alamein University Logo" className="logo-img" onError={e => e.target.style.display = 'none'} />
+            <div className="card-accent-line"></div>
             
-            <h2 style={{ fontSize: '2.2rem', color: '#0f172a', marginBottom: '0.5rem', fontWeight: 800, letterSpacing: '-0.5px' }}>
+            <div className="logo-wrapper">
+              <img src="./alamein_logo.png" alt="Alamein University Logo" className="lab-logo" onError={e => e.target.style.display = 'none'} />
+            </div>
+            
+            <h2 style={{ fontSize: '2rem', color: '#0f172a', marginBottom: '1rem', fontWeight: 800 }}>
               Alamein University
             </h2>
-            <div style={{ display: 'inline-block', padding: '0.4rem 1rem', background: 'rgba(128, 90, 213, 0.1)', color: '#805ad5', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 700, marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              Faculty of Science Hub
+            
+            <div className="card-tags">
+              <span className="tag"><GraduationCap size={12}/> Education</span>
+              <span className="tag"><BookOpen size={12}/> Teaching</span>
+              <span className="tag"><Users size={12}/> Faculty Hub</span>
             </div>
             
-            <p style={{ color: '#475569', fontSize: '1.1rem', lineHeight: '1.7', marginBottom: '2.5rem', fontWeight: 500 }}>
-              The dedicated academic node for Alamein International University. Access faculty equipment inventory, detailed student tracking, and localized laboratory data.
+            <p style={{ color: '#64748b', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2.5rem', fontWeight: 500 }}>
+              The interactive hub for the Faculty of Science. Empowering educators to manage inventory, track student progress, and communicate effectively.
             </p>
             
-            <div className="action-text">
-              Enter Workspace 
-              <div className="action-icon" style={{ color: '#805ad5', background: 'rgba(128, 90, 213, 0.1)' }}>→</div>
-            </div>
+            <button className="action-button">
+              Enter Faculty Hub →
+            </button>
           </div>
 
         </div>
         
-        <div style={{ marginTop: '5rem', color: '#94a3b8', fontSize: '0.9rem', zIndex: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ width: '8px', height: '8px', background: '#22c55e', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 10px #22c55e' }}></span>
-          All Systems Operational • Secure Connection
-        </div>
       </div>
     </>
   );
