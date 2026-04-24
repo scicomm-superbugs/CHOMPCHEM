@@ -626,6 +626,22 @@ input, select, textarea {
     margin: 0.5rem 0;
   }
 
+  .user-controls {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    margin-left: 0 !important;
+    margin-top: auto !important;
+    width: 100%;
+    gap: 1rem !important;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .user-controls > div, .user-controls > button {
+    width: 100%;
+    justify-content: flex-start !important;
+  }
+
   /* ===== MOBILE BOTTOM TAB BAR ===== */
   .mobile-bottom-bar {
     display: flex;

@@ -540,7 +540,7 @@ export default function Portal() {
             margin-top: 50px; /* Room for pop-out logo */
           }
           .lab-logo {
-            height: 180px; /* Still huge on mobile */
+            height: 140px; /* Still huge on mobile */
           }
         }
       `}</style>
