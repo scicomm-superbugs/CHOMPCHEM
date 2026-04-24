@@ -13,8 +13,10 @@ export default function Login() {
   const navigate = useNavigate();
   const { workspace } = useParams();
 
-  if (workspace && (workspace === 'alamein' || workspace === 'compchem')) {
-    localStorage.setItem('workspaceId', workspace);
+  const mappedWorkspace = (workspace === 'aiu' || workspace === 'Alamein International University' || workspace === 'alamein') ? 'alamein' : workspace;
+
+  if (mappedWorkspace && (mappedWorkspace === 'alamein' || mappedWorkspace === 'compchem')) {
+    localStorage.setItem('workspaceId', mappedWorkspace);
   }
 
   const workspaceId = localStorage.getItem('workspaceId');
