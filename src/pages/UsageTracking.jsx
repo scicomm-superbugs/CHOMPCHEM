@@ -196,7 +196,7 @@ export default function UsageTracking() {
         </div>
       )}
 
-      <div className="two-col-grid" style={isAdmin ? { gridTemplateColumns: '1fr 2.5fr' } : { gridTemplateColumns: '1fr 2.5fr' }}>
+      <div className="two-col-grid">
         
         {/* Form - Shared but labels differ */}
         <div className="card" style={{ alignSelf: 'start' }}>

@@ -79,9 +79,9 @@ export default function TeamSearch() {
         />
       </div>
 
-      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+      <div className="team-layout">
         {/* Team List */}
-        <div style={{ flex: '1', minWidth: '300px' }}>
+        <div className="team-list-col">
           <div className="card" style={{ padding: 0 }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <strong>📋 {filtered.length} Members Found</strong>
@@ -141,7 +141,7 @@ export default function TeamSearch() {
         </div>
 
         {/* Profile Detail Panel */}
-        <div style={{ flex: '0 0 350px', maxWidth: '100%' }}>
+        <div className="team-detail-col">
           {selectedUser ? (
             <div className="card" style={{ textAlign: 'center', position: 'sticky', top: '90px' }}>
               {/* Profile header */}

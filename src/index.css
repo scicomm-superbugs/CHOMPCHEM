@@ -326,6 +326,7 @@ input, select, textarea {
   border-radius: var(--radius);
   border: 1px solid var(--border-color);
   -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 
 .table {
@@ -487,6 +488,40 @@ input, select, textarea {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 1.5rem;
+}
+
+/* ===== PROFILE LAYOUT ===== */
+.profile-layout {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.profile-sidebar {
+  flex: 0 0 250px;
+  max-width: 100%;
+}
+
+.profile-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ===== TEAM SEARCH LAYOUT ===== */
+.team-layout {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.team-list-col {
+  flex: 1;
+  min-width: 300px;
+}
+
+.team-detail-col {
+  flex: 0 0 350px;
+  max-width: 100%;
 }
 
 /* ===== PRIVACY BUTTONS ===== */
@@ -703,16 +738,19 @@ input, select, textarea {
 
   .card-header {
     margin-bottom: 0.75rem;
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.5rem;
   }
 
   .card-title {
     font-size: 0.95rem;
   }
 
-  /* Dashboard Grid */
+  /* ===== TWO-COL GRID: STACK ON MOBILE ===== */
   .two-col-grid {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
+    grid-template-columns: 1fr !important;
+    gap: 1rem;
   }
 
   .dashboard-grid {
@@ -744,14 +782,25 @@ input, select, textarea {
     line-height: 1.2;
   }
 
-  /* Tables */
+  /* ===== TABLES: Compact & scrollable on mobile ===== */
+  .table-container {
+    margin: 0 -0.875rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
   .table th, .table td {
     padding: 0.5rem 0.6rem;
     font-size: 0.75rem;
+    white-space: nowrap;
   }
 
   .table th {
     font-size: 0.6rem;
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
 
   /* Buttons */
@@ -769,6 +818,42 @@ input, select, textarea {
   /* Search */
   .search-box input {
     font-size: 0.875rem;
+  }
+
+  /* ===== PROFILE LAYOUT: Stack on mobile ===== */
+  .profile-layout {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .profile-sidebar {
+    flex: unset;
+    width: 100%;
+  }
+
+  .profile-main {
+    width: 100%;
+  }
+
+  /* ===== TEAM SEARCH: Stack on mobile ===== */
+  .team-layout {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .team-list-col {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .team-detail-col {
+    flex: unset;
+    width: 100%;
+    order: -1;
+  }
+
+  .team-detail-col .card {
+    position: static !important;
   }
 }
 

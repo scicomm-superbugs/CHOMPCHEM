@@ -148,10 +148,10 @@ export default function Profile() {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+      <div className="profile-layout">
         
         {/* Sidebar */}
-        <div style={{ flex: '0 0 250px', maxWidth: '100%' }}>
+        <div className="profile-sidebar">
           <div className="card" style={{ padding: '1.5rem', textAlign: 'center' }}>
             <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 1rem' }}>
               {currentUserData?.avatar ? (
@@ -207,7 +207,7 @@ export default function Profile() {
         </div>
 
         {/* Content Area */}
-        <div style={{ flex: '1', minWidth: '300px' }}>
+        <div className="profile-main">
           
           {activeTab === 'details' && (
             <div className="card">
