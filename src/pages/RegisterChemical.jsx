@@ -249,7 +249,7 @@ export default function RegisterChemical() {
         {/* Inventory List */}
         <div className="card">
           <div className="card-header">
-            <h2 className="card-title">Registered Compounds ({filteredChemicals.length})</h2>
+            <h2 className="card-title">Registered Compounds</h2>
             <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
               <button className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }} onClick={() => {
                 const data = chemicals.map(c => ({ formula: c.formula, name: c.name, mw: c.mw, hazards: c.hazards || '', smiles: c.smiles || '', properties: c.properties || '', department: c.department || '' }));
@@ -301,7 +301,11 @@ export default function RegisterChemical() {
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.3rem', flexWrap: 'wrap' }}>
                       <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>MW {c.mw}</span>
                       {c.hazards && <span style={{ fontSize: '0.68rem', color: '#822727', backgroundColor: '#FFF5F5', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #FED7D7' }}>{c.hazards}</span>}
-                      {c.department && <span style={{ fontSize: '0.68rem', color: 'var(--primary)', backgroundColor: 'var(--secondary)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>{c.department}</span>}
+                      {c.department ? (
+                        <span style={{ fontSize: '0.68rem', color: 'var(--primary)', backgroundColor: 'var(--secondary)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>Dept: {c.department}</span>
+                      ) : (
+                        <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>Dept: None</span>
+                      )}
                     </div>
                   </div>
                 </div>

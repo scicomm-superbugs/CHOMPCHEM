@@ -131,7 +131,7 @@ export default function Equipment() {
 
         <div className="card">
           <div className="card-header">
-            <h2 className="card-title">Inventory ({filteredItems.length})</h2>
+            <h2 className="card-title">Inventory</h2>
             <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
               <button className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }} onClick={handleExport}><Download size={14} /> Export</button>
               <button className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }} onClick={() => fileInputRef.current.click()}><Upload size={14} /> Import</button>
@@ -155,7 +155,11 @@ export default function Equipment() {
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.2rem', flexWrap: 'wrap' }}>
                       {d.type && <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>{d.type}</span>}
                       <span style={{ fontSize: '0.68rem', color: '#4A5568', fontFamily: 'monospace', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>ID {d.identifier}</span>
-                      {d.department && <span style={{ fontSize: '0.68rem', color: 'var(--primary)', backgroundColor: 'var(--secondary)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>{d.department}</span>}
+                      {d.department ? (
+                        <span style={{ fontSize: '0.68rem', color: 'var(--primary)', backgroundColor: 'var(--secondary)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>Dept: {d.department}</span>
+                      ) : (
+                        <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>Dept: None</span>
+                      )}
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>

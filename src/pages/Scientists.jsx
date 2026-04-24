@@ -156,7 +156,7 @@ export default function Scientists() {
         {/* Directory List */}
         <div className="card">
           <div className="card-header">
-            <h2 className="card-title">Directory ({filteredScientists.length})</h2>
+            <h2 className="card-title">Directory</h2>
           </div>
 
           <div className="search-box">
