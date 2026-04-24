@@ -165,10 +165,6 @@ export default function Layout() {
                 </span>
               </Link>
             </div>
-            
-            <button onClick={() => { localStorage.removeItem('workspaceId'); window.location.href = '#/portal'; window.location.reload(); }} className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-              <Building2 size={16} /> Workspace
-            </button>
             <button onClick={() => { handleLogout(); handleNavClick(); }} className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
               <LogOut size={16} /> Logout
             </button>

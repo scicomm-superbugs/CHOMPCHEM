@@ -100,16 +100,6 @@ export default function Login() {
         <div style={{ textAlign: 'center', fontSize: '0.875rem' }}>
           Don't have an account? <Link to="/register" style={{ fontWeight: 600 }}>Register</Link>
         </div>
-        
-        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-          <button 
-            className="btn btn-secondary" 
-            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
-            onClick={() => { localStorage.removeItem('workspaceId'); window.location.href = '#/portal'; window.location.reload(); }}
-          >
-            <Building2 size={14} /> Switch Workspace
-          </button>
-        </div>
       </div>
     </div>
   );
