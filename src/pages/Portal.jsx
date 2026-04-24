@@ -1,8 +1,89 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Microscope, Users, BookOpen, GraduationCap, Atom, Network } from 'lucide-react';
+import { Users, Microscope, Atom, Network, GraduationCap, BookOpen } from 'lucide-react';
+
+// 3D Glass Card Component
+const GlassCard = ({ title, subtitle, description, logoSrc, tags, accentColor, onClick, delay }) => {
+  const cardRef = useRef(null);
+  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
+  const [transform, setTransform] = useState('perspective(1000px) rotateX(0deg) rotateY(0deg)');
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Calculate rotation (-10 to 10 degrees)
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -8;
+    const rotateY = ((x - centerX) / centerX) * 8;
+    
+    setTransform(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`);
+    setGlare({ x: (x / rect.width) * 100, y: (y / rect.height) * 100, opacity: 1 });
+  };
+
+  const handleMouseLeave = () => {
+    setTransform('perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
+    setGlare({ ...glare, opacity: 0 });
+  };
+
+  return (
+    <div 
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onClick={onClick}
+      className="glass-card"
+      style={{
+        '--accent': accentColor,
+        transform,
+        animationDelay: delay
+      }}
+    >
+      {/* Glare effect */}
+      <div 
+        className="card-glare" 
+        style={{
+          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.4) 0%, transparent 60%)`,
+          opacity: glare.opacity
+        }}
+      />
+      
+      <div className="card-accent-line" style={{ background: accentColor }}></div>
+      
+      <div className="logo-wrapper">
+        <img src={logoSrc} alt={title} className="lab-logo" onError={e => e.target.style.display = 'none'} />
+      </div>
+      
+      <h2 style={{ fontSize: '2rem', color: '#0f172a', marginBottom: '0.5rem', fontWeight: 800 }}>
+        {title}
+      </h2>
+      <div style={{ color: accentColor, fontWeight: 700, fontSize: '0.9rem', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
+        {subtitle}
+      </div>
+      
+      <div className="card-tags">
+        {tags.map((tag, i) => (
+          <span key={i} className="tag">{tag.icon} {tag.label}</span>
+        ))}
+      </div>
+      
+      <p style={{ color: '#475569', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2.5rem', fontWeight: 500, position: 'relative', zIndex: 2 }}>
+        {description}
+      </p>
+      
+      <button className="action-button" style={{ '--btn-accent': accentColor }}>
+        Initialize Protocol →
+      </button>
+    </div>
+  );
+};
 
 export default function Portal() {
   const navigate = useNavigate();
+  const canvasRef = useRef(null);
 
   const handleSelectWorkspace = (workspaceId) => {
     localStorage.setItem('workspaceId', workspaceId);
@@ -11,66 +92,185 @@ export default function Portal() {
     window.location.reload();
   };
 
+  // Interactive Particle Network Background
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
+    let particles = [];
+    
+    // Setup Canvas
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Mouse Interaction
+    let mouse = { x: null, y: null, radius: 150 };
+    const handleMouseMove = (e) => { mouse.x = e.x; mouse.y = e.y; };
+    const handleMouseLeave = () => { mouse.x = null; mouse.y = null; };
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseout', handleMouseLeave);
+
+    // Particle Class
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 3 + 1;
+        this.baseX = this.x;
+        this.baseY = this.y;
+        this.density = (Math.random() * 30) + 1;
+        // Thematic colors (mint, blue, orange, purple)
+        const colors = ['rgba(16, 185, 129, 0.5)', 'rgba(56, 189, 248, 0.5)', 'rgba(249, 115, 22, 0.5)', 'rgba(168, 85, 247, 0.5)'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+      }
+      
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      update() {
+        // Natural slight float
+        this.baseX += Math.sin(Date.now() / 1000 + this.density) * 0.2;
+        this.baseY += Math.cos(Date.now() / 1000 + this.density) * 0.2;
+
+        if (mouse.x != null && mouse.y != null) {
+          let dx = mouse.x - this.x;
+          let dy = mouse.y - this.y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
+          let forceDirectionX = dx / distance;
+          let forceDirectionY = dy / distance;
+          let maxDistance = mouse.radius;
+          let force = (maxDistance - distance) / maxDistance;
+          let directionX = forceDirectionX * force * this.density;
+          let directionY = forceDirectionY * force * this.density;
+          
+          if (distance < mouse.radius) {
+            this.x -= directionX;
+            this.y -= directionY;
+          } else {
+            if (this.x !== this.baseX) {
+              let dx = this.x - this.baseX;
+              this.x -= dx / 10;
+            }
+            if (this.y !== this.baseY) {
+              let dy = this.y - this.baseY;
+              this.y -= dy / 10;
+            }
+          }
+        } else {
+          // Return to base if mouse is not around
+          if (this.x !== this.baseX) this.x -= (this.x - this.baseX) / 10;
+          if (this.y !== this.baseY) this.y -= (this.y - this.baseY) / 10;
+        }
+        
+        ctx.fillStyle = this.color;
+        this.draw();
+      }
+    }
+
+    // Initialize Particles
+    const init = () => {
+      particles = [];
+      const numberOfParticles = (canvas.width * canvas.height) / 12000;
+      for (let i = 0; i < numberOfParticles; i++) {
+        particles.push(new Particle());
+      }
+    };
+
+    // Animation Loop
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+      }
+      connect();
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    // Draw connecting lines
+    const connect = () => {
+      let opacityValue = 1;
+      for (let a = 0; a < particles.length; a++) {
+        for (let b = a; b < particles.length; b++) {
+          let distance = ((particles[a].x - particles[b].x) * (particles[a].x - particles[b].x))
+                       + ((particles[a].y - particles[b].y) * (particles[a].y - particles[b].y));
+          if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+            opacityValue = 1 - (distance / 20000);
+            ctx.strokeStyle = `rgba(148, 163, 184, ${opacityValue * 0.15})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(particles[a].x, particles[a].y);
+            ctx.lineTo(particles[b].x, particles[b].y);
+            ctx.stroke();
+          }
+        }
+      }
+    };
+
+    init();
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseout', handleMouseLeave);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
   return (
     <>
       <style>{`
-        @keyframes drift {
-          0% { transform: translate(0, 0) rotate(0deg); }
-          33% { transform: translate(30px, -50px) rotate(10deg); }
-          66% { transform: translate(-20px, 20px) rotate(-5deg); }
-          100% { transform: translate(0, 0) rotate(0deg); }
-        }
-        @keyframes pulse-ring {
-          0% { transform: scale(0.8); opacity: 0.5; }
-          100% { transform: scale(1.5); opacity: 0; }
-        }
-        @keyframes float-up {
-          0% { opacity: 0; transform: translateY(40px); }
+        @keyframes slideUpFade {
+          0% { opacity: 0; transform: translateY(30px); }
           100% { opacity: 1; transform: translateY(0); }
         }
-        @keyframes float-icon {
-          0% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-          100% { transform: translateY(0px); }
-        }
+        
         .portal-wrapper {
           min-height: 100vh;
-          background: #f0fdf4; /* Very soft mint green, feels lively and organic */
-          background-image: 
-            radial-gradient(circle at 0% 0%, #dcfce7 0%, transparent 40%),
-            radial-gradient(circle at 100% 100%, #e0e7ff 0%, transparent 40%),
-            radial-gradient(circle at 50% 50%, #fefce8 0%, transparent 60%);
+          background: #f8fafc;
+          position: relative;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           padding: 2rem;
-          position: relative;
-          overflow: hidden;
           font-family: 'Inter', system-ui, sans-serif;
+          overflow: hidden;
         }
-        
-        /* Animated Science Background Elements */
-        .science-bg-item {
+
+        #science-network-canvas {
           position: absolute;
-          opacity: 0.08;
-          color: #16a34a;
-          animation: drift 20s ease-in-out infinite;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
           z-index: 0;
+          pointer-events: none;
         }
         
         .portal-header {
           text-align: center;
           z-index: 10;
           margin-bottom: 3.5rem;
-          animation: float-up 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+          animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+          position: relative;
         }
         
         .role-badge {
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          background: white;
+          background: rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(8px);
           color: #059669;
           padding: 0.6rem 1.5rem;
           border-radius: 50px;
@@ -80,11 +280,7 @@ export default function Portal() {
           text-transform: uppercase;
           box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.1);
           margin-bottom: 1.5rem;
-          border: 2px solid #34d399;
-        }
-
-        .role-badge svg {
-          animation: float-icon 3s ease-in-out infinite;
+          border: 1px solid rgba(52, 211, 153, 0.3);
         }
 
         .cards-container {
@@ -95,43 +291,61 @@ export default function Portal() {
           max-width: 1200px;
           width: 100%;
           z-index: 10;
+          perspective: 2000px; /* Crucial for 3D effect child elements */
         }
 
-        .lab-card {
+        .glass-card {
           flex: 1;
           min-width: 320px;
           max-width: 480px;
-          background: var(--card-bg, rgba(255, 255, 255, 0.9));
-          border: 1px solid var(--brand-color-light);
+          /* The Glass Effect */
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.6);
           border-radius: 32px;
           padding: 3rem 2.5rem;
-          box-shadow: 0 20px 40px -10px var(--brand-color-light), 0 0 0 4px rgba(255,255,255,0.6) inset;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+          
           cursor: pointer;
-          transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
           display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
           position: relative;
           opacity: 0;
-          animation: float-up 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+          animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+          
+          /* Smooth transform reset on leave */
+          transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+          transform-style: preserve-3d;
         }
 
-        .lab-card:hover {
-          transform: translateY(-15px) scale(1.03);
-          box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.1), 0 0 0 4px white inset;
+        .glass-card:hover {
+          box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.15), inset 0 0 0 2px rgba(255, 255, 255, 0.8);
+          z-index: 20;
+        }
+
+        .card-glare {
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          border-radius: 32px;
+          pointer-events: none;
+          z-index: 10;
+          transition: opacity 0.3s;
         }
 
         .card-accent-line {
           position: absolute;
           top: 0; left: 0; right: 0;
-          height: 8px;
-          background: var(--brand-color);
-          transition: height 0.3s;
+          height: 0px;
+          transition: height 0.3s ease;
+          opacity: 0.8;
+          border-radius: 32px 32px 0 0;
         }
 
-        .lab-card:hover .card-accent-line {
-          height: 12px;
+        .glass-card:hover .card-accent-line {
+          height: 8px;
         }
 
         .logo-wrapper {
@@ -142,6 +356,7 @@ export default function Portal() {
           align-items: center;
           justify-content: center;
           margin-bottom: 1.5rem;
+          transform: translateZ(30px); /* 3D pop out */
         }
 
         .logo-wrapper::before {
@@ -150,16 +365,16 @@ export default function Portal() {
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%; height: 100%;
-          background: radial-gradient(circle, var(--brand-color-light) 0%, transparent 70%);
-          opacity: 0.15;
+          background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+          opacity: 0.1;
           border-radius: 50%;
           z-index: 0;
-          transition: opacity 0.5s, transform 0.5s;
+          transition: opacity 0.4s, transform 0.4s;
         }
 
-        .lab-card:hover .logo-wrapper::before {
-          opacity: 0.3;
-          transform: translate(-50%, -50%) scale(1.2);
+        .glass-card:hover .logo-wrapper::before {
+          opacity: 0.2;
+          transform: translate(-50%, -50%) scale(1.3);
         }
 
         .lab-logo {
@@ -167,11 +382,11 @@ export default function Portal() {
           width: auto;
           object-fit: contain;
           z-index: 1;
-          filter: drop-shadow(0 15px 20px rgba(0,0,0,0.06));
-          transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+          filter: drop-shadow(0 15px 20px rgba(0,0,0,0.1));
+          transition: transform 0.4s;
         }
 
-        .lab-card:hover .lab-logo {
+        .glass-card:hover .lab-logo {
           transform: scale(1.1);
         }
 
@@ -181,6 +396,7 @@ export default function Portal() {
           margin-bottom: 1.5rem;
           flex-wrap: wrap;
           justify-content: center;
+          transform: translateZ(20px);
         }
 
         .tag {
@@ -188,19 +404,20 @@ export default function Portal() {
           font-weight: 700;
           padding: 0.4rem 0.8rem;
           border-radius: 12px;
-          background: white;
+          background: rgba(255, 255, 255, 0.7);
+          border: 1px solid rgba(255,255,255,0.9);
           color: #475569;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
           display: flex;
           align-items: center;
           gap: 0.25rem;
+          backdrop-filter: blur(5px);
         }
 
         .action-button {
           margin-top: auto;
           background: white;
-          color: var(--brand-color);
-          border: 2px solid var(--brand-color-light);
+          color: var(--btn-accent);
+          border: 1px solid rgba(255,255,255,0.8);
           padding: 0.8rem 2rem;
           border-radius: 50px;
           font-weight: 700;
@@ -209,23 +426,22 @@ export default function Portal() {
           align-items: center;
           gap: 0.5rem;
           transition: all 0.3s;
+          transform: translateZ(25px);
+          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        .lab-card:hover .action-button {
-          background: var(--brand-color);
+        .glass-card:hover .action-button {
+          background: var(--btn-accent);
           color: white;
-          border-color: var(--brand-color);
-          box-shadow: 0 10px 20px var(--brand-color-light);
+          border-color: var(--btn-accent);
+          box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
       `}</style>
 
       <div className="portal-wrapper">
         
-        {/* Animated Background Icons representing Science Communication & Research */}
-        <Atom className="science-bg-item" size={120} style={{ top: '10%', left: '10%', animationDelay: '0s' }} />
-        <Network className="science-bg-item" size={150} style={{ top: '60%', right: '5%', animationDelay: '-5s', color: '#4f46e5' }} />
-        <BookOpen className="science-bg-item" size={100} style={{ top: '20%', right: '15%', animationDelay: '-10s', color: '#ea580c' }} />
-        <Microscope className="science-bg-item" size={140} style={{ bottom: '10%', left: '15%', animationDelay: '-15s', color: '#0ea5e9' }} />
+        {/* Interactive Science Network Canvas */}
+        <canvas id="science-network-canvas" ref={canvasRef}></canvas>
 
         <div className="portal-header">
           <div className="role-badge">
@@ -242,77 +458,35 @@ export default function Portal() {
 
         <div className="cards-container">
           
-          {/* Workspace 1: CompChem */}
-          <div 
-            className="lab-card"
+          <GlassCard 
+            title="CompChem Laboratory"
+            subtitle="Advanced Analytics Node"
+            description="Dive into the core computational engine. A dedicated space for intensive chemical research, data analysis, and driving scientific breakthroughs."
+            logoSrc="./compchem_logo.png"
+            accentColor="#ea580c"
+            delay="0.2s"
             onClick={() => handleSelectWorkspace('compchem')}
-            style={{ 
-              '--card-bg': 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
-              '--brand-color': '#ea580c', 
-              '--brand-color-light': '#fdba74', 
-              animationDelay: '0.2s' 
-            }}
-          >
-            <div className="card-accent-line"></div>
-            
-            <div className="logo-wrapper">
-              <img src="./compchem_logo.png" alt="CompChem Logo" className="lab-logo" onError={e => e.target.style.display = 'none'} />
-            </div>
-            
-            <h2 style={{ fontSize: '2rem', color: '#0f172a', marginBottom: '1rem', fontWeight: 800 }}>
-              CompChem Laboratory
-            </h2>
-            
-            <div className="card-tags">
-              <span className="tag"><Microscope size={12}/> Research</span>
-              <span className="tag"><Atom size={12}/> Computation</span>
-              <span className="tag"><Network size={12}/> Analytics</span>
-            </div>
-            
-            <p style={{ color: '#334155', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2.5rem', fontWeight: 500 }}>
-              Dive into the core computational engine. A dedicated space for intensive chemical research, data analysis, and driving scientific breakthroughs.
-            </p>
-            
-            <button className="action-button">
-              Access Laboratory →
-            </button>
-          </div>
+            tags={[
+              { icon: <Microscope size={12}/>, label: 'Research' },
+              { icon: <Atom size={12}/>, label: 'Computation' },
+              { icon: <Network size={12}/>, label: 'Analytics' }
+            ]}
+          />
 
-          {/* Workspace 2: Alamein University */}
-          <div 
-            className="lab-card"
+          <GlassCard 
+            title="Alamein University"
+            subtitle="Faculty of Science Hub"
+            description="The interactive hub for the Faculty of Science. Empowering educators to manage inventory, track student progress, and communicate effectively."
+            logoSrc="./alamein_logo.png"
+            accentColor="#4f46e5"
+            delay="0.4s"
             onClick={() => handleSelectWorkspace('alamein')}
-            style={{ 
-              '--card-bg': 'linear-gradient(135deg, #f5f3ff 0%, #e0e7ff 100%)',
-              '--brand-color': '#4f46e5', 
-              '--brand-color-light': '#a5b4fc', 
-              animationDelay: '0.4s' 
-            }}
-          >
-            <div className="card-accent-line"></div>
-            
-            <div className="logo-wrapper">
-              <img src="./alamein_logo.png" alt="Alamein University Logo" className="lab-logo" onError={e => e.target.style.display = 'none'} />
-            </div>
-            
-            <h2 style={{ fontSize: '2rem', color: '#0f172a', marginBottom: '1rem', fontWeight: 800 }}>
-              Alamein University
-            </h2>
-            
-            <div className="card-tags">
-              <span className="tag"><GraduationCap size={12}/> Education</span>
-              <span className="tag"><BookOpen size={12}/> Teaching</span>
-              <span className="tag"><Users size={12}/> Faculty Hub</span>
-            </div>
-            
-            <p style={{ color: '#334155', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2.5rem', fontWeight: 500 }}>
-              The interactive hub for the Faculty of Science. Empowering educators to manage inventory, track student progress, and communicate effectively.
-            </p>
-            
-            <button className="action-button">
-              Enter Faculty Hub →
-            </button>
-          </div>
+            tags={[
+              { icon: <GraduationCap size={12}/>, label: 'Education' },
+              { icon: <BookOpen size={12}/>, label: 'Teaching' },
+              { icon: <Users size={12}/>, label: 'Faculty Hub' }
+            ]}
+          />
 
         </div>
         
