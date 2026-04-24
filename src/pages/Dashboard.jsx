@@ -1,4 +1,4 @@
-import { useLiveCollection } from '../db';
+import { db, useLiveCollection } from '../db';
 import { Beaker, Users, Activity, AlertTriangle, Crown, Check, ShieldOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -66,7 +66,7 @@ export default function Dashboard() {
       await db.scientists.update(user.id, { privacySettings: newSettings });
     } catch (err) {
       console.error("Privacy update failed:", err);
-      alert(`Update Failed: ${err.message}\nUser ID: ${user.id}`);
+      alert(`Update Failed: ${err.message}`);
     }
   };
 
