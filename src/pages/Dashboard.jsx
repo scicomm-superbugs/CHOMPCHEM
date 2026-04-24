@@ -54,12 +54,19 @@ export default function Dashboard() {
   const currentUserRank = leaderboardRaw.find(s => String(s.id) === String(user.id));
 
   const handleTogglePrivacy = async (field) => {
-    const currentSettings = currentUserRank.privacySettings || { hideName: false, hideScore: false };
+    if (!user?.id || !scientistsData) return;
+    
+    // Find latest data from the live collection
+    const currentData = scientistsData.find(s => String(s.id) === String(user.id));
+    if (!currentData) return;
+
+    const currentSettings = currentData.privacySettings || { hideName: false, hideScore: false };
     const newSettings = { ...currentSettings, [field]: !currentSettings[field] };
+    
     try {
       await db.scientists.update(user.id, { privacySettings: newSettings });
     } catch (err) {
-      console.error("Failed to update privacy", err);
+      console.error("Privacy update failed:", err);
     }
   };
 

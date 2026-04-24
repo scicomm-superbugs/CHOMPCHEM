@@ -13,8 +13,7 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     name: user.name || '',
     username: user.username || '',
-    department: user.department || '',
-    hideFromLeaderboard: user.hideFromLeaderboard || false
+    department: user.department || ''
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -203,15 +202,6 @@ export default function Profile() {
                 <div className="form-group">
                   <label className="form-label">Department</label>
                   <input type="text" className="form-control" value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} />
-                </div>
-                <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem', marginBottom: '1.5rem' }}>
-                  <input 
-                    type="checkbox" 
-                    id="hideFromLeaderboard" 
-                    checked={formData.hideFromLeaderboard} 
-                    onChange={e => setFormData({...formData, hideFromLeaderboard: e.target.checked})} 
-                  />
-                  <label htmlFor="hideFromLeaderboard" style={{ cursor: 'pointer', margin: 0 }}>Hide my name and score from the Leaderboard (Appear as Anonymous)</label>
                 </div>
                 <button type="submit" className="btn btn-primary">Save Changes</button>
               </form>
