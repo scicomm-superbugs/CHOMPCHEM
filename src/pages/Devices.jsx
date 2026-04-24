@@ -24,6 +24,10 @@ export default function Devices() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (devices.some(d => d.serialNumber === device.serialNumber)) {
+      alert('A device with this serial number is already registered.');
+      return;
+    }
     try {
       const newDevice = {
         ...device,

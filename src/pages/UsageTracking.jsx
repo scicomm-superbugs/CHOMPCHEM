@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function UsageTracking() {
   const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'master';
 
   const [logEntry, setLogEntry] = useState({
     itemType: 'chemical',
@@ -85,6 +85,11 @@ export default function UsageTracking() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!logEntry.itemId || !logEntry.dueDate) return;
+
+    const previousUsageCount = usageLogsRaw.filter(log => String(log.scientistId) === String(user.id) && (log.itemId === logEntry.itemId || log.chemicalFormula === logEntry.itemId)).length;
+    if (previousUsageCount > 0 && !window.confirm(`You have already registered usage for this item ${previousUsageCount} time(s) before. Do you want to register it again?`)) {
+      return;
+    }
 
     try {
       await db.usage_logs.add({
@@ -246,6 +251,11 @@ export default function UsageTracking() {
               {logEntry.itemId && usageLogsRaw.some(log => (log.itemId === logEntry.itemId || log.chemicalFormula === logEntry.itemId) && log.status === 'In Use') && (
                 <div style={{ color: 'var(--accent)', fontSize: '0.875rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   <X size={14} /> This item is currently in use by someone else.
+                </div>
+              )}
+              {logEntry.itemId && usageLogsRaw.filter(log => String(log.scientistId) === String(user.id) && (log.itemId === logEntry.itemId || log.chemicalFormula === logEntry.itemId)).length > 0 && (
+                <div style={{ color: '#D97706', fontSize: '0.875rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem', backgroundColor: '#FEF3C7', padding: '0.5rem', borderRadius: '4px' }}>
+                  <Activity size={14} /> You have previously registered this item {usageLogsRaw.filter(log => String(log.scientistId) === String(user.id) && (log.itemId === logEntry.itemId || log.chemicalFormula === logEntry.itemId)).length} time(s).
                 </div>
               )}
             </div>
