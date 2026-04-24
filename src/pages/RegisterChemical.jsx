@@ -267,19 +267,30 @@ export default function RegisterChemical() {
 
           <div className="mobile-card-list" style={{ maxHeight: '600px', overflowY: 'auto' }}>
             {filteredChemicals.length > 0 ? filteredChemicals.map(c => (
-              <div key={c.formula} className="mobile-list-item">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#EBF8FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.1rem' }}>🧪</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--primary)' }}>{c.formula}</div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-main)' }}>{c.name}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>MW: {c.mw} {c.hazards && <span style={{ color: 'var(--accent)' }}>• {c.hazards}</span>}</div>
+              <div key={c.formula} className="mobile-list-item" style={{ padding: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  {/* Structure Thumbnail */}
+                  <div style={{ flexShrink: 0 }}>
+                    <SmilesViewer smiles={c.smiles} width={64} height={56} />
                   </div>
-                  <button className="btn btn-danger" style={{ padding: '0.3rem 0.4rem', flexShrink: 0 }} onClick={() => handleDelete(c.formula)}><Trash2 size={14} /></button>
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--primary)', fontFamily: 'monospace' }}>{c.formula}</span>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-main)', marginTop: '1px' }}>{c.name}</div>
+                      </div>
+                      <button className="btn btn-danger" style={{ padding: '0.25rem 0.35rem', flexShrink: 0 }} onClick={() => handleDelete(c.formula)}><Trash2 size={13} /></button>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.3rem', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>MW {c.mw}</span>
+                      {c.hazards && <span style={{ fontSize: '0.68rem', color: '#822727', backgroundColor: '#FFF5F5', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #FED7D7' }}>{c.hazards}</span>}
+                    </div>
+                  </div>
                 </div>
               </div>
             )) : (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No chemicals found.</div>
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No compounds registered.</div>
             )}
           </div>
         </div>

@@ -93,7 +93,7 @@ export default function Devices() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '1.5rem' }}>🖥️ Lab Devices</h1>
+      <h1 style={{ marginBottom: '1.5rem', fontWeight: 700, letterSpacing: '-0.5px' }}>Lab Devices</h1>
 
       <div className="two-col-grid">
         <div className="card" style={{ alignSelf: 'start' }}>
@@ -136,26 +136,29 @@ export default function Devices() {
             <input type="text" className="form-control" placeholder="Search devices..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
 
-          {/* Mobile-friendly card list */}
+          {/* Device list */}
           <div className="mobile-card-list">
             {filteredDevices.length > 0 ? filteredDevices.map(d => (
-              <div key={d.id} className="mobile-list-item">
+              <div key={d.id} className="mobile-list-item" style={{ padding: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div style={{ backgroundColor: 'var(--secondary)', padding: '0.5rem', borderRadius: '8px', color: 'var(--primary)', flexShrink: 0 }}>
-                    <Monitor size={18} />
+                  <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#EDF2F7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', flexShrink: 0 }}>
+                    <Monitor size={20} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{d.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{d.model || 'No model'} • SN: {d.serialNumber}</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>{d.name}</div>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.2rem', flexWrap: 'wrap' }}>
+                      {d.model && <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>{d.model}</span>}
+                      <span style={{ fontSize: '0.68rem', color: '#4A5568', fontFamily: 'monospace', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>SN {d.serialNumber}</span>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
                     <span className={`badge ${d.status === 'Available' ? 'badge-available' : 'badge-in-use'}`}>{d.status}</span>
-                    <button className="btn btn-danger" style={{ padding: '0.3rem 0.4rem' }} onClick={() => handleDelete(d.id)}><Trash2 size={14} /></button>
+                    <button className="btn btn-danger" style={{ padding: '0.25rem 0.35rem' }} onClick={() => handleDelete(d.id)}><Trash2 size={13} /></button>
                   </div>
                 </div>
               </div>
             )) : (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No devices found.</div>
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No devices registered.</div>
             )}
           </div>
         </div>

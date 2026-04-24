@@ -150,7 +150,7 @@ export default function UsageTracking() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '1.5rem' }}>{isAdmin ? '📋 Register Items' : '📋 My Registrations'}</h1>
+      <h1 style={{ marginBottom: '1.5rem', fontWeight: 700, letterSpacing: '-0.5px' }}>{isAdmin ? 'Item Registration' : 'My Registrations'}</h1>
 
       {isAdmin && pendingRequests.length > 0 && (
         <div className="card" style={{ marginBottom: '2rem', borderLeft: '4px solid #F6E05E' }}>
@@ -405,27 +405,28 @@ export default function UsageTracking() {
               trackingLogs.map(log => (
                 <div key={log.id} className="mobile-list-item" style={{
                   borderLeft: `3px solid ${log.computedStatus === 'Overdue' ? 'var(--accent)' : log.isApproaching ? 'var(--warning)' : log.status === 'Returned' ? 'var(--success)' : log.status === 'Pending' ? '#D69E2E' : 'var(--primary)'}`,
-                  opacity: (log.status === 'Pending' || log.status === 'Rejected') ? 0.75 : 1
+                  opacity: (log.status === 'Pending' || log.status === 'Rejected') ? 0.75 : 1,
+                  padding: '0.7rem 0.75rem'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                        <strong style={{ fontSize: '0.88rem' }}>{log.chemicalFormula}</strong>
-                        <span className={`badge ${log.computedStatus === 'Overdue' ? 'badge-overdue' : log.status === 'Returned' ? 'badge-available' : log.status === 'Pending' ? 'badge-warning' : log.status === 'Rejected' ? 'badge-overdue' : log.isApproaching ? 'badge-warning' : 'badge-in-use'}`} style={{ fontSize: '0.6rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--primary)', fontFamily: 'monospace' }}>{log.chemicalFormula}</span>
+                        <span className={`badge ${log.computedStatus === 'Overdue' ? 'badge-overdue' : log.status === 'Returned' ? 'badge-available' : log.status === 'Pending' ? 'badge-warning' : log.status === 'Rejected' ? 'badge-overdue' : log.isApproaching ? 'badge-warning' : 'badge-in-use'}`}>
                           {log.computedStatus === 'Overdue' ? 'Overdue' : log.isApproaching ? 'Due Soon' : log.status}
                         </span>
                       </div>
                       <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)' }}>{log.chemicalName}</div>
-                      {isAdmin && <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)' }}>👤 {log.scientistName}</div>}
-                      <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                        <span>📤 {new Date(log.borrowDate).toLocaleDateString()}</span>
-                        <span style={{ color: log.computedStatus === 'Overdue' ? 'var(--accent)' : 'inherit', fontWeight: log.computedStatus === 'Overdue' ? 600 : 400 }}>📅 {new Date(log.dueDate).toLocaleDateString()}</span>
+                      {isAdmin && <div style={{ fontSize: '0.73rem', color: '#4A5568', fontWeight: 500 }}>{log.scientistName}</div>}
+                      <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.68rem', color: '#A0AEC0', marginTop: '0.3rem' }}>
+                        <span>Out: {new Date(log.borrowDate).toLocaleDateString()}</span>
+                        <span style={{ color: log.computedStatus === 'Overdue' ? 'var(--accent)' : 'inherit', fontWeight: log.computedStatus === 'Overdue' ? 600 : 400 }}>Due: {new Date(log.dueDate).toLocaleDateString()}</span>
                       </div>
-                      {log.notes && <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.15rem', fontStyle: 'italic' }}>📝 {log.notes}</div>}
+                      {log.notes && <div style={{ fontSize: '0.68rem', color: '#A0AEC0', marginTop: '0.15rem', fontStyle: 'italic' }}>{log.notes}</div>}
                     </div>
                     {log.status === 'In Use' && (
-                      <button className="btn btn-secondary" style={{ padding: '0.3rem 0.5rem', fontSize: '0.7rem', flexShrink: 0, marginTop: '0.25rem' }} onClick={() => markReturned(log.id)}>
-                        <Check size={12} /> Return
+                      <button className="btn btn-secondary" style={{ padding: '0.25rem 0.45rem', fontSize: '0.68rem', flexShrink: 0, marginTop: '0.15rem' }} onClick={() => markReturned(log.id)}>
+                        <Check size={11} /> Return
                       </button>
                     )}
                   </div>

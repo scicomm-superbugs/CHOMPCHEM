@@ -341,19 +341,20 @@ input, select, textarea {
 .mobile-card-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .mobile-list-item {
-  padding: 0.65rem 0.75rem;
-  background-color: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #edf2f7;
-  transition: background 0.15s;
+  padding: 0.7rem 0.75rem;
+  background-color: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #EDF2F7;
+  transition: all 0.15s ease;
 }
 
 .mobile-list-item:hover {
-  background-color: #edf2f7;
+  background-color: #fafbfc;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
 /* ===== DASHBOARD GRID ===== */
