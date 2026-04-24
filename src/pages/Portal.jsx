@@ -101,11 +101,11 @@ export default function Portal() {
           flex: 1;
           min-width: 320px;
           max-width: 480px;
-          background: rgba(255, 255, 255, 0.9);
-          backdrop-filter: blur(10px);
+          background: var(--card-bg, rgba(255, 255, 255, 0.9));
+          border: 1px solid var(--brand-color-light);
           border-radius: 32px;
           padding: 3rem 2.5rem;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05), 0 0 0 4px white inset;
+          box-shadow: 0 20px 40px -10px var(--brand-color-light), 0 0 0 4px rgba(255,255,255,0.6) inset;
           cursor: pointer;
           transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
           display: flex;
@@ -186,10 +186,11 @@ export default function Portal() {
         .tag {
           font-size: 0.75rem;
           font-weight: 700;
-          padding: 0.3rem 0.8rem;
+          padding: 0.4rem 0.8rem;
           border-radius: 12px;
-          background: #f1f5f9;
+          background: white;
           color: #475569;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
           display: flex;
           align-items: center;
           gap: 0.25rem;
@@ -245,7 +246,12 @@ export default function Portal() {
           <div 
             className="lab-card"
             onClick={() => handleSelectWorkspace('compchem')}
-            style={{ '--brand-color': '#ea580c', '--brand-color-light': '#ffedd5', animationDelay: '0.2s' }}
+            style={{ 
+              '--card-bg': 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
+              '--brand-color': '#ea580c', 
+              '--brand-color-light': '#fdba74', 
+              animationDelay: '0.2s' 
+            }}
           >
             <div className="card-accent-line"></div>
             
@@ -263,7 +269,7 @@ export default function Portal() {
               <span className="tag"><Network size={12}/> Analytics</span>
             </div>
             
-            <p style={{ color: '#64748b', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2.5rem', fontWeight: 500 }}>
+            <p style={{ color: '#334155', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2.5rem', fontWeight: 500 }}>
               Dive into the core computational engine. A dedicated space for intensive chemical research, data analysis, and driving scientific breakthroughs.
             </p>
             
@@ -276,7 +282,12 @@ export default function Portal() {
           <div 
             className="lab-card"
             onClick={() => handleSelectWorkspace('alamein')}
-            style={{ '--brand-color': '#4f46e5', '--brand-color-light': '#e0e7ff', animationDelay: '0.4s' }}
+            style={{ 
+              '--card-bg': 'linear-gradient(135deg, #f5f3ff 0%, #e0e7ff 100%)',
+              '--brand-color': '#4f46e5', 
+              '--brand-color-light': '#a5b4fc', 
+              animationDelay: '0.4s' 
+            }}
           >
             <div className="card-accent-line"></div>
             
@@ -294,7 +305,7 @@ export default function Portal() {
               <span className="tag"><Users size={12}/> Faculty Hub</span>
             </div>
             
-            <p style={{ color: '#64748b', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2.5rem', fontWeight: 500 }}>
+            <p style={{ color: '#334155', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2.5rem', fontWeight: 500 }}>
               The interactive hub for the Faculty of Science. Empowering educators to manage inventory, track student progress, and communicate effectively.
             </p>
             
