@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { db, useLiveCollection } from '../db';
 import { Activity, Check, Search, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +19,9 @@ export default function UsageTracking() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [successMsg, setSuccessMsg] = useState('');
+  const [itemSearchQuery, setItemSearchQuery] = useState('');
+  const [showItemSuggestions, setShowItemSuggestions] = useState(false);
+  const itemSearchRef = useRef(null);
 
   // Fetch data
   const chemicals = useLiveCollection('chemicals');
@@ -103,6 +106,7 @@ export default function UsageTracking() {
       });
       setSuccessMsg(isAdmin ? 'Registration assigned successfully!' : 'Registration requested successfully!');
       setLogEntry({ ...logEntry, itemId: '', notes: '' });
+      setItemSearchQuery('');
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (error) {
       console.error(error);
@@ -225,29 +229,91 @@ export default function UsageTracking() {
 
             <div className="form-group" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input type="radio" name="itemType" checked={logEntry.itemType === 'chemical'} onChange={() => setLogEntry({...logEntry, itemType: 'chemical', itemId: ''})} /> Chemical
+                <input type="radio" name="itemType" checked={logEntry.itemType === 'chemical'} onChange={() => { setLogEntry({...logEntry, itemType: 'chemical', itemId: ''}); setItemSearchQuery(''); }} /> Chemical
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input type="radio" name="itemType" checked={logEntry.itemType === 'device'} onChange={() => setLogEntry({...logEntry, itemType: 'device', itemId: ''})} /> Device
+                <input type="radio" name="itemType" checked={logEntry.itemType === 'device'} onChange={() => { setLogEntry({...logEntry, itemType: 'device', itemId: ''}); setItemSearchQuery(''); }} /> Device
               </label>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">{logEntry.itemType === 'chemical' ? 'Select Chemical' : 'Select Device'}</label>
-              <select 
-                className="form-control" 
-                required
-                value={logEntry.itemId}
-                onChange={e => setLogEntry({...logEntry, itemId: e.target.value})}
-              >
-                <option value="">Choose...</option>
-                {logEntry.itemType === 'chemical' && chemicals.map(c => (
-                  <option key={c.formula} value={c.formula}>{c.formula} - {c.name}</option>
-                ))}
-                {logEntry.itemType === 'device' && devices.map(d => (
-                  <option key={d.id} value={d.id}>{d.name} ({d.serialNumber})</option>
-                ))}
-              </select>
+            <div className="form-group" style={{ position: 'relative' }}>
+              <label className="form-label">{logEntry.itemType === 'chemical' ? '🧪 Select Chemical' : '🖥️ Select Device'}</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder={logEntry.itemType === 'chemical' ? 'Type chemical name or formula...' : 'Type device name or serial...'}
+                value={itemSearchQuery}
+                ref={itemSearchRef}
+                onChange={e => {
+                  setItemSearchQuery(e.target.value);
+                  setShowItemSuggestions(true);
+                  if (!e.target.value.trim()) {
+                    setLogEntry({...logEntry, itemId: ''});
+                  }
+                }}
+                onFocus={() => setShowItemSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowItemSuggestions(false), 200)}
+              />
+              {logEntry.itemId && (
+                <div style={{ fontSize: '0.8rem', color: 'var(--success)', marginTop: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <Check size={14} /> Selected: <strong>{logEntry.itemId}</strong>
+                  <button 
+                    type="button"
+                    onClick={() => { setLogEntry({...logEntry, itemId: ''}); setItemSearchQuery(''); }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', padding: 0, marginLeft: '0.25rem' }}
+                  ><X size={14} /></button>
+                </div>
+              )}
+              {showItemSuggestions && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: 'white', border: '1px solid var(--border-color)', borderRadius: '0 0 8px 8px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 50, maxHeight: '200px', overflowY: 'auto' }}>
+                  {logEntry.itemType === 'chemical' && (() => {
+                    const q = itemSearchQuery.toLowerCase();
+                    const filtered = chemicals.filter(c => 
+                      c.name?.toLowerCase().includes(q) || 
+                      c.formula?.toLowerCase().includes(q)
+                    );
+                    if (filtered.length === 0) return <div style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>No chemicals found</div>;
+                    return filtered.map(c => (
+                      <div 
+                        key={c.formula}
+                        style={{ padding: '0.6rem 1rem', cursor: 'pointer', borderBottom: '1px solid #f5f5f5', fontSize: '0.875rem', transition: 'background 0.15s' }}
+                        onMouseDown={() => {
+                          setLogEntry({...logEntry, itemId: c.formula});
+                          setItemSearchQuery(`${c.formula} - ${c.name}`);
+                          setShowItemSuggestions(false);
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#f7fafc'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <strong>{c.formula}</strong> <span style={{ color: 'var(--text-muted)' }}>— {c.name}</span>
+                      </div>
+                    ));
+                  })()}
+                  {logEntry.itemType === 'device' && (() => {
+                    const q = itemSearchQuery.toLowerCase();
+                    const filtered = devices.filter(d => 
+                      d.name?.toLowerCase().includes(q) || 
+                      d.serialNumber?.toLowerCase().includes(q)
+                    );
+                    if (filtered.length === 0) return <div style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>No devices found</div>;
+                    return filtered.map(d => (
+                      <div 
+                        key={d.id}
+                        style={{ padding: '0.6rem 1rem', cursor: 'pointer', borderBottom: '1px solid #f5f5f5', fontSize: '0.875rem', transition: 'background 0.15s' }}
+                        onMouseDown={() => {
+                          setLogEntry({...logEntry, itemId: d.id});
+                          setItemSearchQuery(`${d.name} (${d.serialNumber})`);
+                          setShowItemSuggestions(false);
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#f7fafc'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <strong>{d.name}</strong> <span style={{ color: 'var(--text-muted)' }}>— {d.serialNumber}</span>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              )}
               {logEntry.itemId && usageLogsRaw.some(log => (log.itemId === logEntry.itemId || log.chemicalFormula === logEntry.itemId) && log.status === 'In Use') && (
                 <div style={{ color: 'var(--accent)', fontSize: '0.875rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   <X size={14} /> This item is currently in use by someone else.
