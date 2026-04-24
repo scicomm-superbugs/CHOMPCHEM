@@ -15,17 +15,16 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
-        <Route path="/" element={<Layout />}>
-          {/* Protected routes for all users */}
-          <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="tracking" element={<UsageTracking />} />
-          </Route>
-          
-          {/* Admin only routes */}
-          <Route element={<ProtectedRoute requireAdmin={true} />}>
-            <Route path="chemicals" element={<RegisterChemical />} />
-            <Route path="scientists" element={<Scientists />} />
+            
+            {/* Admin only routes */}
+            <Route element={<ProtectedRoute requireAdmin={true} />}>
+              <Route path="chemicals" element={<RegisterChemical />} />
+              <Route path="scientists" element={<Scientists />} />
+            </Route>
           </Route>
         </Route>
         
