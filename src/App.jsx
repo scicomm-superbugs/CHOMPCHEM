@@ -1,4 +1,5 @@
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import RegisterChemical from './pages/RegisterChemical';
@@ -16,6 +17,17 @@ import Portal from './pages/Portal';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
+  useEffect(() => {
+    const workspaceId = localStorage.getItem('workspaceId');
+    if (workspaceId === 'alamein') {
+      document.title = 'Alamein International University';
+    } else if (workspaceId === 'compchem') {
+      document.title = 'COMPCHEM Laboratory';
+    } else {
+      document.title = 'Science Communication & Research Hub';
+    }
+  }, []);
+
   return (
     <Router>
       <Routes>
