@@ -21,7 +21,9 @@ function App() {
     <Router>
       <Routes>
         <Route path="/portal" element={<Portal />} />
+        <Route path="/login/:workspace" element={<Login />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register/:workspace" element={<Register />} />
         <Route path="/register" element={<Register />} />
         
         <Route element={<ProtectedRoute />}>

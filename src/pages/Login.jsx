@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link, Navigate } from 'react-router-dom';
+import { useNavigate, Link, Navigate, useParams } from 'react-router-dom';
 import { Lock, User, Building2 } from 'lucide-react';
 
 export default function Login() {
@@ -11,6 +11,11 @@ export default function Login() {
   
   const { login, user } = useAuth();
   const navigate = useNavigate();
+  const { workspace } = useParams();
+
+  if (workspace && (workspace === 'alamein' || workspace === 'compchem')) {
+    localStorage.setItem('workspaceId', workspace);
+  }
 
   const workspaceId = localStorage.getItem('workspaceId');
   if (!workspaceId) {

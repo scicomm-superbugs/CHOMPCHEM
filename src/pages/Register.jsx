@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link, Navigate } from 'react-router-dom';
+import { useNavigate, Link, Navigate, useParams } from 'react-router-dom';
 import { db } from '../db';
 import bcrypt from 'bcryptjs';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +19,11 @@ export default function Register() {
   const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { workspace } = useParams();
+
+  if (workspace && (workspace === 'alamein' || workspace === 'compchem')) {
+    localStorage.setItem('workspaceId', workspace);
+  }
 
   const workspaceId = localStorage.getItem('workspaceId') || 'compchem';
 
