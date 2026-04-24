@@ -4,6 +4,7 @@ import { db, useLiveCollection } from '../db';
 import { User, Key, Trash2, Camera, Activity, Eye } from 'lucide-react';
 import bcrypt from 'bcryptjs';
 import { useNavigate } from 'react-router-dom';
+import { ranks } from '../utils/ranks';
 
 export default function Profile() {
   const { user, logout } = useAuth();
@@ -248,18 +249,9 @@ export default function Profile() {
                 You unlock new tags automatically by earning points (registering chemicals, etc.). Here are all the tags you have unlocked!
               </p>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {[
-                  { name: 'Lab Legend', color: '#805AD5', emoji: '🏆', pointsRequired: 500 },
-                  { name: 'Mad Scientist', color: '#DD6B20', emoji: '🧑‍🔬', pointsRequired: 300 },
-                  { name: 'Chemical Warrior', color: '#3182CE', emoji: '⚔️', pointsRequired: 150 },
-                  { name: 'Beaker Breaker', color: '#38A169', emoji: '🧪', pointsRequired: 50 },
-                  { name: 'Lab Rat', color: '#718096', emoji: '🐀', pointsRequired: 10 },
-                  { name: 'Baby Chemist', color: '#A0AEC0', emoji: '🍼', pointsRequired: 0 }
-                ].map(rank => {
-                  const isUnlocked = user.role === 'master' || (currentUserData?.points || 0) >= rank.pointsRequired;
-                  const isSelected = currentUserData?.selectedRankTitle === rank.name || (!currentUserData?.selectedRankTitle && ((currentUserData?.points || 0) >= rank.pointsRequired && ((currentUserData?.points || 0) < [500,300,150,50,10,0].find(p => p > rank.pointsRequired) || rank.pointsRequired===500)));
-                  // (simplified: if they manually selected it)
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '500px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                {ranks.map(rank => {
+                  const isUnlocked = user.role === 'master' || (currentUserData?.points || 0) >= rank.req;
                   const isActivelySelected = currentUserData?.selectedRankTitle === rank.name;
                   
                   return (
@@ -268,7 +260,7 @@ export default function Profile() {
                         <span style={{ fontSize: '2rem' }}>{rank.emoji}</span>
                         <div>
                           <strong style={{ fontSize: '1.1rem', color: isUnlocked ? rank.color : 'var(--text-muted)' }}>{rank.name}</strong>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Requires {rank.pointsRequired} pts</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Requires {rank.req} pts</div>
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

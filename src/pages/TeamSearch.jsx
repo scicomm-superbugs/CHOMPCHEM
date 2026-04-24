@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { db, useLiveCollection } from '../db';
 import { Search, User, Shield, Crown, Eye, Mail, Building, Award } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getRankByPoints } from '../utils/ranks';
 
 export default function TeamSearch() {
   const { user } = useAuth();
@@ -26,23 +27,6 @@ export default function TeamSearch() {
         s.department?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : activeScientists;
-
-  const getRank = (points, customTitle) => {
-    const ranks = [
-      { name: 'Lab Legend', color: '#805AD5', emoji: '🏆', req: 500 },
-      { name: 'Mad Scientist', color: '#DD6B20', emoji: '🧑‍🔬', req: 300 },
-      { name: 'Chemical Warrior', color: '#3182CE', emoji: '⚔️', req: 150 },
-      { name: 'Beaker Breaker', color: '#38A169', emoji: '🧪', req: 50 },
-      { name: 'Lab Rat', color: '#718096', emoji: '🐀', req: 10 },
-      { name: 'Baby Chemist', color: '#A0AEC0', emoji: '🍼', req: 0 }
-    ];
-    let highestRank = ranks.find(r => points >= r.req);
-    if (customTitle) {
-      const customRank = ranks.find(r => r.name === customTitle && points >= r.req);
-      if (customRank) return customRank;
-    }
-    return highestRank || ranks[ranks.length - 1];
-  };
 
   const getUserPoints = (userId) => {
     const usagePoints = usageLogsData.filter(log => String(log.scientistId) === String(userId)).length * 10;
@@ -103,7 +87,7 @@ export default function TeamSearch() {
             <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
               {filtered.map(s => {
                 const pts = s.role === 'master' ? '∞' : getUserPoints(s.id);
-                const rank = s.role === 'master' ? { name: 'Lab Master', color: '#D69E2E', emoji: '👑' } : getRank(pts, s.selectedRankTitle);
+                const rank = s.role === 'master' ? { name: 'Lab Master', color: '#D69E2E', emoji: '👑' } : getRankByPoints(pts, s.selectedRankTitle);
                 const isSelected = selectedUser && String(selectedUser.id) === String(s.id);
 
                 return (
@@ -208,7 +192,7 @@ export default function TeamSearch() {
                   <span>
                     {(() => {
                       const pts = selectedUser.role === 'master' ? Infinity : getUserPoints(selectedUser.id);
-                      const rank = selectedUser.role === 'master' ? { name: 'Lab Master', color: '#D69E2E', emoji: '👑' } : getRank(pts, selectedUser.selectedRankTitle);
+                      const rank = selectedUser.role === 'master' ? { name: 'Lab Master', color: '#D69E2E', emoji: '👑' } : getRankByPoints(pts, selectedUser.selectedRankTitle);
                       return <span style={{ color: rank.color, fontWeight: 600 }}>{rank.emoji} {rank.name}</span>;
                     })()}
                   </span>
