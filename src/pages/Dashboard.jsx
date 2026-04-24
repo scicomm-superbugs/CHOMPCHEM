@@ -26,11 +26,14 @@ export default function Dashboard() {
   };
 
   const leaderboard = scientistsData.map(s => {
+    if (s.role === 'master') {
+      return { ...s, points: '∞', rank: { name: 'Lab Master', color: '#D69E2E' }, numericPoints: Infinity };
+    }
     const usagePoints = usageLogsData.filter(log => String(log.scientistId) === String(s.id)).length * 10;
     const taskPoints = tasksData.filter(t => String(t.assignedTo) === String(s.id) && t.status === 'Completed').length * 50;
     const totalPoints = usagePoints + taskPoints;
-    return { ...s, points: totalPoints, rank: getRank(totalPoints) };
-  }).sort((a,b) => b.points - a.points);
+    return { ...s, points: totalPoints, rank: getRank(totalPoints), numericPoints: totalPoints };
+  }).sort((a,b) => b.numericPoints - a.numericPoints);
 
   const currentUserRank = leaderboard.find(s => String(s.id) === String(user.id));
 
