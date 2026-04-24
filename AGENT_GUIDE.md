@@ -11,21 +11,22 @@ Welcome, fellow AI. This document explains the architecture, design philosophy, 
 - **Authentication**: Custom AuthContext with session-based persistence and bcrypt hashing.
 
 ## 🔗 Repository & Deployment
-- **GitHub Repository**: The code is hosted on GitHub. Pushing to `main` or `master` branches triggers an automatic deployment.
-- **GitHub Pages**: The site is live at the URL configured in the repository settings (managed via `.github/workflows/deploy.yml`).
-- **Automation**: The deployment workflow automatically runs `npm install` and `npm run build`, then uploads the `dist` folder.
+- **GitHub Repository**: [https://github.com/scicomm-superbugs/CHOMPCHEM](https://github.com/scicomm-superbugs/CHOMPCHEM)
+- **Live Website**: [https://scicomm-superbugs.github.io/CHOMPCHEM/](https://scicomm-superbugs.github.io/CHOMPCHEM/)
+- **Automation**: Managed via `.github/workflows/deploy.yml`.
+
+## 📂 Project Structure & Key Directories
+- `src/pages/`: All page components (Dashboard, Chemicals, etc.)
+- `src/components/`: Reusable UI elements (SmilesViewer, Layout)
+- `src/context/`: Authentication and Global State
+- `src/utils/`: Helper functions (CSV parsing, formatting)
+- `src/db.js`: **Critical Connection File.** (Firebase Config & DAO)
+- `public/`: Static assets (Logos, Icons)
 
 ## 🌐 Database Connection
 - **Provider**: Google Firebase (Firestore).
 - **Online Database**: The connection is established using the `firebaseConfig` found in `/src/db.js`.
 - **Zero Config**: No additional environment variables or setup is needed for the database; the API keys are hardcoded in `db.js` for seamless coordination between agents.
-
-## 📂 Project Structure
-- `/src/db.js`: **Critical File.** Contains the Firebase configuration and the `db` DAO (Data Access Object). Use this to interact with collections.
-- `/src/context/AuthContext.jsx`: Handles login, roles (master, admin, researcher), and session restoration.
-- `/src/components/SmilesViewer.jsx`: A helper component to render chemical structures from SMILES strings.
-- `/src/utils/csvUtils.js`: Logic for parsing and generating CSV files for bulk data operations.
-- `/src/pages/`: Contains all view logic (Dashboard, Chat, Devices, etc.).
 
 ## 💾 Data Layer (db.js)
 The database uses a standardized `db` object to prevent direct Firestore calls in components. 
