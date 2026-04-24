@@ -9,10 +9,19 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isTimeout = false;
+    const timeoutId = setTimeout(() => {
+      isTimeout = true;
+      console.warn('Firebase auth check timed out. Forcing load.');
+      setLoading(false);
+    }, 3000);
+
     // Check if user is logged in
     const storedUserId = sessionStorage.getItem('userId');
     if (storedUserId) {
       db.scientists.get(String(storedUserId)).then(scientist => {
+        if (isTimeout) return;
+        clearTimeout(timeoutId);
         if (scientist) {
           setUser({
             id: scientist.id,
@@ -23,11 +32,14 @@ export const AuthProvider = ({ children }) => {
         }
         setLoading(false);
       }).catch(err => {
+        if (isTimeout) return;
+        clearTimeout(timeoutId);
         console.error('Failed to restore session:', err);
         sessionStorage.removeItem('userId');
         setLoading(false);
       });
     } else {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   }, []);
