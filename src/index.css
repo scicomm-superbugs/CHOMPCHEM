@@ -108,9 +108,8 @@ input, select, textarea {
 }
 
 .logo-image {
-  height: 130px;
+  height: 44px;
   width: auto;
-  margin: -40px 0 -40px -25px; /* Counteracts the whitespace in the image file */
 }
 
 .logo-text {
@@ -540,8 +539,7 @@ input, select, textarea {
   }
 
   .logo-image {
-    height: 100px;
-    margin: -30px 0 -30px -20px;
+    height: 32px;
   }
 
   .hamburger-btn {
