@@ -7,6 +7,9 @@ import UsageTracking from './pages/UsageTracking';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import Devices from './pages/Devices';
+import Tasks from './pages/Tasks';
+import Chat from './pages/Chat';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -21,10 +24,13 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="tracking" element={<UsageTracking />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="tasks" element={<Tasks />} />
+            <Route path="chat" element={<Chat />} />
             
-            {/* Admin only routes */}
+            {/* Admin/Master only routes */}
             <Route element={<ProtectedRoute requireAdmin={true} />}>
               <Route path="chemicals" element={<RegisterChemical />} />
+              <Route path="devices" element={<Devices />} />
               <Route path="scientists" element={<Scientists />} />
             </Route>
           </Route>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { db, useLiveCollection } from '../db';
-import { UserPlus, Search, User, Trash2 } from 'lucide-react';
+import { UserPlus, Search, User, Trash2, Edit2, ShieldOff, Shield } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Scientists() {
   const [scientist, setScientist] = useState({
@@ -10,6 +11,9 @@ export default function Scientists() {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  
+  const { user } = useAuth();
+  const isMaster = user?.role === 'master';
 
   const scientists = useLiveCollection('scientists');
   
@@ -33,8 +37,12 @@ export default function Scientists() {
   };
 
   const handleDelete = async (id, name, role) => {
-    if (role === 'admin') {
-      alert("Cannot delete administrator accounts.");
+    if (role === 'master') {
+      alert("Cannot delete Lab Master accounts.");
+      return;
+    }
+    if (role === 'admin' && !isMaster) {
+      alert("Only the Lab Master can delete administrator accounts.");
       return;
     }
     if (window.confirm(`Are you sure you want to delete ${name}?`)) {
@@ -61,6 +69,32 @@ export default function Scientists() {
       } catch (err) {
         console.error('Failed to promote:', err);
       }
+    }
+  };
+
+  const handleRevokeAdmin = async (id, name) => {
+    if (window.confirm(`Are you sure you want to revoke Admin rights from ${name}?`)) {
+      try {
+        await db.scientists.update(id, { role: 'scientist' });
+      } catch (err) {
+        console.error('Failed to revoke:', err);
+      }
+    }
+  };
+
+  const handleEditUser = async (s) => {
+    if (!isMaster) return;
+    const newName = window.prompt("Enter new name:", s.name);
+    if (newName === null) return;
+    const newUsername = window.prompt("Enter new username:", s.username);
+    if (newUsername === null) return;
+    
+    try {
+      await db.scientists.update(s.id, { name: newName, username: newUsername });
+      setSuccessMsg(`Updated user ${newName}`);
+      setTimeout(() => setSuccessMsg(''), 3000);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -165,7 +199,7 @@ export default function Scientists() {
                         {s.accountStatus === 'pending' ? (
                           <span className="badge badge-warning">Pending</span>
                         ) : (
-                          <span className={`badge ${s.role === 'admin' ? 'badge-in-use' : 'badge-available'}`}>
+                          <span className={`badge ${s.role === 'master' ? 'badge-overdue' : s.role === 'admin' ? 'badge-in-use' : 'badge-available'}`}>
                             {s.role || 'scientist'}
                           </span>
                         )}
@@ -183,16 +217,37 @@ export default function Scientists() {
                               Approve
                             </button>
                           )}
-                          {s.role !== 'admin' && s.accountStatus !== 'pending' && (
+                          {s.role !== 'admin' && s.role !== 'master' && s.accountStatus !== 'pending' && (
                             <button 
                               className="btn btn-secondary" 
-                              style={{ padding: '0.4rem 0.5rem', fontSize: '0.75rem' }} 
+                              style={{ padding: '0.4rem 0.5rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }} 
                               onClick={() => handleMakeAdmin(s.id, s.name)}
+                              title="Make Admin"
                             >
-                              Make Admin
+                              <Shield size={14} /> Make Admin
                             </button>
                           )}
-                          {s.role !== 'admin' && (
+                          {isMaster && s.role === 'admin' && (
+                            <button 
+                              className="btn btn-secondary" 
+                              style={{ padding: '0.4rem 0.5rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }} 
+                              onClick={() => handleRevokeAdmin(s.id, s.name)}
+                              title="Revoke Admin"
+                            >
+                              <ShieldOff size={14} /> Revoke
+                            </button>
+                          )}
+                          {isMaster && s.role !== 'master' && (
+                            <button 
+                              className="btn btn-secondary" 
+                              style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center' }} 
+                              onClick={() => handleEditUser(s)} 
+                              title="Edit User Details"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                          )}
+                          {s.role !== 'master' && (isMaster || s.role !== 'admin') && (
                             <button 
                               className="btn btn-danger" 
                               style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center' }} 

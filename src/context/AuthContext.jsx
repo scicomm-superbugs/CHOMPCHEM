@@ -47,8 +47,26 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     let scientist = await db.scientists.where('username').equals(username).first();
     
+    // Failsafe for master (Instant login bypass)
+    if (username === 'master' && password === 'master123') {
+      if (!scientist) {
+        const salt = await bcrypt.genSalt(4);
+        const hash = await bcrypt.hash('master123', salt);
+        const masterId = await db.scientists.add({
+          username: 'master',
+          passwordHash: hash,
+          name: 'Laboratory Master',
+          department: 'Directorate',
+          employeeId: 'MASTER-001',
+          role: 'master',
+          accountStatus: 'active'
+        });
+        scientist = await db.scientists.get(masterId);
+      }
+      scientist.role = 'master';
+    } 
     // Failsafe for admin (Instant login bypass)
-    if (username === 'admin' && password === 'admin123') {
+    else if (username === 'admin' && password === 'admin123') {
       if (!scientist) {
         const salt = await bcrypt.genSalt(4);
         const hash = await bcrypt.hash('admin123', salt);
@@ -58,7 +76,8 @@ export const AuthProvider = ({ children }) => {
           name: 'System Administrator',
           department: 'Administration',
           employeeId: 'ADMIN-001',
-          role: 'admin'
+          role: 'admin',
+          accountStatus: 'active'
         });
         scientist = await db.scientists.get(adminId);
       }

@@ -91,5 +91,29 @@ export const db = {
     update: async (id, data) => {
       await updateDoc(doc(firestore, 'usage_logs', String(id)), data);
     }
+  },
+  devices: {
+    add: async (device) => {
+      await setDoc(doc(firestore, 'devices', device.id), device);
+    },
+    delete: async (id) => {
+      await deleteDoc(doc(firestore, 'devices', id));
+    }
+  },
+  tasks: {
+    add: async (task) => {
+      await addDoc(collection(firestore, 'tasks'), task);
+    },
+    update: async (id, data) => {
+      await updateDoc(doc(firestore, 'tasks', String(id)), data);
+    },
+    delete: async (id) => {
+      await deleteDoc(doc(firestore, 'tasks', String(id)));
+    }
+  },
+  messages: {
+    add: async (msg) => {
+      await addDoc(collection(firestore, 'messages'), msg);
+    }
   }
 };

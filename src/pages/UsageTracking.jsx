@@ -129,7 +129,7 @@ export default function UsageTracking() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '2rem' }}>{isAdmin ? 'Usage Tracking' : 'My Chemicals'}</h1>
+      <h1 style={{ marginBottom: '2rem' }}>{isAdmin ? 'Lab Equipment & Chemicals Tracking' : 'My Lab Equipment & Chemicals'}</h1>
 
       {isAdmin && pendingRequests.length > 0 && (
         <div className="card" style={{ marginBottom: '2rem', borderLeft: '4px solid #F6E05E' }}>

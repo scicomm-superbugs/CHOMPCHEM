@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
-import { Beaker, Users, Activity, Home, LogOut, Shield, Settings, User } from 'lucide-react';
+import { Beaker, Users, Activity, Home, LogOut, Shield, Settings, User, Monitor, ClipboardList, MessageSquare, Crown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection } from '../db';
 
@@ -38,8 +38,12 @@ export default function Layout() {
               <span>Dashboard</span>
             </Link>
             
-            {user.role === 'admin' && (
+            {(user.role === 'admin' || user.role === 'master') && (
               <>
+                <Link to="/devices" className={`nav-link ${isActive('/devices')}`}>
+                  <Monitor size={20} />
+                  <span>Devices</span>
+                </Link>
                 <Link to="/chemicals" className={`nav-link ${isActive('/chemicals')}`}>
                   <Beaker size={20} />
                   <span>Chemicals</span>
@@ -53,7 +57,17 @@ export default function Layout() {
             
             <Link to="/tracking" className={`nav-link ${isActive('/tracking')}`}>
               <Activity size={20} />
-              <span>Tracking</span>
+              <span className="hide-mobile">Lab Equipment</span>
+            </Link>
+
+            <Link to="/tasks" className={`nav-link ${isActive('/tasks')}`}>
+              <ClipboardList size={20} />
+              <span className="hide-mobile">Tasks</span>
+            </Link>
+
+            <Link to="/chat" className={`nav-link ${isActive('/chat')}`}>
+              <MessageSquare size={20} />
+              <span className="hide-mobile">Chat</span>
             </Link>
             
             <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border-color)', margin: '0 0.5rem' }}></div>
@@ -67,8 +81,11 @@ export default function Layout() {
                     <User size={14} />
                   </div>
                 )}
-                <span style={{ fontWeight: 600 }}>{user.name}</span>
-                {user.role === 'admin' && <Shield size={14} style={{ color: 'var(--accent)' }} title="Admin" />}
+                <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {user.name}
+                  {user.role === 'admin' && <Shield size={14} style={{ color: 'var(--accent)' }} title="Admin" />}
+                  {user.role === 'master' && <Crown size={14} style={{ color: '#F6E05E' }} title="Lab Master" />}
+                </span>
               </Link>
             </div>
             
