@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { db, useLiveCollection } from '../db';
-import { Send, User, MessageSquare, Smile, Paperclip, X, FileText, Image } from 'lucide-react';
+import { Send, User, Users, MessageSquare, Smile, Paperclip, X, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Chat() {
