@@ -34,8 +34,8 @@ export async function seedDatabase() {
     }
 
     if (sciCount === 0) {
-      const salt = bcrypt.genSaltSync(10);
-      const hash = bcrypt.hashSync('password', salt);
+      const salt = await bcrypt.genSalt(4);
+      const hash = await bcrypt.hash('password', salt);
       
       const s1 = await db.scientists.add({ username: 'sconnor', passwordHash: hash, name: 'Dr. Sarah Connor', department: 'Analytical Chemistry', employeeId: 'EMP001', role: 'scientist' });
       const s2 = await db.scientists.add({ username: 'ebrown', passwordHash: hash, name: 'Dr. Emmett Brown', department: 'Physical Chemistry', employeeId: 'EMP002', role: 'scientist' });

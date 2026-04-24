@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     let scientist = await db.scientists.where('username').equals(username).first();
     
-    // Failsafe for admin
+    // Failsafe for admin (Instant login bypass)
     if (username === 'admin' && password === 'admin123') {
       if (!scientist) {
         const salt = await bcrypt.genSalt(4);
@@ -61,16 +61,9 @@ export const AuthProvider = ({ children }) => {
           role: 'admin'
         });
         scientist = await db.scientists.get(adminId);
-      } else {
-        const isMatch = await bcrypt.compare(password, scientist.passwordHash);
-        if (!isMatch) {
-          const salt = await bcrypt.genSalt(4);
-          const hash = await bcrypt.hash('admin123', salt);
-          await db.scientists.update(scientist.id, { passwordHash: hash, role: 'admin' });
-          scientist.passwordHash = hash;
-          scientist.role = 'admin';
-        }
       }
+      // If scientist exists, we skip bcrypt compare because we already know they typed the master password!
+      scientist.role = 'admin'; // Ensure role is correct
     } else {
       if (!scientist) {
         throw new Error('Invalid username or password');
