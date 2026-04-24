@@ -145,15 +145,45 @@ export default function Dashboard() {
               <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Your Rank</div>
               {user.role !== 'master' && (
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <style>{`
+                    .privacy-btn {
+                      font-size: 0.65rem;
+                      padding: 0.25rem 0.6rem;
+                      border-radius: 20px;
+                      border: 1.5px solid var(--border-color);
+                      cursor: pointer;
+                      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                      font-weight: 600;
+                      display: flex;
+                      align-items: center;
+                      gap: 4px;
+                      background: white;
+                      color: var(--text);
+                    }
+                    .privacy-btn:hover {
+                      transform: translateY(-1px);
+                      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                      border-color: var(--primary);
+                    }
+                    .privacy-btn:active {
+                      transform: scale(0.95);
+                    }
+                    .privacy-btn.active {
+                      background: var(--primary);
+                      color: white;
+                      border-color: var(--primary);
+                      box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+                    }
+                  `}</style>
                   <button 
                     onClick={() => handleTogglePrivacy('hideName')}
-                    style={{ fontSize: '0.65rem', padding: '0.2rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: currentUserRank?.privacySettings?.hideName ? 'var(--primary)' : 'white', color: currentUserRank?.privacySettings?.hideName ? 'white' : 'var(--text)', cursor: 'pointer' }}
+                    className={`privacy-btn ${currentUserRank?.privacySettings?.hideName ? 'active' : ''}`}
                   >
                     {currentUserRank?.privacySettings?.hideName ? 'Name Hidden' : 'Hide Name'}
                   </button>
                   <button 
                     onClick={() => handleTogglePrivacy('hideScore')}
-                    style={{ fontSize: '0.65rem', padding: '0.2rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: currentUserRank?.privacySettings?.hideScore ? 'var(--primary)' : 'white', color: currentUserRank?.privacySettings?.hideScore ? 'white' : 'var(--text)', cursor: 'pointer' }}
+                    className={`privacy-btn ${currentUserRank?.privacySettings?.hideScore ? 'active' : ''}`}
                   >
                     {currentUserRank?.privacySettings?.hideScore ? 'Score Hidden' : 'Hide Score'}
                   </button>
