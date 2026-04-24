@@ -75,13 +75,25 @@ export default function Register() {
     }
   };
 
+  const workspaceId = localStorage.getItem('workspaceId') || 'compchem';
+
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 150px)', padding: '2rem 1rem' }}>
       <div className="card" style={{ maxWidth: '420px', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img src="/logo.png" alt="COMPCHEM" style={{ height: '50px', marginBottom: '1rem' }} onError={e => e.target.style.display='none'}/>
-          <h2>🔬 Scientist Registration</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Create a new account</p>
+          {workspaceId === 'alamein' ? (
+            <>
+              <img src="./alamein_logo.png" alt="Alamein University" style={{ height: '50px', marginBottom: '1rem', objectFit: 'contain' }} onError={e => e.target.style.display='none'}/>
+              <h2>🎓 Faculty Registration</h2>
+              <p style={{ color: 'var(--text-muted)' }}>Create a new account</p>
+            </>
+          ) : (
+            <>
+              <img src="./compchem_logo.jpeg" alt="COMPCHEM" style={{ height: '50px', marginBottom: '1rem', objectFit: 'contain' }} onError={e => e.target.style.display='none'}/>
+              <h2>🔬 Scientist Registration</h2>
+              <p style={{ color: 'var(--text-muted)' }}>Create a new account</p>
+            </>
+          )}
         </div>
 
         {error && (

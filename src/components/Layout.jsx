@@ -71,13 +71,13 @@ export default function Layout() {
           <div className="logo-container">
             {localStorage.getItem('workspaceId') === 'alamein' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Building2 size={32} color="#805AD5" />
+                <img src="./alamein_logo.png" alt="Alamein Logo" style={{ height: '32px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
                 <div className="logo-text" style={{ color: '#805AD5', lineHeight: 1.1 }}>
                   Alamein<br/><span style={{ fontSize: '0.65rem', fontWeight: 'bold' }}>Faculty of Science</span>
                 </div>
               </div>
             ) : (
-              <img src="./logo.png" alt="COMPCHEM Logo" className="logo-image" onError={(e) => { e.target.style.display = 'none'; }} />
+              <img src="./compchem_logo.jpeg" alt="COMPCHEM Logo" className="logo-image" style={{ objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
             )}
           </div>
           <button className="hamburger-btn" onClick={() => setMobileNavOpen(!mobileNavOpen)}>

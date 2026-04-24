@@ -565,7 +565,7 @@ export default function Portal() {
             title="CompChem Laboratory"
             subtitle="Advanced Analytics Node"
             description="Dive into the core computational engine. A dedicated space for intensive chemical research, data analysis, and driving scientific breakthroughs."
-            logoSrc="./compchem_logo.png"
+            logoSrc="./compchem_logo.jpeg"
             accentColor="#f97316"
             delay="0.2s"
             onClick={() => handleSelectWorkspace('compchem')}
