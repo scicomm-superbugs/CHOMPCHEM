@@ -148,56 +148,58 @@ export default function Dashboard() {
           </div>
           
           <div style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Your Rank</div>
-              {user.role !== 'master' && (
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <style>{`
-                    .privacy-btn {
-                      font-size: 0.65rem;
-                      padding: 0.25rem 0.6rem;
-                      border-radius: 20px;
-                      border: 1.5px solid var(--border-color);
-                      cursor: pointer;
-                      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                      font-weight: 600;
-                      display: flex;
-                      align-items: center;
-                      gap: 4px;
-                      background: white;
-                      color: var(--text);
-                    }
-                    .privacy-btn:hover {
-                      transform: translateY(-1px);
-                      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                      border-color: var(--primary);
-                    }
-                    .privacy-btn:active {
-                      transform: scale(0.95);
-                    }
-                    .privacy-btn.active {
-                      background: #F0FFF4 !important;
-                      color: #2F855A !important;
-                      border-color: #38A169 !important;
-                      box-shadow: 0 0 8px rgba(56, 161, 105, 0.2);
-                    }
-                  `}</style>
-                  <button 
-                    onClick={() => handleTogglePrivacy('hideName')}
-                    className={`privacy-btn ${currentUserRank?.privacySettings?.hideName ? 'active' : ''}`}
-                  >
-                    {currentUserRank?.privacySettings?.hideName ? <Check size={12} /> : <ShieldOff size={12} />}
-                    {currentUserRank?.privacySettings?.hideName ? 'Name Hidden' : 'Hide Name'}
-                  </button>
-                  <button 
-                    onClick={() => handleTogglePrivacy('hideScore')}
-                    className={`privacy-btn ${currentUserRank?.privacySettings?.hideScore ? 'active' : ''}`}
-                  >
-                    {currentUserRank?.privacySettings?.hideScore ? <Check size={12} /> : <ShieldOff size={12} />}
-                    {currentUserRank?.privacySettings?.hideScore ? 'Score Hidden' : 'Hide Score'}
-                  </button>
-                </div>
-              )}
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <style>{`
+                  .privacy-btn {
+                    font-size: 0.65rem;
+                    padding: 0.25rem 0.6rem;
+                    border-radius: 20px;
+                    border: 1.5px solid var(--border-color);
+                    cursor: pointer;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    background: white;
+                    color: var(--text);
+                    user-select: none;
+                  }
+                  .privacy-btn:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+                    border-color: var(--primary);
+                  }
+                  .privacy-btn:active {
+                    transform: scale(0.92);
+                  }
+                  .privacy-btn.active {
+                    background: #F0FFF4 !important;
+                    color: #2F855A !important;
+                    border-color: #38A169 !important;
+                    box-shadow: 0 0 8px rgba(56, 161, 105, 0.25);
+                  }
+                  .privacy-btn.active:hover {
+                    background: #C6F6D5 !important;
+                  }
+                `}</style>
+                <button 
+                  onClick={() => handleTogglePrivacy('hideName')}
+                  className={`privacy-btn ${currentUserRank?.privacySettings?.hideName ? 'active' : ''}`}
+                >
+                  {currentUserRank?.privacySettings?.hideName ? <Check size={12} /> : <ShieldOff size={12} />}
+                  {currentUserRank?.privacySettings?.hideName ? 'Name Hidden' : 'Hide Name'}
+                </button>
+                <button 
+                  onClick={() => handleTogglePrivacy('hideScore')}
+                  className={`privacy-btn ${currentUserRank?.privacySettings?.hideScore ? 'active' : ''}`}
+                >
+                  {currentUserRank?.privacySettings?.hideScore ? <Check size={12} /> : <ShieldOff size={12} />}
+                  {currentUserRank?.privacySettings?.hideScore ? 'Score Hidden' : 'Hide Score'}
+                </button>
+              </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
               <strong style={{ fontSize: '1.25rem' }}>{currentUserRank?.rank.name}</strong>
