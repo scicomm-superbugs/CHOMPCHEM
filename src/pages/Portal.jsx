@@ -57,7 +57,7 @@ const GlassCard = ({ title, subtitle, description, logoSrc, tags, accentColor, o
         <img src={logoSrc} alt={title} className="lab-logo" onError={e => e.target.style.display = 'none'} />
       </div>
       
-      <h2 style={{ fontSize: '2rem', color: '#0f172a', marginBottom: '0.5rem', fontWeight: 800 }}>
+      <h2 style={{ fontSize: '1.8rem', color: '#f8fafc', marginBottom: '0.5rem', fontWeight: 800 }}>
         {title}
       </h2>
       <div style={{ color: accentColor, fontWeight: 700, fontSize: '0.9rem', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
@@ -70,7 +70,7 @@ const GlassCard = ({ title, subtitle, description, logoSrc, tags, accentColor, o
         ))}
       </div>
       
-      <p style={{ color: '#475569', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2.5rem', fontWeight: 500, position: 'relative', zIndex: 2 }}>
+      <p style={{ color: '#cbd5e1', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2.5rem', fontWeight: 500, position: 'relative', zIndex: 2 }}>
         {description}
       </p>
       
@@ -204,7 +204,7 @@ export default function Portal() {
                        + ((particles[a].y - particles[b].y) * (particles[a].y - particles[b].y));
           if (distance < (canvas.width / 7) * (canvas.height / 7)) {
             opacityValue = 1 - (distance / 20000);
-            ctx.strokeStyle = `rgba(148, 163, 184, ${opacityValue * 0.15})`;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${opacityValue * 0.15})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(particles[a].x, particles[a].y);
@@ -236,7 +236,7 @@ export default function Portal() {
         
         .portal-wrapper {
           min-height: 100vh;
-          background: #f8fafc;
+          background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
           position: relative;
           display: flex;
           flex-direction: column;
@@ -269,9 +269,9 @@ export default function Portal() {
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          background: rgba(255, 255, 255, 0.8);
+          background: rgba(16, 185, 129, 0.1);
           backdrop-filter: blur(8px);
-          color: #059669;
+          color: #34d399;
           padding: 0.6rem 1.5rem;
           border-radius: 50px;
           font-weight: 700;
@@ -299,13 +299,13 @@ export default function Portal() {
           min-width: 320px;
           max-width: 480px;
           /* The Glass Effect */
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
+          background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.7) 100%);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.6);
+          border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 32px;
           padding: 3rem 2.5rem;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
           
           cursor: pointer;
           display: flex;
@@ -322,7 +322,7 @@ export default function Portal() {
         }
 
         .glass-card:hover {
-          box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.15), inset 0 0 0 2px rgba(255, 255, 255, 0.8);
+          box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
           z-index: 20;
         }
 
@@ -350,8 +350,8 @@ export default function Portal() {
 
         .logo-wrapper {
           position: relative;
-          width: 180px;
-          height: 180px;
+          width: 240px;
+          height: 240px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -378,7 +378,7 @@ export default function Portal() {
         }
 
         .lab-logo {
-          height: 140px;
+          height: 200px;
           width: auto;
           object-fit: contain;
           z-index: 1;
@@ -404,9 +404,9 @@ export default function Portal() {
           font-weight: 700;
           padding: 0.4rem 0.8rem;
           border-radius: 12px;
-          background: rgba(255, 255, 255, 0.7);
-          border: 1px solid rgba(255,255,255,0.9);
-          color: #475569;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: #e2e8f0;
           display: flex;
           align-items: center;
           gap: 0.25rem;
@@ -415,9 +415,9 @@ export default function Portal() {
 
         .action-button {
           margin-top: auto;
-          background: white;
+          background: rgba(255, 255, 255, 0.05);
           color: var(--btn-accent);
-          border: 1px solid rgba(255,255,255,0.8);
+          border: 1px solid rgba(255,255,255,0.2);
           padding: 0.8rem 2rem;
           border-radius: 50px;
           font-weight: 700;
@@ -448,10 +448,10 @@ export default function Portal() {
             <Users size={18} />
             Science Communication & Research Hub
           </div>
-          <h1 style={{ fontSize: '3.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '1rem', letterSpacing: '-1px' }}>
+          <h1 style={{ fontSize: '3.5rem', fontWeight: 800, color: '#f8fafc', marginBottom: '1rem', letterSpacing: '-1px' }}>
             Inspiring Minds, Advancing Science.
           </h1>
-          <p style={{ color: '#475569', fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto', lineHeight: 1.6, fontWeight: 500 }}>
+          <p style={{ color: '#cbd5e1', fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto', lineHeight: 1.6, fontWeight: 500 }}>
             Welcome to the centralized platform where cutting-edge research meets accessible education. Choose your workspace to begin exploring, teaching, and managing data.
           </p>
         </div>
@@ -474,7 +474,7 @@ export default function Portal() {
           />
 
           <GlassCard 
-            title="Alamein University"
+            title="Alamein International University"
             subtitle="Faculty of Science Hub"
             description="The interactive hub for the Faculty of Science. Empowering educators to manage inventory, track student progress, and communicate effectively."
             logoSrc="./alamein_logo.png"
