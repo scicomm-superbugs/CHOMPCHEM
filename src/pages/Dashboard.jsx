@@ -1,5 +1,5 @@
 import { useLiveCollection } from '../db';
-import { Beaker, Users, Activity, AlertTriangle } from 'lucide-react';
+import { Beaker, Users, Activity, AlertTriangle, Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -28,7 +28,7 @@ export default function Dashboard() {
   const leaderboardRaw = scientistsData
     .map(s => {
       if (s.role === 'master') {
-        return { ...s, points: '999999999+Infinite', rank: { name: 'Lab Master', color: '#D69E2E' }, numericPoints: Infinity };
+        return { ...s, points: '99999999999+', rank: { name: 'Lab Master', color: '#D69E2E' }, numericPoints: Infinity };
       }
       const usagePoints = usageLogsData.filter(log => String(log.scientistId) === String(s.id)).length * 10;
       const taskPoints = tasksData.filter(t => String(t.assignedTo) === String(s.id) && t.status === 'Completed').length * 50;
@@ -71,11 +71,16 @@ export default function Dashboard() {
     };
   });
 
+  const totalTeamScore = leaderboardRaw
+    .filter(s => s.role !== 'master')
+    .reduce((sum, s) => sum + s.numericPoints, 0);
+
   const stats = {
     chemicals: chemicalsData.length,
     activeUsage,
     overdue,
-    recentLogs: recentWithDetails
+    recentLogs: recentWithDetails,
+    totalTeamScore
   };
 
   return (
@@ -104,6 +109,14 @@ export default function Dashboard() {
           <div className="stat-content">
             <p>{isAdmin ? 'Overdue Chemicals' : 'My Overdue Chemicals'}</p>
             <h3 style={{ color: 'var(--accent)' }}>{stats.overdue}</h3>
+          </div>
+        </div>
+
+        <div className="stat-card" style={{ borderLeft: '4px solid #805AD5' }}>
+          <div className="stat-icon" style={{ color: '#805AD5' }}><Crown size={24} /></div>
+          <div className="stat-content">
+            <p>Total Team Points</p>
+            <h3 style={{ color: '#805AD5' }}>{stats.totalTeamScore.toLocaleString()}</h3>
           </div>
         </div>
       </div>
