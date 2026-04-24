@@ -98,7 +98,7 @@ export default function Register() {
             </>
           ) : (
             <>
-              <img src="./compchem_logo.jpeg" alt="COMPCHEM" style={{ height: '50px', marginBottom: '1rem', objectFit: 'contain' }} onError={e => e.target.style.display='none'}/>
+              <img src="./compchem_logo_2.png" alt="COMPCHEM" style={{ height: '50px', marginBottom: '1rem', objectFit: 'contain' }} onError={e => e.target.style.display='none'}/>
               <h2>🔬 Scientist Registration</h2>
               <p style={{ color: 'var(--text-muted)' }}>Create a new account</p>
             </>

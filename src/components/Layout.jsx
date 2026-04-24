@@ -78,7 +78,7 @@ export default function Layout() {
                 <img src="./alamein_logo_2.png" alt="Alamein Logo" style={{ height: '48px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
               </div>
             ) : (
-              <img src="./compchem_logo.jpeg" alt="COMPCHEM Logo" className="logo-image" style={{ objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
+              <img src="./compchem_logo_2.png" alt="COMPCHEM Logo" className="logo-image" style={{ objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
             )}
           </div>
           <button className="hamburger-btn" onClick={() => setMobileNavOpen(!mobileNavOpen)}>
@@ -187,7 +187,7 @@ export default function Layout() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-            <img src="./compchem_logo.jpeg" alt="COMPCHEM" style={{ height: '40px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
+            <img src="./compchem_logo_2.png" alt="COMPCHEM" style={{ height: '40px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
             <div style={{ fontWeight: 'bold', color: 'var(--text)' }}>COMPCHEM Laboratory</div>
           </div>
         )}

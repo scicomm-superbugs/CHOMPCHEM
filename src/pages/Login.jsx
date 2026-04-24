@@ -56,7 +56,7 @@ export default function Login() {
             </div>
           ) : (
             <>
-              <img src="./compchem_logo.jpeg" alt="COMPCHEM" style={{ height: '140px', marginBottom: '1.5rem', objectFit: 'contain' }} onError={e => e.target.style.display='none'}/>
+              <img src="./compchem_logo_2.png" alt="COMPCHEM" style={{ height: '140px', marginBottom: '1.5rem', objectFit: 'contain' }} onError={e => e.target.style.display='none'}/>
               <h2 style={{ fontSize: '1.25rem', color: 'var(--primary)', marginTop: '0.5rem' }}>Laboratory Management</h2>
             </>
           )}
