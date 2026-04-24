@@ -281,38 +281,46 @@ export default function RegisterChemical() {
             <input type="text" className="form-control" placeholder="Search by formula or name..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
 
-          <div className="mobile-card-list" style={{ maxHeight: '600px', overflowY: 'auto' }}>
-            {filteredChemicals.length > 0 ? filteredChemicals.map(c => (
-              <div key={c.formula} className="mobile-list-item" style={{ padding: '0.75rem' }}>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  {/* Structure Thumbnail */}
-                  <div style={{ flexShrink: 0 }}>
-                    <SmilesViewer smiles={c.smiles} width={64} height={56} />
-                  </div>
-                  {/* Info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div>
-                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--primary)', fontFamily: 'monospace' }}>{c.formula}</span>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-main)', marginTop: '1px' }}>{c.name}</div>
+          <div className="table-container" style={{ maxHeight: '600px', overflowY: 'auto' }}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Structure</th>
+                  <th>Formula</th>
+                  <th>Name</th>
+                  <th>Properties (MW & Hazards)</th>
+                  <th>Department \ Lab</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredChemicals.length > 0 ? filteredChemicals.map(c => (
+                  <tr key={c.formula}>
+                    <td style={{ width: '80px', verticalAlign: 'middle' }}>
+                      <SmilesViewer smiles={c.smiles} width={64} height={56} />
+                    </td>
+                    <td style={{ fontWeight: 700, fontFamily: 'monospace', color: 'var(--primary)', verticalAlign: 'middle' }}>
+                      {c.formula}
+                    </td>
+                    <td style={{ verticalAlign: 'middle' }}>{c.name}</td>
+                    <td style={{ verticalAlign: 'middle' }}>
+                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.15rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>MW {c.mw}</span>
+                        {c.hazards && <span style={{ fontSize: '0.75rem', color: '#822727', backgroundColor: '#FFF5F5', padding: '0.15rem 0.4rem', borderRadius: '4px', border: '1px solid #FED7D7' }}>{c.hazards}</span>}
                       </div>
-                      <button className="btn btn-danger" style={{ padding: '0.25rem 0.35rem', flexShrink: 0 }} onClick={() => handleDelete(c.formula)}><Trash2 size={13} /></button>
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.3rem', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>MW {c.mw}</span>
-                      {c.hazards && <span style={{ fontSize: '0.68rem', color: '#822727', backgroundColor: '#FFF5F5', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #FED7D7' }}>{c.hazards}</span>}
-                      {c.department ? (
-                        <span style={{ fontSize: '0.68rem', color: 'var(--primary)', backgroundColor: 'var(--secondary)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>Dept: {c.department}</span>
-                      ) : (
-                        <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>Dept: None</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )) : (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No compounds registered.</div>
-            )}
+                    </td>
+                    <td style={{ verticalAlign: 'middle' }}>{c.department || '-'}</td>
+                    <td style={{ verticalAlign: 'middle' }}>
+                      <button className="btn btn-danger" style={{ padding: '0.35rem 0.5rem' }} onClick={() => handleDelete(c.formula)} title="Delete Compound"><Trash2 size={14} /></button>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No compounds registered.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

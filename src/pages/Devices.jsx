@@ -144,34 +144,49 @@ export default function Devices() {
           </div>
 
           {/* Device list */}
-          <div className="mobile-card-list">
-            {filteredDevices.length > 0 ? filteredDevices.map(d => (
-              <div key={d.id} className="mobile-list-item" style={{ padding: '0.75rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#EDF2F7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', flexShrink: 0 }}>
-                    <Monitor size={20} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>{d.name}</div>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.2rem', flexWrap: 'wrap' }}>
-                      {d.model && <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>{d.model}</span>}
-                      <span style={{ fontSize: '0.68rem', color: '#4A5568', fontFamily: 'monospace', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>SN {d.serialNumber}</span>
-                      {d.department ? (
-                        <span style={{ fontSize: '0.68rem', color: 'var(--primary)', backgroundColor: 'var(--secondary)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>Dept: {d.department}</span>
-                      ) : (
-                        <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>Dept: None</span>
-                      )}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
-                    <span className={`badge ${d.status === 'Available' ? 'badge-available' : 'badge-in-use'}`}>{d.status}</span>
-                    <button className="btn btn-danger" style={{ padding: '0.25rem 0.35rem' }} onClick={() => handleDelete(d.id)}><Trash2 size={13} /></button>
-                  </div>
-                </div>
-              </div>
-            )) : (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No devices registered.</div>
-            )}
+          <div className="table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Device</th>
+                  <th>Model & SN</th>
+                  <th>Department \ Lab</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredDevices.length > 0 ? filteredDevices.map(d => (
+                  <tr key={d.id}>
+                    <td style={{ verticalAlign: 'middle' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#EDF2F7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                          <Monitor size={18} />
+                        </div>
+                        <span style={{ fontWeight: 600 }}>{d.name}</span>
+                      </div>
+                    </td>
+                    <td style={{ verticalAlign: 'middle' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                        {d.model && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Model: {d.model}</span>}
+                        <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: '#4A5568' }}>SN: {d.serialNumber}</span>
+                      </div>
+                    </td>
+                    <td style={{ verticalAlign: 'middle' }}>{d.department || '-'}</td>
+                    <td style={{ verticalAlign: 'middle' }}>
+                      <span className={`badge ${d.status === 'Available' ? 'badge-available' : 'badge-in-use'}`}>{d.status}</span>
+                    </td>
+                    <td style={{ verticalAlign: 'middle' }}>
+                      <button className="btn btn-danger" style={{ padding: '0.35rem 0.5rem' }} onClick={() => handleDelete(d.id)} title="Delete Device"><Trash2 size={14} /></button>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No devices registered.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
