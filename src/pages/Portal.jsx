@@ -409,9 +409,9 @@ export default function Portal() {
         }
 
         .lab-logo {
-          height: 180px; /* HUGE LOGO */
+          height: 220px; /* HUGE LOGO */
           width: 100%;
-          max-width: 260px;
+          max-width: 360px;
           object-fit: contain;
           z-index: 1;
           filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
@@ -536,7 +536,7 @@ export default function Portal() {
             margin-top: 50px; /* Room for pop-out logo */
           }
           .lab-logo {
-            height: 140px; /* Slightly smaller on mobile to fit screen */
+            height: 180px; /* Still huge on mobile */
           }
         }
       `}</style>
