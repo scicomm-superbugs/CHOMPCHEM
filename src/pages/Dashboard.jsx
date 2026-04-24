@@ -25,9 +25,11 @@ export default function Dashboard() {
     return { name: 'Novice', color: '#A0AEC0' };
   };
 
-  const leaderboard = scientistsData
-    .filter(s => s.role !== 'master')
+  const leaderboardRaw = scientistsData
     .map(s => {
+      if (s.role === 'master') {
+        return { ...s, points: '999999999+Infinite', rank: { name: 'Lab Master', color: '#D69E2E' }, numericPoints: Infinity };
+      }
       const usagePoints = usageLogsData.filter(log => String(log.scientistId) === String(s.id)).length * 10;
       const taskPoints = tasksData.filter(t => String(t.assignedTo) === String(s.id) && t.status === 'Completed').length * 50;
       const totalPoints = usagePoints + taskPoints;
@@ -35,10 +37,14 @@ export default function Dashboard() {
     })
     .sort((a,b) => b.numericPoints - a.numericPoints);
 
-  const currentUserData = scientistsData.find(s => String(s.id) === String(user.id));
-  const currentUserRank = currentUserData?.role === 'master' 
-    ? { ...currentUserData, points: '999999999+∞', rank: { name: 'Lab Master', color: '#D69E2E' } } 
-    : leaderboard.find(s => String(s.id) === String(user.id));
+  const leaderboard = leaderboardRaw.map(s => {
+    if (s.hideFromLeaderboard && String(s.id) !== String(user.id) && s.role !== 'master') {
+      return { ...s, name: 'Anonymous Scientist', points: '***', avatar: null };
+    }
+    return s;
+  });
+
+  const currentUserRank = leaderboardRaw.find(s => String(s.id) === String(user.id));
 
   let filteredLogs = usageLogsData;
   if (!isAdmin) {
@@ -116,18 +122,20 @@ export default function Dashboard() {
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {leaderboard.slice(0, 5).map((s, idx) => (
+            {leaderboard.slice(0, 5).map((s, idx) => {
+              const displayIdx = s.role === 'master' ? '👑' : idx + (leaderboard[0]?.role === 'master' ? 0 : 1);
+              return (
               <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: idx === 0 ? '#F6E05E' : idx === 1 ? '#E2E8F0' : idx === 2 ? '#ED8936' : 'var(--secondary)', color: idx < 3 ? 'black' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.875rem' }}>
-                  {idx + 1}
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: s.role === 'master' ? '#F6E05E' : idx === 0 ? '#F6E05E' : idx === 1 ? '#E2E8F0' : idx === 2 ? '#ED8936' : 'var(--secondary)', color: s.role === 'master' || idx < 3 ? 'black' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.875rem' }}>
+                  {displayIdx}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{s.name}</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.875rem', fontStyle: s.name === 'Anonymous Scientist' ? 'italic' : 'normal' }}>{s.name}</div>
                   <div style={{ fontSize: '0.75rem', color: s.rank.color, fontWeight: 500 }}>{s.rank.name}</div>
                 </div>
                 <div style={{ fontSize: '0.875rem', fontWeight: 'bold' }}>{s.points}</div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
 
