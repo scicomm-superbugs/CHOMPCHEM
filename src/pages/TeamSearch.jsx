@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { db, useLiveCollection } from '../db';
 import { Search, User, Shield, Crown, Eye, Mail, Building, Award } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getRankByPoints } from '../utils/ranks';
+import { ranks, getRankByPoints } from '../utils/ranks';
 
 export default function TeamSearch() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [showAllTagsModal, setShowAllTagsModal] = useState(false);
 
   const scientists = useLiveCollection('scientists');
   const usageLogsData = useLiveCollection('usage_logs');
@@ -36,6 +37,7 @@ export default function TeamSearch() {
 
   const handleViewProfile = async (scientist) => {
     setSelectedUser(scientist);
+    setShowAllTagsModal(false);
 
     // Increment profile views if viewing someone else's profile
     if (String(scientist.id) !== String(user.id)) {
@@ -209,6 +211,29 @@ export default function TeamSearch() {
                     </div>
                   </div>
                 )}
+                
+                {selectedUser.pinnedTags && selectedUser.pinnedTags.length > 0 && (
+                  <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>📌 Pinned Tags</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      {selectedUser.pinnedTags.map(tagName => {
+                        const r = ranks.find(x => x.name === tagName);
+                        if (!r) return null;
+                        return (
+                          <span key={tagName} style={{ backgroundColor: `${r.color}20`, color: r.color, padding: '0.25rem 0.5rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600, border: `1px solid ${r.color}40`, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                            {r.emoji} {r.name}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                
+                <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+                  <button className="btn btn-secondary" onClick={() => setShowAllTagsModal(true)} style={{ width: '100%', fontSize: '0.8rem' }}>
+                    🏅 View All Unlocked Tags
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
@@ -219,6 +244,32 @@ export default function TeamSearch() {
           )}
         </div>
       </div>
+
+      {/* All Tags Modal */}
+      {showAllTagsModal && selectedUser && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }} onClick={() => setShowAllTagsModal(false)}>
+          <div className="card" style={{ width: '100%', maxWidth: '600px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', padding: 0 }} onClick={e => e.stopPropagation()}>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem', borderBottom: '1px solid var(--border-color)' }}>
+              <h3 style={{ margin: 0 }}>🏅 {selectedUser.name}'s Unlocked Tags</h3>
+              <button onClick={() => setShowAllTagsModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-muted)' }}>&times;</button>
+            </div>
+            <div style={{ padding: '1.25rem', overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem' }}>
+              {ranks.map(rank => {
+                const pts = selectedUser.role === 'master' ? Infinity : getUserPoints(selectedUser.id);
+                const isUnlocked = selectedUser.role === 'master' || pts >= rank.req;
+                if (!isUnlocked) return null;
+                
+                return (
+                  <div key={rank.name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '1rem 0.5rem', backgroundColor: 'var(--secondary)', borderRadius: '12px', border: `1px solid ${rank.color}40` }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{rank.emoji}</div>
+                    <strong style={{ fontSize: '0.85rem', color: rank.color, lineHeight: '1.2' }}>{rank.name}</strong>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

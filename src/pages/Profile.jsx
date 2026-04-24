@@ -245,44 +245,63 @@ export default function Profile() {
               <div className="card-header">
                 <h2 className="card-title">🏅 Your Tags & Ranks</h2>
               </div>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-                You unlock new tags automatically by earning points (registering chemicals, etc.). Here are all the tags you have unlocked!
-              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>
+                  Unlock tags by earning points. Pin up to 5 favorites, and equip 1 main rank!
+                </p>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                  📌 Pinned: {(currentUserData?.pinnedTags || []).length}/5
+                </div>
+              </div>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '500px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem', maxHeight: '500px', overflowY: 'auto', paddingRight: '0.5rem', paddingBottom: '1rem' }}>
                 {ranks.map(rank => {
                   const isUnlocked = user.role === 'master' || (currentUserData?.points || 0) >= rank.req;
                   const isActivelySelected = currentUserData?.selectedRankTitle === rank.name;
+                  const currentPins = currentUserData?.pinnedTags || [];
+                  const isPinned = currentPins.includes(rank.name);
                   
                   return (
-                    <div key={rank.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: isUnlocked ? 'var(--secondary)' : 'var(--bg-color)', borderRadius: '8px', border: isUnlocked ? `1px solid ${rank.color}` : '1px solid var(--border-color)', opacity: isUnlocked ? 1 : 0.5 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <span style={{ fontSize: '2rem' }}>{rank.emoji}</span>
-                        <div>
-                          <strong style={{ fontSize: '1.1rem', color: isUnlocked ? rank.color : 'var(--text-muted)' }}>{rank.name}</strong>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Requires {rank.req} pts</div>
+                    <div key={rank.name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '1.25rem 0.5rem', backgroundColor: isUnlocked ? 'var(--surface)' : 'var(--bg-color)', borderRadius: '16px', border: isUnlocked ? `1px solid ${rank.color}50` : '1px solid var(--border-color)', opacity: isUnlocked ? 1 : 0.4, position: 'relative', boxShadow: isUnlocked ? '0 4px 6px rgba(0,0,0,0.05)' : 'none', transition: 'transform 0.2s' }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem', filter: isUnlocked ? 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' : 'grayscale(100%)' }}>{rank.emoji}</div>
+                      <strong style={{ fontSize: '0.9rem', color: isUnlocked ? rank.color : 'var(--text-muted)', lineHeight: '1.2', marginBottom: '0.25rem' }}>{rank.name}</strong>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>{rank.req.toLocaleString()} pts</div>
+                      
+                      {isUnlocked ? (
+                        <div style={{ display: 'flex', gap: '0.4rem', marginTop: 'auto' }}>
+                          <button 
+                            className="btn"
+                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.7rem', borderRadius: '6px', backgroundColor: isActivelySelected ? 'var(--primary)' : 'var(--secondary)', color: isActivelySelected ? 'white' : 'var(--text-main)', border: isActivelySelected ? 'none' : '1px solid var(--border-color)', fontWeight: isActivelySelected ? 'bold' : 'normal', cursor: 'pointer' }}
+                            onClick={() => {
+                              db.scientists.update(user.id, { selectedRankTitle: rank.name }).then(() => {
+                                showMessage('success', `Equipped ${rank.name} as main rank!`);
+                              });
+                            }}
+                          >
+                            {isActivelySelected ? '⭐ Main' : 'Equip'}
+                          </button>
+                          
+                          <button 
+                            className="btn"
+                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.7rem', borderRadius: '6px', backgroundColor: isPinned ? 'var(--accent)' : 'var(--secondary)', color: isPinned ? 'white' : 'var(--text-main)', border: isPinned ? 'none' : '1px solid var(--border-color)', fontWeight: isPinned ? 'bold' : 'normal', cursor: 'pointer' }}
+                            onClick={async () => {
+                              if (isPinned) {
+                                await db.scientists.update(user.id, { pinnedTags: currentPins.filter(t => t !== rank.name) });
+                              } else {
+                                if (currentPins.length >= 5) {
+                                  showMessage('error', 'You can only pin up to 5 tags!');
+                                } else {
+                                  await db.scientists.update(user.id, { pinnedTags: [...currentPins, rank.name] });
+                                }
+                              }
+                            }}
+                          >
+                            {isPinned ? '📌 Pinned' : 'Pin'}
+                          </button>
                         </div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        {isUnlocked ? (
-                          <>
-                            {isActivelySelected && <span className="badge" style={{ backgroundColor: 'var(--success)', color: 'white' }}>Equipped</span>}
-                            <button 
-                              className="btn btn-secondary" 
-                              style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
-                              onClick={() => {
-                                db.scientists.update(user.id, { selectedRankTitle: rank.name }).then(() => {
-                                  showMessage('success', `Equipped ${rank.name} tag!`);
-                                });
-                              }}
-                            >
-                              Equip Tag
-                            </button>
-                          </>
-                        ) : (
-                          <span className="badge" style={{ backgroundColor: 'var(--border-color)', color: 'var(--text-muted)' }}>Locked</span>
-                        )}
-                      </div>
+                      ) : (
+                        <div style={{ marginTop: 'auto', fontSize: '0.7rem', padding: '0.25rem 0.5rem', backgroundColor: 'var(--border-color)', color: 'var(--text-muted)', borderRadius: '6px' }}>Locked</div>
+                      )}
                     </div>
                   );
                 })}
