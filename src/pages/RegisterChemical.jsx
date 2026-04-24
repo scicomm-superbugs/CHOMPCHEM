@@ -305,8 +305,8 @@ export default function RegisterChemical() {
                     <td style={{ verticalAlign: 'middle' }}>{c.name}</td>
                     <td style={{ verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', backgroundColor: '#F7FAFC', padding: '0.15rem 0.4rem', borderRadius: '4px', border: '1px solid #EDF2F7' }}>MW {c.mw}</span>
-                        {c.hazards && <span style={{ fontSize: '0.75rem', color: '#822727', backgroundColor: '#FFF5F5', padding: '0.15rem 0.4rem', borderRadius: '4px', border: '1px solid #FED7D7' }}>{c.hazards}</span>}
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', backgroundColor: 'var(--bg-color)', padding: '0.15rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>MW {c.mw}</span>
+                        {c.hazards && <span style={{ fontSize: '0.75rem', color: 'var(--accent)', backgroundColor: 'rgba(229, 62, 62, 0.1)', padding: '0.15rem 0.4rem', borderRadius: '4px', border: '1px solid rgba(229, 62, 62, 0.2)' }}>{c.hazards}</span>}
                       </div>
                     </td>
                     <td style={{ verticalAlign: 'middle' }}>{c.department || '-'}</td>

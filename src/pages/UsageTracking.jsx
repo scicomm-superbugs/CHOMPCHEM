@@ -283,7 +283,7 @@ export default function UsageTracking() {
                           setItemSearchQuery(`${c.formula} - ${c.name}`);
                           setShowItemSuggestions(false);
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#f7fafc'}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--secondary)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <strong>{c.formula}</strong> <span style={{ color: 'var(--text-muted)' }}>— {c.name}</span>
@@ -306,7 +306,7 @@ export default function UsageTracking() {
                           setItemSearchQuery(`${d.name} (${d.serialNumber})`);
                           setShowItemSuggestions(false);
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#f7fafc'}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--secondary)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <strong>{d.name}</strong> <span style={{ color: 'var(--text-muted)' }}>— {d.serialNumber}</span>

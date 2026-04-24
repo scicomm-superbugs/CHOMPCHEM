@@ -103,14 +103,14 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="stat-card active">
-          <div className="stat-icon" style={{ color: 'var(--success)', backgroundColor: '#F0FFF4' }}><FlaskConical size={22} /></div>
+          <div className="stat-icon" style={{ color: 'var(--success)', backgroundColor: 'rgba(56, 161, 105, 0.15)' }}><FlaskConical size={22} /></div>
           <div className="stat-content">
             <p>{isAdmin ? 'Active Records' : 'My Active'}</p>
             <h3>{stats.activeUsage}</h3>
           </div>
         </div>
         <div className="stat-card overdue">
-          <div className="stat-icon" style={{ color: 'var(--accent)', backgroundColor: '#FFF5F5' }}><AlertTriangle size={22} /></div>
+          <div className="stat-icon" style={{ color: 'var(--accent)', backgroundColor: 'rgba(229, 62, 62, 0.15)' }}><AlertTriangle size={22} /></div>
           <div className="stat-content">
             <p>Overdue</p>
             <h3 style={{ color: stats.overdue > 0 ? 'var(--accent)' : 'inherit' }}>{stats.overdue}</h3>
@@ -157,17 +157,17 @@ export default function Dashboard() {
               const isTop3 = idx < 3 || s.role === 'master';
               const isFirst = idx === 0 && s.role !== 'master';
               return (
-                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.55rem 1.25rem', borderBottom: '1px solid #f0f0f0', transition: 'background 0.15s', position: 'relative' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.55rem 1.25rem', borderBottom: '1px solid var(--border-color)', transition: 'background 0.15s', position: 'relative' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--secondary)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
                   {isFirst && <div style={{ position: 'absolute', right: '10px', top: '5px', fontSize: '0.8rem' }}>🔥</div>}
-                  <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: isTop3 ? s.rank.color : '#EDF2F7', color: isTop3 ? 'white' : '#718096', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.7rem', flexShrink: 0 }}>{pos}</span>
+                  <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: isTop3 ? s.rank.color : 'var(--secondary)', color: isTop3 ? 'white' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.7rem', flexShrink: 0 }}>{pos}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontStyle: s.name === 'Anonymous' ? 'italic' : 'normal', color: 'var(--text-main)' }}>{s.name}</div>
                     <div style={{ fontSize: '0.65rem', color: s.rank.color, fontWeight: 600, letterSpacing: '0.2px' }}>{s.rank.emoji} {s.rank.name}</div>
                   </div>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: s.role === 'master' ? s.rank.color : '#2D3748', fontFamily: 'monospace', flexShrink: 0 }}>{s.points}</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: s.role === 'master' ? s.rank.color : 'var(--text-main)', fontFamily: 'monospace', flexShrink: 0 }}>{s.points}</span>
                 </div>
               );
             })}

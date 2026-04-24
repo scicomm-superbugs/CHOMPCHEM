@@ -38,6 +38,11 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
 }
 
+[data-theme='dark'] .badge-available { background-color: rgba(72, 187, 120, 0.2); color: #9AE6B4; }
+[data-theme='dark'] .badge-in-use { background-color: rgba(66, 153, 225, 0.2); color: #90CDF4; }
+[data-theme='dark'] .badge-overdue { background-color: rgba(245, 101, 101, 0.2); color: #FEB2B2; }
+[data-theme='dark'] .badge-warning { background-color: rgba(237, 137, 54, 0.2); color: #FBD38D; }
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -55,6 +60,10 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+}
+
+[data-theme='dark'] body {
+  background-blend-mode: overlay;
 }
 
 #root {
@@ -337,7 +346,7 @@ input, select, textarea {
 }
 
 .table tr:hover {
-  background-color: rgba(247, 250, 252, 0.5);
+  background-color: var(--secondary);
 }
 
 /* ===== BADGES ===== */
@@ -366,14 +375,14 @@ input, select, textarea {
 
 .mobile-list-item {
   padding: 0.7rem 0.75rem;
-  background-color: #ffffff;
+  background-color: var(--surface);
   border-radius: 6px;
-  border: 1px solid #EDF2F7;
+  border: 1px solid var(--border-color);
   transition: all 0.15s ease;
 }
 
 .mobile-list-item:hover {
-  background-color: #fafbfc;
+  background-color: var(--secondary);
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 

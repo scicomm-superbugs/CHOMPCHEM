@@ -112,7 +112,7 @@ export default function TeamSearch() {
                       borderLeft: isSelected ? '3px solid var(--primary)' : '3px solid transparent',
                       transition: 'all 0.2s'
                     }}
-                    onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = '#f7fafc'; }}
+                    onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = 'var(--secondary)'; }}
                     onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'; }}
                   >
                     {s.avatar ? (
@@ -166,13 +166,13 @@ export default function TeamSearch() {
 
               {/* Stats */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <div style={{ backgroundColor: '#F7FAFC', borderRadius: '8px', padding: '0.75rem' }}>
+                <div style={{ backgroundColor: 'var(--secondary)', borderRadius: '8px', padding: '0.75rem' }}>
                   <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)' }}>
                     {selectedUser.role === 'master' ? '∞' : getUserPoints(selectedUser.id)}
                   </div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>⭐ Points</div>
                 </div>
-                <div style={{ backgroundColor: '#F7FAFC', borderRadius: '8px', padding: '0.75rem' }}>
+                <div style={{ backgroundColor: 'var(--secondary)', borderRadius: '8px', padding: '0.75rem' }}>
                   <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)' }}>
                     {selectedUser.profileViews || 0}
                   </div>

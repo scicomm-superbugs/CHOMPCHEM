@@ -159,7 +159,7 @@ export default function Equipment() {
                   <tr key={d.id}>
                     <td style={{ verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#EDF2F7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
                           <Package size={18} />
                         </div>
                         <span style={{ fontWeight: 600 }}>{d.name}</span>

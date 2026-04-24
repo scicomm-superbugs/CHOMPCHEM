@@ -246,7 +246,7 @@ export default function Chat() {
           
           {/* File Preview */}
           {filePreview && (
-            <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border-color)', backgroundColor: '#f7fafc', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               {filePreview.isImage ? (
                 <img src={filePreview.data} alt="Preview" style={{ width: '48px', height: '48px', borderRadius: '6px', objectFit: 'cover' }} />
               ) : (
