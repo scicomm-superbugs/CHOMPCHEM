@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
-import { Beaker, Users, Home, LogOut, Shield, User, Monitor, ClipboardList, MessageSquare, Crown, Menu, X, Search, FilePlus2, Settings, Package } from 'lucide-react';
+import { Beaker, Users, Home, LogOut, Shield, User, Monitor, ClipboardList, MessageSquare, Crown, Menu, X, Search, FilePlus2, Settings, Package, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection } from '../db';
 
@@ -9,6 +9,16 @@ export default function Layout() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+  
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
   
   const scientists = useLiveCollection('scientists');
   const currentUserData = scientists?.find(s => String(s.id) === String(user?.id));
@@ -92,6 +102,15 @@ export default function Layout() {
               <Search size={20} />
               <span>Team</span>
             </Link>
+            
+            <button 
+              onClick={toggleTheme} 
+              className="btn btn-secondary" 
+              style={{ padding: '0.4rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
+              title="Toggle Dark Mode"
+            >
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
             
             <div className="nav-divider" style={{ width: '1px', height: '24px', backgroundColor: 'var(--border-color)', margin: '0 0.25rem' }}></div>
             
