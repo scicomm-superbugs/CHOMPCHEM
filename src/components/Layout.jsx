@@ -98,16 +98,16 @@ export default function Layout() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem' }}>
               <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }} onClick={handleNavClick}>
                 {currentUserData?.avatar ? (
-                  <img src={currentUserData.avatar} alt="Avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }} />
+                  <img src={currentUserData.avatar} alt="Avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)', flexShrink: 0 }} />
                 ) : (
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', flexShrink: 0 }}>
                     <User size={14} />
                   </div>
                 )}
-                <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  {user.name}
-                  {user.role === 'admin' && <Shield size={14} style={{ color: 'var(--accent)' }} title="Admin" />}
-                  {user.role === 'master' && <Crown size={14} style={{ color: '#F6E05E' }} title="Lab Master" />}
+                <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.name}</span>
+                  {user.role === 'admin' && <Shield size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} title="Admin" />}
+                  {user.role === 'master' && <Crown size={14} style={{ color: '#F6E05E', flexShrink: 0 }} title="Lab Master" />}
                 </span>
               </Link>
             </div>
