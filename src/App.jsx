@@ -26,8 +26,8 @@ import SciCommAdmin from './scicomm/SciCommAdmin';
 import SciCommLeaderboard from './scicomm/SciCommLeaderboard';
 import SciCommChat from './scicomm/SciCommChat';
 import SciCommMeetings from './scicomm/SciCommMeetings';
-import SciCommReels from './scicomm/SciCommReels';
 import SciCommCalendar from './scicomm/SciCommCalendar';
+import SciCommMemberProfile from './scicomm/SciCommMemberProfile';
 
 function App() {
   return (
@@ -51,7 +51,7 @@ function App() {
               <Route path="chat" element={<SciCommChat />} />
               <Route path="meetings" element={<SciCommMeetings />} />
               <Route path="calendar" element={<SciCommCalendar />} />
-              <Route path="reels" element={<SciCommReels />} />
+              <Route path="member/:memberId" element={<SciCommMemberProfile />} />
               <Route element={<ProtectedRoute requireAdmin={true} />}>
                 <Route path="admin" element={<SciCommAdmin />} />
               </Route>

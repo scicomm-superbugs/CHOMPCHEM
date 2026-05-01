@@ -15,7 +15,6 @@ export default function SciCommFeed() {
   const tasksData = useLiveCollection('tasks') || [];
   const meetingsData = useLiveCollection('scicomm_meetings') || [];
   const recognitions = useLiveCollection('scicomm_recognitions') || [];
-  const reelsRaw = useLiveCollection('scicomm_reels') || [];
 
   const [newPost, setNewPost] = useState('');
   const [commentText, setCommentText] = useState({});
@@ -26,6 +25,9 @@ export default function SciCommFeed() {
   const [postImage, setPostImage] = useState(null);
   const [postVideo, setPostVideo] = useState(null);
   const [isPostingMedia, setIsPostingMedia] = useState(false);
+  const [showArticle, setShowArticle] = useState(false);
+  const [articleTitle, setArticleTitle] = useState('');
+  const [postFile, setPostFile] = useState(null);
   const isAdmin = user.role === 'admin' || user.role === 'master';
 
   const banners = [...bannersRaw].sort((a,b) => (a.order||0) - (b.order||0));
@@ -65,17 +67,24 @@ export default function SciCommFeed() {
     }
     try {
       setIsPostingMedia(true);
-      let imageUrl = null, videoUrl = null;
+      let imageUrl = null, videoUrl = null, fileUrl = null, fileName = null;
       if (postImage) {
         imageUrl = await uploadFile(postImage, `posts/${user.id}_${Date.now()}_${postImage.name}`);
       }
       if (postVideo) {
         videoUrl = await uploadFile(postVideo, `posts/${user.id}_${Date.now()}_${postVideo.name}`);
       }
+      if (postFile) {
+        fileUrl = await uploadFile(postFile, `posts/${user.id}_${Date.now()}_${postFile.name}`);
+        fileName = postFile.name;
+      }
       await db.scicomm_posts.add({
         content: newPost,
         imageUrl,
         videoUrl,
+        fileUrl,
+        fileName,
+        articleTitle: showArticle ? articleTitle : null,
         authorId: user.id,
         authorName: user.name,
         createdAt: new Date().toISOString(),
@@ -86,6 +95,9 @@ export default function SciCommFeed() {
       setNewPost('');
       setPostImage(null);
       setPostVideo(null);
+      setPostFile(null);
+      setShowArticle(false);
+      setArticleTitle('');
     } catch (err) {
       console.error("Failed to post", err);
     }
@@ -216,14 +228,24 @@ export default function SciCommFeed() {
           {/* Media Preview */}
           {postImage && <div style={{ marginBottom: '8px', position: 'relative' }}><img src={URL.createObjectURL(postImage)} alt="" style={{ maxHeight: '200px', borderRadius: '8px' }} /><button onClick={() => setPostImage(null)} style={{ position: 'absolute', top: 4, right: 4, background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer' }}>×</button></div>}
           {postVideo && <div style={{ marginBottom: '8px', position: 'relative' }}><video src={URL.createObjectURL(postVideo)} style={{ maxHeight: '200px', borderRadius: '8px' }} controls /><button onClick={() => setPostVideo(null)} style={{ position: 'absolute', top: 4, right: 4, background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer' }}>×</button></div>}
+          {postFile && <div style={{ marginBottom: '8px', padding: '8px', background: '#eef3f8', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', position: 'relative' }}>📎 {postFile.name}<button onClick={() => setPostFile(null)} style={{ position: 'absolute', top: 4, right: 4, background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%', width: 20, height: 20, cursor: 'pointer', fontSize: '12px' }}>×</button></div>}
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex' }}>
+          {/* Article Title Input */}
+          {showArticle && (
+            <div style={{ marginBottom: '8px' }}>
+              <input type="text" placeholder="Article title..." value={articleTitle} onChange={e => setArticleTitle(e.target.value)} style={{ width: '100%', padding: '8px 12px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px', fontWeight: 600, outline: 'none', boxSizing: 'border-box' }} />
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
               <label className="scicomm-feed-action" style={{ cursor: 'pointer' }}><Image size={18} color="#70b5f9" /> <span>Photo</span><input type="file" accept="image/*" onChange={e => setPostImage(e.target.files[0])} style={{ display: 'none' }} /></label>
               <label className="scicomm-feed-action" style={{ cursor: 'pointer' }}><Video size={18} color="#7fc15e" /> <span>Video</span><input type="file" accept="video/*" onChange={e => setPostVideo(e.target.files[0])} style={{ display: 'none' }} /></label>
-              <button className="scicomm-feed-action"><FileText size={18} color="#e7a33e" /> <span>Article</span></button>
+              <button className="scicomm-feed-action" onClick={() => setShowArticle(!showArticle)} style={{ color: showArticle ? '#e7a33e' : undefined }}><FileText size={18} color="#e7a33e" /> <span>Article</span></button>
+              <button className="scicomm-feed-action" onClick={() => { const gifs = ['🧪','🔬','🧬','⚗️','🧫','🔭','🌡️','💊','🧲','⚡','🌋','🦠','🧠','💉','🔋']; setNewPost(prev => prev + gifs[Math.floor(Math.random()*gifs.length)]); }}><span style={{ fontSize: '16px' }}>GIF</span></button>
+              <label className="scicomm-feed-action" style={{ cursor: 'pointer' }}><span style={{ fontSize: '14px' }}>📎</span> <span>File</span><input type="file" onChange={e => setPostFile(e.target.files[0])} style={{ display: 'none' }} /></label>
             </div>
-            {(newPost.trim() || postImage || postVideo) && <button className="scicomm-btn-primary" onClick={handlePostSubmit} disabled={isPostingMedia} style={{ padding: '6px 20px' }}>{isPostingMedia ? 'Posting...' : <><Send size={14} /> Post</>}</button>}
+            {(newPost.trim() || postImage || postVideo || postFile || (showArticle && articleTitle.trim())) && <button className="scicomm-btn-primary" onClick={handlePostSubmit} disabled={isPostingMedia} style={{ padding: '6px 20px' }}>{isPostingMedia ? 'Posting...' : <><Send size={14} /> Post</>}</button>}
           </div>
         </div>
 
@@ -247,9 +269,9 @@ export default function SciCommFeed() {
             <div key={post.id} className="scicomm-card" style={{ marginBottom: '8px' }}>
               <div className="scicomm-card-padding">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                  {renderAvatar(author, 48)}
+                  <Link to={`/member/${post.authorId}`} style={{ cursor: 'pointer', flexShrink: 0 }}>{renderAvatar(author, 48)}</Link>
                   <div style={{ flex: 1 }}>
-                    <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>{post.authorName}</h4>
+                    <Link to={`/member/${post.authorId}`} style={{ textDecoration: 'none', color: 'inherit' }}><h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>{post.authorName}</h4></Link>
                     <div style={{ color: 'rgba(0,0,0,0.6)', fontSize: '12px' }}>{author?.department || 'Member'}</div>
                     <div style={{ color: 'rgba(0,0,0,0.5)', fontSize: '11px' }}>{timeAgo(post.createdAt)} • 🌐{post.recognized && ' ⭐ Master Recognized'}</div>
                   </div>
@@ -266,8 +288,10 @@ export default function SciCommFeed() {
                   )}
                 </div>
                 <p style={{ margin: '0 0 8px', fontSize: '14px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{post.content}</p>
+                {post.articleTitle && <div style={{ padding: '10px 14px', background: 'linear-gradient(135deg, #fef3c7, #fde68a)', borderRadius: '8px', marginBottom: '8px', fontWeight: 700, fontSize: '16px', color: '#92400e' }}>📝 {post.articleTitle}</div>}
                 {post.imageUrl && <img src={post.imageUrl} alt="" style={{ width: '100%', borderRadius: '8px', marginBottom: '8px', maxHeight: '500px', objectFit: 'cover' }} />}
                 {post.videoUrl && <video src={post.videoUrl} controls playsInline style={{ width: '100%', borderRadius: '8px', marginBottom: '8px', maxHeight: '500px' }} />}
+                {post.fileUrl && <a href={post.fileUrl} target="_blank" rel="noreferrer" style={{ display: 'block', padding: '10px 14px', background: '#eef3f8', borderRadius: '8px', marginBottom: '8px', color: '#2563eb', textDecoration: 'none', fontWeight: 600, fontSize: '13px' }}>📎 {post.fileName || 'Download Attachment'}</a>}
               </div>
 
               {/* Reaction summary + comment count */}

@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { initializeFirestore, doc, setDoc, deleteDoc, getDoc, getDocs, collection, query, where, addDoc, updateDoc, onSnapshot } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, uploadBytes, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useState, useEffect } from "react";
 
 const firebaseConfig = {
@@ -17,10 +17,37 @@ const app = initializeApp(firebaseConfig);
 export const firestore = initializeFirestore(app, {});
 export const storage = getStorage(app);
 
-export const uploadFile = async (file, path) => {
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
+export const uploadFile = async (file, path, onProgress) => {
+  if (!file) throw new Error('No file provided');
+  if (file.size > MAX_FILE_SIZE) throw new Error(`File too large (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
+  
   const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
+  
+  if (onProgress) {
+    // Resumable upload with progress
+    return new Promise((resolve, reject) => {
+      const task = uploadBytesResumable(storageRef, file);
+      const timeout = setTimeout(() => { task.cancel(); reject(new Error('Upload timed out after 2 minutes')); }, 120000);
+      task.on('state_changed',
+        (snapshot) => {
+          const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          onProgress(pct);
+        },
+        (error) => { clearTimeout(timeout); reject(error); },
+        async () => {
+          clearTimeout(timeout);
+          try { const url = await getDownloadURL(task.snapshot.ref); resolve(url); }
+          catch (e) { reject(e); }
+        }
+      );
+    });
+  } else {
+    // Simple upload for small files
+    await uploadBytes(storageRef, file);
+    return await getDownloadURL(storageRef);
+  }
 };
 
 export const getCollectionName = (baseName) => {

@@ -1,7 +1,7 @@
 import { useLiveCollection, db } from '../db';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
-import { UserPlus, UserCheck, MessageCircle, UserCircle, Search } from 'lucide-react';
+import { UserPlus, UserCheck, MessageCircle, UserCircle, Search, UserX, ShieldOff } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AVATARS } from './scicommConstants';
 
@@ -64,6 +64,10 @@ export default function SciCommNetwork() {
 
   const handleReject = async (connId) => {
     await db.scicomm_connections.delete(connId);
+  };
+
+  const handleRemoveConnection = async (connId) => {
+    if (window.confirm('Remove this connection?')) await db.scicomm_connections.delete(connId);
   };
 
   const handleStartChat = async (otherId) => {
@@ -134,9 +138,11 @@ export default function SciCommNetwork() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
               {suggestions.map(s => (
                 <div key={s.id} className="scicomm-card" style={{ textAlign: 'center', padding: '16px', border: '1px solid #e0dfdc' }}>
-                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>{renderAvatar(s, 72)}</div>
-                  <h4 style={{ margin: '0 0 4px', fontSize: '14px' }}>{s.name}</h4>
-                  <p style={{ color: 'rgba(0,0,0,0.6)', margin: '0 0 12px', fontSize: '12px', height: '32px', overflow: 'hidden' }}>{s.department || 'Science Communicator'}</p>
+                  <Link to={`/member/${s.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>{renderAvatar(s, 72)}</div>
+                    <h4 style={{ margin: '0 0 4px', fontSize: '14px' }}>{s.name}</h4>
+                    <p style={{ color: 'rgba(0,0,0,0.6)', margin: '0 0 12px', fontSize: '12px', height: '32px', overflow: 'hidden' }}>{s.department || 'Science Communicator'}</p>
+                  </Link>
                   <button className="scicomm-btn-secondary" onClick={() => handleConnect(s.id)} style={{ width: '100%', justifyContent: 'center' }}>
                     <UserPlus size={16} /> Connect
                   </button>
@@ -152,18 +158,22 @@ export default function SciCommNetwork() {
             <h3 style={{ margin: '0 0 16px', fontSize: '18px' }}>Your Connections</h3>
             {filteredConnections.length === 0 ? (
               <p style={{ color: '#666', textAlign: 'center', padding: '24px' }}>No connections yet. Start connecting!</p>
-            ) : filteredConnections.map(m => (
+            ) : filteredConnections.map(m => {
+              const conn = myConnections.find(c => String(c.fromId) === String(m.id) || String(c.toId) === String(m.id));
+              return (
               <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px solid #eef3f8' }}>
-                {renderAvatar(m, 48)}
+                <Link to={`/member/${m.id}`} style={{ flexShrink: 0 }}>{renderAvatar(m, 48)}</Link>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: '14px' }}>{m.name}</div>
+                  <Link to={`/member/${m.id}`} style={{ textDecoration: 'none', color: 'inherit' }}><div style={{ fontWeight: 600, fontSize: '14px' }}>{m.name}</div></Link>
                   <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>{m.department || 'Member'}</div>
                 </div>
-                <button className="scicomm-btn-primary" onClick={() => handleStartChat(m.id)} style={{ padding: '6px 14px', fontSize: '13px' }}>
-                  <MessageCircle size={14} /> Chat
-                </button>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <button className="scicomm-btn-primary" onClick={() => handleStartChat(m.id)} style={{ padding: '6px 12px', fontSize: '12px' }}><MessageCircle size={14} /></button>
+                  {conn && <button onClick={() => handleRemoveConnection(conn.id)} style={{ padding: '6px 12px', fontSize: '12px', border: '1px solid #ef4444', borderRadius: '24px', background: 'transparent', color: '#ef4444', cursor: 'pointer' }}><UserX size={14} /></button>}
+                </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -176,9 +186,9 @@ export default function SciCommNetwork() {
               const sender = scientists.find(s => String(s.id) === String(c.fromId));
               return (
                 <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px solid #eef3f8' }}>
-                  {renderAvatar(sender, 48)}
+                  <Link to={`/member/${c.fromId}`} style={{ flexShrink: 0 }}>{renderAvatar(sender, 48)}</Link>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontSize: '14px' }}>{c.fromName}</div>
+                    <Link to={`/member/${c.fromId}`} style={{ textDecoration: 'none', color: 'inherit' }}><div style={{ fontWeight: 600, fontSize: '14px' }}>{c.fromName}</div></Link>
                     <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>wants to connect</div>
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>

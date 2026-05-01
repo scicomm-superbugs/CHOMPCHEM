@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Users, Briefcase, Bell, UserCircle, Search, Trophy, Shield, MessageCircle, Calendar, Play, Menu } from 'lucide-react';
+import { Home, Users, Briefcase, Bell, UserCircle, Search, Trophy, Shield, MessageCircle, Calendar, AlertTriangle, Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection } from '../db';
 import { useState, useEffect, useRef } from 'react';
@@ -64,7 +64,7 @@ export default function SciCommLayout() {
     return <UserCircle size={size} />;
   };
 
-  const PLATFORM_VERSION = 'v2.5.0';
+  const PLATFORM_VERSION = 'v3.0.0';
   const [showChangelog, setShowChangelog] = useState(() => {
     const seen = localStorage.getItem('scicomm_version_seen');
     return seen !== PLATFORM_VERSION;
@@ -88,7 +88,6 @@ export default function SciCommLayout() {
             <Link to="/tasks" className={`scicomm-nav-item ${isActive('/tasks') ? 'active' : ''}`} style={{position:'relative'}}><Briefcase size={20} />{myPendingTasks.length > 0 && <span className="scicomm-notif-badge">{myPendingTasks.length}</span>}<span className="nav-text">Tasks</span></Link>
             <Link to="/calendar" className={`scicomm-nav-item ${isActive('/calendar') ? 'active' : ''}`} style={{position:'relative'}}><Calendar size={20} />{upcomingMeetings.length > 0 && <span className="scicomm-notif-badge">{upcomingMeetings.length}</span>}<span className="nav-text">Calendar</span></Link>
             <Link to="/chat" className={`scicomm-nav-item ${isActive('/chat') ? 'active' : ''}`}><MessageCircle size={20} /><span className="nav-text">Chat</span></Link>
-            <Link to="/reels" className={`scicomm-nav-item ${isActive('/reels') ? 'active' : ''}`}><Play size={20} /><span className="nav-text">Reels</span></Link>
             <Link to="/leaderboard" className={`scicomm-nav-item ${isActive('/leaderboard') ? 'active' : ''}`}><Trophy size={20} /><span className="nav-text">Leaderboard</span></Link>
             <Link to="/notifications" className={`scicomm-nav-item ${isActive('/notifications') ? 'active' : ''}`} style={{position:'relative'}}><Bell size={20} />{notifCount > 0 && <span className="scicomm-notif-badge">{notifCount}</span>}<span className="nav-text">Alerts</span></Link>
             
@@ -124,7 +123,6 @@ export default function SciCommLayout() {
         <Link to="/tasks" className={`scicomm-mobile-item ${isActive('/tasks') ? 'active' : ''}`} style={{position:'relative'}}><Briefcase size={20} />{myPendingTasks.length > 0 && <span className="scicomm-notif-badge">{myPendingTasks.length}</span>}<span>Tasks</span></Link>
         <Link to="/chat" className={`scicomm-mobile-item ${isActive('/chat') ? 'active' : ''}`}><MessageCircle size={20} /><span>Chat</span></Link>
         <Link to="/network" className={`scicomm-mobile-item ${isActive('/network') ? 'active' : ''}`} style={{position:'relative'}}><Users size={20} />{pendingConnections.length > 0 && <span className="scicomm-notif-badge">{pendingConnections.length}</span>}<span>Network</span></Link>
-        <Link to="/reels" className={`scicomm-mobile-item ${isActive('/reels') ? 'active' : ''}`}><Play size={20} /><span>Reels</span></Link>
         <Link to="/notifications" className={`scicomm-mobile-item ${isActive('/notifications') ? 'active' : ''}`} style={{position:'relative'}}><Bell size={20} />{notifCount > 0 && <span className="scicomm-notif-badge">{notifCount}</span>}<span>Alerts</span></Link>
         <Link to="/profile" className={`scicomm-mobile-item ${isActive('/profile') ? 'active' : ''}`}>{renderAvatar(20)}<span>Me</span></Link>
         {isAdmin && <Link to="/admin" className={`scicomm-mobile-item ${isActive('/admin') ? 'active' : ''}`}><Shield size={20} /><span>Admin</span></Link>}
@@ -143,24 +141,24 @@ export default function SciCommLayout() {
               <div style={{ background: '#ecfdf5', padding: '14px', borderRadius: '10px' }}>
                 <h4 style={{ margin: '0 0 6px', color: '#065f46', fontSize: '14px' }}>✨ New Features</h4>
                 <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#065f46', lineHeight: '1.8' }}>
-                  <li>Custom profile photo upload</li>
-                  <li>CV/Resume file upload (PDF)</li>
-                  <li>Cover photo for profiles</li>
-                  <li>Photo & video posts</li>
-                  <li>Emoji & file sharing in chat</li>
-                  <li>Multi-timeframe leaderboard</li>
-                  <li>Interactive calendar day view</li>
-                  <li>Admin recognition on posts</li>
+                  <li>Clickable member profiles everywhere</li>
+                  <li>Mystery tag auto-unlock system</li>
+                  <li>Pin earned tags to profile</li>
+                  <li>Calendar time slots</li>
+                  <li>Global search (people + posts)</li>
+                  <li>Connection management (remove/block)</li>
+                  <li>Article composer for posts</li>
+                  <li>GIF picker in posts</li>
                 </ul>
               </div>
               <div style={{ background: '#fef3c7', padding: '14px', borderRadius: '10px' }}>
                 <h4 style={{ margin: '0 0 6px', color: '#92400e', fontSize: '14px' }}>🔧 Bugs Fixed</h4>
                 <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#92400e', lineHeight: '1.8' }}>
-                  <li>White screen crash on iOS/Safari</li>
-                  <li>Mobile chat layout broken</li>
-                  <li>Search bar non-functional</li>
-                  <li>Password change now works</li>
-                  <li>Connection request badges</li>
+                  <li>Upload system fully rebuilt</li>
+                  <li>Tasks only visible to assigned user</li>
+                  <li>Reels module removed (performance)</li>
+                  <li>Tag unlock logic activated</li>
+                  <li>Badge sync across all nav items</li>
                 </ul>
               </div>
               <div style={{ background: '#dbeafe', padding: '14px', borderRadius: '10px' }}>

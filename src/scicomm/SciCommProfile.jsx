@@ -297,7 +297,7 @@ export default function SciCommProfile() {
 
           <div className="scicomm-card scicomm-card-padding" style={{ marginBottom: '8px' }}>
             <h2 style={{ fontSize: '18px', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}><Award size={20} color="#10b981" /> Achievement Tags</h2>
-            <p style={{ margin: '0 0 12px', fontSize: '12px', color: 'rgba(0,0,0,0.5)' }}>Click to pin (max 5). Keep participating to unlock more mystery tags!</p>
+            <p style={{ margin: '0 0 12px', fontSize: '12px', color: 'rgba(0,0,0,0.5)' }}>Click to pin (max 5). Score: {myScore} pts — {unlockedTags.length}/{AUTO_TAGS.length} tags unlocked!</p>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               {unlockedTags.map((t, i) => {
                 const isPinned = pinnedTags.includes(t);
@@ -307,10 +307,22 @@ export default function SciCommProfile() {
                   </button>
                 );
               })}
-              {AUTO_TAGS.filter(t => !unlockedTags.includes(t.tag)).slice(0, 1).map((t, i) => (
-                <span key={'locked' + i} style={{ background: '#f3f2ef', color: '#ccc', padding: '5px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600, border: '1px dashed #ddd' }}>🔒 Mystery Tag Unlocked Soon...</span>
-              ))}
             </div>
+            {(() => {
+              const nextTag = AUTO_TAGS.find(t => t.threshold > myScore);
+              if (!nextTag) return null;
+              const prevThreshold = AUTO_TAGS.filter(t => t.threshold <= myScore).pop()?.threshold || 0;
+              const progress = Math.min(100, ((myScore - prevThreshold) / (nextTag.threshold - prevThreshold)) * 100);
+              return (
+                <div style={{ marginTop: '12px', padding: '12px', background: '#f9fafb', borderRadius: '8px', border: '1px dashed #d1d5db' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>🔒 Next Mystery Tag: {nextTag.threshold} pts needed</div>
+                  <div style={{ width: '100%', height: '8px', background: '#e5e7eb', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: `${progress}%`, height: '100%', background: 'linear-gradient(90deg, #10b981, #059669)', borderRadius: '4px', transition: 'width 0.5s' }}></div>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>{myScore}/{nextTag.threshold} pts ({Math.round(progress)}%)</div>
+                </div>
+              );
+            })()}
           </div>
 
           <div className="scicomm-card scicomm-card-padding">

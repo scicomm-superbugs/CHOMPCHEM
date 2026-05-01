@@ -2,6 +2,7 @@ import { useLiveCollection } from '../db';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { Trophy, UserCircle, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { AVATARS, AUTO_TAGS, calculateScore, getUnlockedTags, REACTIONS } from './scicommConstants';
 
 export default function SciCommLeaderboard() {
@@ -96,8 +97,10 @@ export default function SciCommLeaderboard() {
               return (
                 <div key={person.id} style={{ textAlign: 'center', width: isFirst ? '140px' : '110px', order: idx === 0 ? 1 : idx === 1 ? 0 : 2 }}>
                   <div style={{ fontSize: isFirst ? '36px' : '24px', marginBottom: '6px' }}>{badge.emoji}</div>
-                  {renderAvatar(person, isFirst ? 80 : 60)}
-                  <div style={{ fontWeight: 700, fontSize: '14px', marginTop: '6px' }}>{person.name}</div>
+                  <Link to={`/member/${person.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    {renderAvatar(person, isFirst ? 80 : 60)}
+                    <div style={{ fontWeight: 700, fontSize: '14px', marginTop: '6px' }}>{person.name}</div>
+                  </Link>
                   <div style={{ fontSize: '20px', fontWeight: 700, color: '#10b981', marginTop: '4px' }}>{person.score === Infinity ? '∞' : person.score}</div>
                 </div>
               );
@@ -116,7 +119,7 @@ export default function SciCommLeaderboard() {
             return (
               <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 8px', borderRadius: '8px', marginBottom: '2px', background: isMe ? '#ecfdf5' : 'transparent', border: isMe ? '1px solid #a7f3d0' : '1px solid transparent' }}>
                 <div style={{ width: '32px', textAlign: 'center', fontWeight: 700, fontSize: '14px', color: badge.color }}>{badge.emoji}</div>
-                {renderAvatar(s, 40)}
+                <Link to={`/member/${s.id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>{renderAvatar(s, 40)}</Link>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                     <span style={{ fontWeight: 600, fontSize: '14px' }}>{s.name}</span>

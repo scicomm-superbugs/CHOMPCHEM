@@ -16,7 +16,7 @@ export default function SciCommCalendar() {
   const [calYear, setCalYear] = useState(new Date().getFullYear());
   const [selectedUserId, setSelectedUserId] = useState(user.id);
   const [showAddEvent, setShowAddEvent] = useState(false);
-  const [newEvent, setNewEvent] = useState({ date: '', title: '', type: 'personal' });
+  const [newEvent, setNewEvent] = useState({ date: '', title: '', type: 'personal', startTime: '', endTime: '' });
   const [selectedDay, setSelectedDay] = useState(null);
   const [viewMode, setViewMode] = useState('month'); // month | week | day
 
@@ -49,7 +49,7 @@ export default function SciCommCalendar() {
     const updatedEvents = [...(targetUser?.personalEvents || []), { ...newEvent, id: Date.now() }];
     await db.scientists.update(selectedUserId, { personalEvents: updatedEvents });
     setShowAddEvent(false);
-    setNewEvent({ date: '', title: '', type: 'personal' });
+    setNewEvent({ date: '', title: '', type: 'personal', startTime: '', endTime: '' });
   };
 
   const handleDeletePersonalEvent = async (eventId) => {
@@ -94,7 +94,9 @@ export default function SciCommCalendar() {
           <h3 style={{ margin: '0 0 12px', fontSize: '15px' }}>Add Personal Event / Unavailable Time</h3>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <input type="date" value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
-            <input type="text" placeholder="Event Title (e.g., Lecture, Exam)" value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', flex: 1, minWidth: '200px' }} />
+            <input type="text" placeholder="Event Title (e.g., Lecture, Exam)" value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', flex: 1, minWidth: '150px' }} />
+            <input type="time" value={newEvent.startTime} onChange={e => setNewEvent({...newEvent, startTime: e.target.value})} placeholder="Start" style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+            <input type="time" value={newEvent.endTime} onChange={e => setNewEvent({...newEvent, endTime: e.target.value})} placeholder="End" style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
             <button type="submit" className="scicomm-btn-primary">Save</button>
             <button type="button" className="scicomm-btn-secondary" onClick={() => setShowAddEvent(false)}>Cancel</button>
           </div>
@@ -162,7 +164,7 @@ export default function SciCommCalendar() {
                   <div style={{ width: 40, height: 40, borderRadius: '8px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>📋</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: '14px' }}>{t.title}</div>
-                    <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.5)' }}>Status: {t.status || 'Pending'} • Priority: {t.priority || 'Medium'}</div>
+                    <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.5)' }}>Status: {t.status || 'Pending'} • Priority: {t.priority || 'Medium'}{t.dueTime ? ` • Due: ${t.dueTime}` : ''}</div>
                     {t.description && <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)', marginTop: '4px' }}>{t.description}</div>}
                   </div>
                 </div>
@@ -181,7 +183,7 @@ export default function SciCommCalendar() {
                   <div style={{ width: 40, height: 40, borderRadius: '8px', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>📌</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: '14px' }}>{p.title}</div>
-                    <div style={{ fontSize: '12px', color: '#6b7280' }}>Personal / Unavailable</div>
+                    <div style={{ fontSize: '12px', color: '#6b7280' }}>{p.startTime ? `${p.startTime}${p.endTime ? ' - ' + p.endTime : ''}` : 'All day'} • Personal / Unavailable</div>
                   </div>
                   {String(selectedUserId) === String(user.id) && (
                     <button onClick={() => handleDeletePersonalEvent(p.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px' }}>×</button>
