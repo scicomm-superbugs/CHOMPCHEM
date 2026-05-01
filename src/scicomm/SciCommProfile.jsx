@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db, useLiveCollection } from '../db';
-import { Camera, Edit2, Award, Pin, AlertTriangle, UserCircle, X, Shield } from 'lucide-react';
+import { Camera, Edit2, Award, Pin, AlertTriangle, UserCircle, X, Settings, Briefcase, FileText, CheckCircle, GraduationCap } from 'lucide-react';
 import { AVATARS, AUTO_TAGS, RANKS, calculateScore, getRank, getUnlockedTags, getNextTag, timeAgo } from './scicommConstants';
 
 export default function SciCommProfile() {
@@ -14,14 +14,48 @@ export default function SciCommProfile() {
   const connectionsData = useLiveCollection('scicomm_connections') || [];
   const meetingsData = useLiveCollection('scicomm_meetings') || [];
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview'); // overview | portfolio | settings
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [showWarnings, setShowWarnings] = useState(false);
   const [appealText, setAppealText] = useState('');
   const [appealTarget, setAppealTarget] = useState(null);
-  const [formData, setFormData] = useState({ name: me?.name || user.name, bio: me?.bio || '', department: me?.department || '', email: me?.email || '' });
+  
+  // Settings Form
+  const [settingsForm, setSettingsForm] = useState({ name: '', bio: '', department: '', email: '', privacyProfile: 'public', privacyNetwork: 'public', notificationsEmail: true });
+  const [msg, setMsg] = useState('');
 
-  useEffect(() => { if (me) setFormData({ name: me.name || user.name, bio: me.bio || '', department: me.department || '', email: me.email || '' }); }, [me?.id]);
+  // Portfolio Form
+  const [portfolioData, setPortfolioData] = useState({ 
+    cvLink: '', 
+    certifications: [], 
+    courses: [], 
+    speaking: [], 
+    projects: [] 
+  });
+  const [newItem, setNewItem] = useState({ type: '', title: '', date: '', link: '' });
+
+  useEffect(() => { 
+    if (me) {
+      setSettingsForm({ 
+        name: me.name || user.name, 
+        bio: me.bio || '', 
+        department: me.department || '', 
+        email: me.email || '',
+        privacyProfile: me.privacyProfile || 'public',
+        privacyNetwork: me.privacyNetwork || 'public',
+        notificationsEmail: me.notificationsEmail ?? true
+      });
+      setPortfolioData({
+        cvLink: me.cvLink || '',
+        certifications: me.certifications || [],
+        courses: me.courses || [],
+        speaking: me.speaking || [],
+        projects: me.projects || []
+      });
+    }
+  }, [me?.id]);
+
+  const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
 
   // Score calculation
   const myPosts = postsData.filter(p => String(p.authorId) === String(user.id));
@@ -41,6 +75,17 @@ export default function SciCommProfile() {
   const activeWarnings = myWarnings.filter(w => w.status !== 'removed');
   const isSuspended = activeWarnings.length >= 3;
 
+  // Portfolio Readiness Calculation
+  const calculateReadiness = () => {
+    let score = 0;
+    if (portfolioData.cvLink) score += 20;
+    if (portfolioData.certifications.length > 0) score += 20;
+    if (portfolioData.courses.length > 0) score += 20;
+    if (portfolioData.speaking.length > 0) score += 20;
+    if (portfolioData.projects.length > 0) score += 20;
+    return score;
+  };
+
   const renderAvatar = (size = 120) => {
     if (me?.avatar) return <img src={me.avatar} alt="" style={{ width: size, height: size, borderRadius: '50%', border: '4px solid white', objectFit: 'cover' }} />;
     const av = AVATARS.find(a => a.id === me?.avatarId);
@@ -53,7 +98,30 @@ export default function SciCommProfile() {
     setShowAvatarPicker(false);
   };
 
-  const handleSave = async () => { await db.scientists.update(user.id, formData); setIsEditing(false); };
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    await db.scientists.update(user.id, settingsForm);
+    flash('Settings updated successfully!');
+  };
+
+  const handleSavePortfolio = async (e) => {
+    e.preventDefault();
+    await db.scientists.update(user.id, portfolioData);
+    flash('Portfolio updated successfully!');
+  };
+
+  const handleAddPortfolioItem = () => {
+    if (!newItem.type || !newItem.title) return;
+    const type = newItem.type;
+    const updatedList = [...portfolioData[type], { title: newItem.title, date: newItem.date, link: newItem.link, id: Date.now() }];
+    setPortfolioData(prev => ({ ...prev, [type]: updatedList }));
+    setNewItem({ type: '', title: '', date: '', link: '' });
+  };
+
+  const handleRemovePortfolioItem = (type, id) => {
+    const updatedList = portfolioData[type].filter(item => item.id !== id);
+    setPortfolioData(prev => ({ ...prev, [type]: updatedList }));
+  };
 
   const handlePinTag = async (tag) => {
     let newPinned = [...pinnedTags];
@@ -85,7 +153,9 @@ export default function SciCommProfile() {
   })() : null;
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '800px', margin: '0 auto', paddingBottom: '40px' }}>
+      {msg && <div style={{ background: '#dcfce7', color: '#166534', padding: '12px 16px', borderRadius: '8px', marginBottom: '12px', fontSize: '14px', fontWeight: 600 }}>✅ {msg}</div>}
+
       {/* Suspension Banner */}
       {isSuspended && (
         <div style={{ background: 'linear-gradient(135deg, #dc2626, #991b1b)', color: 'white', padding: '16px 20px', borderRadius: '8px', marginBottom: '8px', textAlign: 'center' }}>
@@ -96,7 +166,7 @@ export default function SciCommProfile() {
         </div>
       )}
 
-      {/* Profile Card */}
+      {/* Profile Header */}
       <div className="scicomm-card" style={{ overflow: 'hidden' }}>
         <div style={{ height: '180px', background: 'linear-gradient(135deg, #10b981 0%, #047857 50%, #064e3b 100%)' }}></div>
         <div style={{ padding: '0 24px 24px' }}>
@@ -107,100 +177,215 @@ export default function SciCommProfile() {
             </button>
           </div>
 
-          {isEditing ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '450px' }}>
-              <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Full Name" style={{ padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '16px', fontWeight: 600 }} />
-              <input type="text" value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })} placeholder="Role / Department" style={{ padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px' }} />
-              <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="Email" style={{ padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px' }} />
-              <textarea value={formData.bio} onChange={e => setFormData({ ...formData, bio: e.target.value })} placeholder="Bio" rows={3} style={{ padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px', resize: 'vertical' }} />
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button className="scicomm-btn-primary" onClick={handleSave}>Save</button>
-                <button className="scicomm-btn-secondary" onClick={() => setIsEditing(false)}>Cancel</button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h1 style={{ margin: '0', fontSize: '22px' }}>{me?.name || user.name}</h1>
+                <span style={{ background: myRank.color + '20', color: myRank.color, padding: '3px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 700 }}>{myRank.icon} {myRank.rank}</span>
               </div>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <h1 style={{ margin: '0', fontSize: '22px' }}>{me?.name || user.name}</h1>
-                  <span style={{ background: myRank.color + '20', color: myRank.color, padding: '3px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 700 }}>{myRank.icon} {myRank.rank}</span>
+              <p style={{ margin: '4px 0 6px', fontSize: '15px' }}>{me?.department || 'Science Communicator'}</p>
+              <p style={{ margin: 0, fontSize: '14px', color: 'rgba(0,0,0,0.6)' }}>{me?.bio || 'Passionate about science communication.'}</p>
+              {pinnedTags.length > 0 && (
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '10px' }}>
+                  {pinnedTags.map((t, i) => <span key={i} style={{ background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)', color: '#065f46', padding: '4px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600, border: '1px solid #a7f3d0' }}>{t}</span>)}
                 </div>
-                <p style={{ margin: '4px 0 6px', fontSize: '15px' }}>{me?.department || 'Science Communicator'}</p>
-                {me?.email && <p style={{ margin: '0 0 6px', fontSize: '13px', color: 'rgba(0,0,0,0.6)' }}>📧 {me.email}</p>}
-                <p style={{ margin: 0, fontSize: '14px', color: 'rgba(0,0,0,0.6)' }}>{me?.bio || 'Passionate about science communication.'}</p>
-                {pinnedTags.length > 0 && (
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '10px' }}>
-                    {pinnedTags.map((t, i) => <span key={i} style={{ background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)', color: '#065f46', padding: '4px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600, border: '1px solid #a7f3d0' }}>{t}</span>)}
-                  </div>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button className="scicomm-btn-secondary" onClick={() => setIsEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Edit2 size={14} /> Edit</button>
-                <button onClick={() => setShowWarnings(true)} style={{ background: activeWarnings.length > 0 ? '#fee2e2' : '#f3f2ef', border: 'none', borderRadius: '24px', padding: '6px 14px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: activeWarnings.length > 0 ? '#991b1b' : '#666', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <AlertTriangle size={14} /> {activeWarnings.length}/3
-                </button>
-              </div>
+              )}
             </div>
-          )}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setShowWarnings(true)} style={{ background: activeWarnings.length > 0 ? '#fee2e2' : '#f3f2ef', border: 'none', borderRadius: '24px', padding: '6px 14px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: activeWarnings.length > 0 ? '#991b1b' : '#666', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <AlertTriangle size={14} /> {activeWarnings.length}/3
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '8px', marginTop: '8px' }}>
+      {/* Tabs */}
+      <div className="scicomm-card" style={{ display: 'flex', overflow: 'hidden', marginBottom: '12px' }}>
         {[
-          { label: 'Score', value: myScore, color: '#10b981' },
-          { label: 'Posts', value: myPosts.length, color: '#3b82f6' },
-          { label: 'Reactions', value: myLikesReceived, color: '#ef4444' },
-          { label: 'Tasks Done', value: myCompletedTasks, color: '#f59e0b' },
-          { label: 'Connections', value: myConnections, color: '#8b5cf6' },
-          { label: 'Tags', value: unlockedTags.length, color: '#ec4899' },
-        ].map((s, i) => (
-          <div key={i} className="scicomm-card scicomm-card-padding" style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.5)' }}>{s.label}</div>
-          </div>
+          { id: 'overview', label: 'Overview', icon: <UserCircle size={16} /> },
+          { id: 'portfolio', label: 'CV & Portfolio', icon: <Briefcase size={16} /> },
+          { id: 'settings', label: 'Settings', icon: <Settings size={16} /> }
+        ].map(t => (
+          <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
+            flex: 1, padding: '12px 8px', border: 'none', background: activeTab === t.id ? '#10b981' : 'transparent',
+            color: activeTab === t.id ? 'white' : 'rgba(0,0,0,0.6)', fontWeight: 600, cursor: 'pointer', fontSize: '14px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', transition: 'all 0.2s'
+          }}>{t.icon} {t.label}</button>
         ))}
       </div>
 
-      {/* Achievement Tags */}
-      <div className="scicomm-card scicomm-card-padding" style={{ marginTop: '8px' }}>
-        <h2 style={{ fontSize: '18px', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}><Award size={20} color="#10b981" /> Achievement Tags</h2>
-        <p style={{ margin: '0 0 12px', fontSize: '12px', color: 'rgba(0,0,0,0.5)' }}>Click to pin (max 5). {nextTag ? `Next unlock: ${nextTag.tag} at ${nextTag.threshold} pts` : 'All unlocked!'}</p>
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          {unlockedTags.map((t, i) => {
-            const isPinned = pinnedTags.includes(t);
-            return (
-              <button key={i} onClick={() => handlePinTag(t)} style={{ background: isPinned ? 'linear-gradient(135deg, #10b981, #059669)' : '#f3f2ef', color: isPinned ? 'white' : '#333', padding: '5px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600, border: isPinned ? 'none' : '1px solid #e0dfdc', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                {isPinned && <Pin size={12} />} {t}
-              </button>
-            );
-          })}
-          {AUTO_TAGS.filter(t => !unlockedTags.includes(t.tag)).slice(0, 3).map((t, i) => (
-            <span key={'locked' + i} style={{ background: '#f3f2ef', color: '#ccc', padding: '5px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600, border: '1px dashed #ddd' }}>🔒 {t.tag}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* Pinned Posts */}
-      <div className="scicomm-card scicomm-card-padding" style={{ marginTop: '8px' }}>
-        <h2 style={{ fontSize: '18px', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: '8px' }}><Pin size={20} color="#10b981" /> Pinned Highlights (max 5)</h2>
-        {myPosts.length === 0 ? <p style={{ color: '#666', fontSize: '14px' }}>No posts yet.</p> : (
-          myPosts.slice(0, 10).map(p => {
-            const isPinned = pinnedPosts.includes(p.id);
-            return (
-              <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #eef3f8' }}>
-                <div style={{ flex: 1 }}>
-                  <p style={{ margin: '0 0 4px', fontSize: '14px' }}>{p.content.substring(0, 100)}{p.content.length > 100 ? '...' : ''}</p>
-                  <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.4)' }}>👍 {Object.values(p.reactions || {}).reduce((s, a) => s + a.length, 0)} • 💬 {(p.comments || []).length} • {timeAgo(p.createdAt)}</div>
-                </div>
-                <button onClick={() => handlePinPost(p.id)} style={{ background: isPinned ? '#10b981' : '#f3f2ef', color: isPinned ? 'white' : '#666', border: 'none', borderRadius: '16px', padding: '4px 12px', fontSize: '12px', cursor: 'pointer', fontWeight: 600 }}>
-                  {isPinned ? '📌 Pinned' : 'Pin'}
-                </button>
+      {/* OVERVIEW TAB */}
+      {activeTab === 'overview' && (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '8px', marginBottom: '8px' }}>
+            {[
+              { label: 'Score', value: myScore, color: '#10b981' },
+              { label: 'Posts', value: myPosts.length, color: '#3b82f6' },
+              { label: 'Reactions', value: myLikesReceived, color: '#ef4444' },
+              { label: 'Tasks Done', value: myCompletedTasks, color: '#f59e0b' },
+              { label: 'Connections', value: myConnections, color: '#8b5cf6' },
+              { label: 'Tags', value: unlockedTags.length, color: '#ec4899' },
+            ].map((s, i) => (
+              <div key={i} className="scicomm-card scicomm-card-padding" style={{ textAlign: 'center', marginBottom: 0 }}>
+                <div style={{ fontSize: '24px', fontWeight: 700, color: s.color }}>{s.value}</div>
+                <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.5)' }}>{s.label}</div>
               </div>
-            );
-          })
-        )}
-      </div>
+            ))}
+          </div>
+
+          <div className="scicomm-card scicomm-card-padding" style={{ marginBottom: '8px' }}>
+            <h2 style={{ fontSize: '18px', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}><Award size={20} color="#10b981" /> Achievement Tags</h2>
+            <p style={{ margin: '0 0 12px', fontSize: '12px', color: 'rgba(0,0,0,0.5)' }}>Click to pin (max 5). {nextTag ? `Next unlock: ${nextTag.tag} at ${nextTag.threshold} pts` : 'All unlocked!'}</p>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {unlockedTags.map((t, i) => {
+                const isPinned = pinnedTags.includes(t);
+                return (
+                  <button key={i} onClick={() => handlePinTag(t)} style={{ background: isPinned ? 'linear-gradient(135deg, #10b981, #059669)' : '#f3f2ef', color: isPinned ? 'white' : '#333', padding: '5px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600, border: isPinned ? 'none' : '1px solid #e0dfdc', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {isPinned && <Pin size={12} />} {t}
+                  </button>
+                );
+              })}
+              {AUTO_TAGS.filter(t => !unlockedTags.includes(t.tag)).slice(0, 3).map((t, i) => (
+                <span key={'locked' + i} style={{ background: '#f3f2ef', color: '#ccc', padding: '5px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600, border: '1px dashed #ddd' }}>🔒 {t.tag}</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="scicomm-card scicomm-card-padding">
+            <h2 style={{ fontSize: '18px', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: '8px' }}><Pin size={20} color="#10b981" /> Pinned Highlights (max 5)</h2>
+            {myPosts.length === 0 ? <p style={{ color: '#666', fontSize: '14px' }}>No posts yet.</p> : (
+              myPosts.slice(0, 10).map(p => {
+                const isPinned = pinnedPosts.includes(p.id);
+                return (
+                  <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #eef3f8' }}>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ margin: '0 0 4px', fontSize: '14px' }}>{p.content.substring(0, 100)}{p.content.length > 100 ? '...' : ''}</p>
+                      <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.4)' }}>👍 {Object.values(p.reactions || {}).reduce((s, a) => s + a.length, 0)} • 💬 {(p.comments || []).length} • {timeAgo(p.createdAt)}</div>
+                    </div>
+                    <button onClick={() => handlePinPost(p.id)} style={{ background: isPinned ? '#10b981' : '#f3f2ef', color: isPinned ? 'white' : '#666', border: 'none', borderRadius: '16px', padding: '4px 12px', fontSize: '12px', cursor: 'pointer', fontWeight: 600 }}>
+                      {isPinned ? '📌 Pinned' : 'Pin'}
+                    </button>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </>
+      )}
+
+      {/* PORTFOLIO TAB */}
+      {activeTab === 'portfolio' && (
+        <div className="scicomm-card scicomm-card-padding">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '20px', margin: 0 }}>Professional Portfolio</h2>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#10b981' }}>{calculateReadiness()}%</div>
+              <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.5)' }}>Readiness Score</div>
+            </div>
+          </div>
+          
+          {/* Progress Bar */}
+          <div style={{ width: '100%', height: '8px', background: '#eef3f8', borderRadius: '4px', marginBottom: '24px', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${calculateReadiness()}%`, background: 'linear-gradient(90deg, #34d399, #10b981)', transition: 'width 0.5s' }}></div>
+          </div>
+
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '16px', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '6px' }}><FileText size={16} color="#3b82f6" /> CV / Resume Link</h3>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input type="url" placeholder="https://drive.google.com/..." value={portfolioData.cvLink} onChange={e => setPortfolioData({...portfolioData, cvLink: e.target.value})} style={{ flex: 1, padding: '10px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px' }} />
+              <button className="scicomm-btn-primary" onClick={handleSavePortfolio}>Save</button>
+            </div>
+          </div>
+
+          {/* Builder */}
+          <div style={{ background: '#f9fafb', padding: '16px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #eef3f8' }}>
+            <h3 style={{ fontSize: '16px', margin: '0 0 12px' }}>Add to Portfolio</h3>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+              <select value={newItem.type} onChange={e => setNewItem({...newItem, type: e.target.value})} style={{ padding: '8px', border: '1px solid #e0dfdc', borderRadius: '8px', flex: 1, minWidth: '150px' }}>
+                <option value="">Select Category...</option>
+                <option value="certifications">Certifications</option>
+                <option value="courses">Completed Courses</option>
+                <option value="speaking">Public Speaking / Events</option>
+                <option value="projects">Media / Content Projects</option>
+              </select>
+              <input type="date" value={newItem.date} onChange={e => setNewItem({...newItem, date: e.target.value})} style={{ padding: '8px', border: '1px solid #e0dfdc', borderRadius: '8px' }} />
+            </div>
+            <input type="text" placeholder="Title (e.g. Science Communication Workshop)" value={newItem.title} onChange={e => setNewItem({...newItem, title: e.target.value})} style={{ width: '100%', padding: '8px', border: '1px solid #e0dfdc', borderRadius: '8px', marginBottom: '8px', boxSizing: 'border-box' }} />
+            <input type="url" placeholder="Link / Verification URL (optional)" value={newItem.link} onChange={e => setNewItem({...newItem, link: e.target.value})} style={{ width: '100%', padding: '8px', border: '1px solid #e0dfdc', borderRadius: '8px', marginBottom: '8px', boxSizing: 'border-box' }} />
+            <button className="scicomm-btn-secondary" onClick={handleAddPortfolioItem} style={{ width: '100%', justifyContent: 'center' }}>+ Add Item</button>
+          </div>
+
+          {/* Lists */}
+          {[
+            { key: 'certifications', title: 'Certifications', icon: <Award size={16} /> },
+            { key: 'courses', title: 'Completed Courses', icon: <GraduationCap size={16} /> },
+            { key: 'speaking', title: 'Public Speaking', icon: <UserCircle size={16} /> },
+            { key: 'projects', title: 'Projects', icon: <Briefcase size={16} /> }
+          ].map(sec => (
+            portfolioData[sec.key].length > 0 && (
+              <div key={sec.key} style={{ marginBottom: '20px' }}>
+                <h4 style={{ fontSize: '15px', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '6px' }}>{sec.icon} {sec.title}</h4>
+                {portfolioData[sec.key].map(item => (
+                  <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: 'white', border: '1px solid #e0dfdc', borderRadius: '8px', marginBottom: '6px' }}>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '14px' }}>{item.title}</div>
+                      <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.5)' }}>{item.date ? new Date(item.date).toLocaleDateString() : 'No date'} {item.link && <span>• <a href={item.link} target="_blank" rel="noreferrer" style={{color:'#10b981'}}>Link</a></span>}</div>
+                    </div>
+                    <button onClick={() => handleRemovePortfolioItem(sec.key, item.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><X size={16}/></button>
+                  </div>
+                ))}
+              </div>
+            )
+          ))}
+          <button className="scicomm-btn-primary" onClick={handleSavePortfolio} style={{ width: '100%', justifyContent: 'center', marginTop: '12px' }}>Save All Portfolio Changes</button>
+        </div>
+      )}
+
+      {/* SETTINGS TAB */}
+      {activeTab === 'settings' && (
+        <div className="scicomm-card scicomm-card-padding">
+          <h2 style={{ fontSize: '20px', margin: '0 0 20px' }}>⚙️ Account Settings</h2>
+          <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Full Name</label>
+              <input type="text" value={settingsForm.name} onChange={e => setSettingsForm({ ...settingsForm, name: e.target.value })} style={{ width: '100%', padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Email Address</label>
+              <input type="email" value={settingsForm.email} onChange={e => setSettingsForm({ ...settingsForm, email: e.target.value })} style={{ width: '100%', padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Role / Department</label>
+              <input type="text" value={settingsForm.department} onChange={e => setSettingsForm({ ...settingsForm, department: e.target.value })} style={{ width: '100%', padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Bio / About</label>
+              <textarea value={settingsForm.bio} onChange={e => setSettingsForm({ ...settingsForm, bio: e.target.value })} rows={3} style={{ width: '100%', padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px', resize: 'vertical', boxSizing: 'border-box' }} />
+            </div>
+
+            <div style={{ borderTop: '1px solid #eef3f8', paddingTop: '16px', marginTop: '8px' }}>
+              <h3 style={{ fontSize: '16px', margin: '0 0 12px' }}>Privacy & Notifications</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={settingsForm.privacyProfile === 'public'} onChange={e => setSettingsForm({...settingsForm, privacyProfile: e.target.checked ? 'public' : 'private'})} />
+                  Make profile public to university members
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={settingsForm.notificationsEmail} onChange={e => setSettingsForm({...settingsForm, notificationsEmail: e.target.checked})} />
+                  Receive email summaries
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" className="scicomm-btn-primary" style={{ padding: '12px', fontSize: '15px', justifyContent: 'center', marginTop: '12px' }}>Save Changes</button>
+          </form>
+        </div>
+      )}
 
       {/* Avatar Picker Modal */}
       {showAvatarPicker && (

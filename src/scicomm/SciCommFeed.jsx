@@ -14,6 +14,8 @@ export default function SciCommFeed() {
   const connectionsRaw = useLiveCollection('scicomm_connections') || [];
   const tasksData = useLiveCollection('tasks') || [];
   const meetingsData = useLiveCollection('scicomm_meetings') || [];
+  const recognitions = useLiveCollection('scicomm_recognitions') || [];
+  const reelsRaw = useLiveCollection('scicomm_reels') || [];
 
   const [newPost, setNewPost] = useState('');
   const [commentText, setCommentText] = useState({});
@@ -309,6 +311,50 @@ export default function SciCommFeed() {
           <Link to="/meetings" style={{ display: 'block', color: '#10b981', fontSize: '13px', marginBottom: '6px', textDecoration: 'none', fontWeight: 600 }}>📅 Meetings</Link>
           <Link to="/chat" style={{ display: 'block', color: '#10b981', fontSize: '13px', textDecoration: 'none', fontWeight: 600 }}>💬 Chat</Link>
         </div>
+        
+        {recognitions.length > 0 && (
+          <div className="scicomm-card scicomm-card-padding" style={{ marginTop: '8px' }}>
+            <h3 style={{ margin: '0 0 10px', fontSize: '15px' }}>🌟 Spotlights</h3>
+            {recognitions.map(r => {
+              if (r.type === 'featured_reel') {
+                const targetReel = reelsRaw.find(x => x.id === r.targetId);
+                if (!targetReel) return null;
+                return (
+                  <div key={r.id} style={{ marginBottom: '12px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#f59e0b', marginBottom: '4px' }}>REEL OF THE WEEK</div>
+                    <Link to="/reels" style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        {renderAvatar(getAuthor(targetReel.authorId), 32)}
+                        <div>
+                          <div style={{ fontSize: '13px', fontWeight: 600 }}>{targetReel.authorName}</div>
+                          <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>{targetReel.caption.substring(0, 30)}...</div>
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+                );
+              }
+              if (r.type === 'post_of_month') {
+                const targetPost = postsRaw.find(x => x.id === r.targetId);
+                if (!targetPost) return null;
+                return (
+                  <div key={r.id} style={{ marginBottom: '12px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#10b981', marginBottom: '4px' }}>POST OF THE MONTH</div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      {renderAvatar(getAuthor(targetPost.authorId), 32)}
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 600 }}>{targetPost.authorName}</div>
+                        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>{targetPost.content.substring(0, 30)}...</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
+        )}
+
         <div className="scicomm-card scicomm-card-padding" style={{ marginTop: '8px' }}>
           <h3 style={{ margin: '0 0 10px', fontSize: '15px' }}>Team</h3>
           {scientists.filter(s => s.accountStatus !== 'pending').slice(0, 5).map(s => (

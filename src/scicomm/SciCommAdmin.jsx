@@ -13,6 +13,7 @@ export default function SciCommAdmin() {
   const meetingsData = useLiveCollection('scicomm_meetings') || [];
   const connectionsData = useLiveCollection('scicomm_connections') || [];
   const bannersData = useLiveCollection('scicomm_banners') || [];
+  const recognitionsData = useLiveCollection('scicomm_recognitions') || [];
   const isMaster = user.role === 'master';
 
   const [activeTab, setActiveTab] = useState('pending');
@@ -84,6 +85,7 @@ export default function SciCommAdmin() {
     { id: 'warnings', label: 'Warnings', icon: <AlertTriangle size={14} /> },
     { id: 'banners', label: 'Banners', icon: <Image size={14} /> },
     { id: 'posts', label: 'Posts', icon: <Trash2 size={14} /> },
+    { id: 'recognitions', label: 'Recognitions', icon: <Award size={14} /> },
     { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={14} /> },
   ];
 
@@ -265,6 +267,35 @@ export default function SciCommAdmin() {
               <button onClick={() => handleRemovePost(p.id)} style={{ background: '#fee2e2', border: 'none', color: '#991b1b', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', flexShrink: 0 }}><Trash2 size={12} /> Remove</button>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* RECOGNITIONS */}
+      {activeTab === 'recognitions' && (
+        <div className="scicomm-card scicomm-card-padding">
+          <h3 style={{ margin: '0 0 12px', fontSize: '18px' }}>🏅 Manage Content Recognitions</h3>
+          <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.6)', marginBottom: '16px' }}>Feature reels or posts to recognize creators on the platform.</p>
+          
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            const targetId = e.target.targetId.value;
+            const type = e.target.recogType.value;
+            if(!targetId) return;
+            const existing = recognitionsData.find(r => r.type === type);
+            if (existing) {
+              await db.scicomm_recognitions.update(existing.id, { targetId, date: new Date().toISOString() });
+            } else {
+              await db.scicomm_recognitions.add({ type, targetId, date: new Date().toISOString() });
+            }
+            flash('Recognition updated!');
+          }} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <select name="recogType" required style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e0dfdc', fontSize: '14px' }}>
+              <option value="featured_reel">Reel of the Week</option>
+              <option value="post_of_month">Post of the Month</option>
+            </select>
+            <input name="targetId" placeholder="Target ID (Reel ID or Post ID)" required style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e0dfdc', fontSize: '14px' }} />
+            <button type="submit" className="scicomm-btn-primary" style={{ padding: '10px', justifyContent: 'center' }}>Set Feature</button>
+          </form>
         </div>
       )}
 
