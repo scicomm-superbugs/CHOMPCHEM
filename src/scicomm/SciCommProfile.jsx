@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db, useLiveCollection } from '../db';
 import { Camera, Edit2, Award, Pin, AlertTriangle, UserCircle, X, Settings, Briefcase, FileText, CheckCircle, GraduationCap } from 'lucide-react';
-import { AVATARS, AUTO_TAGS, RANKS, calculateScore, getRank, getUnlockedTags, getNextTag, timeAgo } from './scicommConstants';
+import { AVATARS, AUTO_TAGS, calculateScore, getUnlockedTags, timeAgo } from './scicommConstants';
 
 export default function SciCommProfile() {
   const { user } = useAuth();
@@ -64,9 +64,7 @@ export default function SciCommProfile() {
   const myConnections = connectionsData.filter(c => c.status === 'accepted' && (String(c.fromId) === String(user.id) || String(c.toId) === String(user.id))).length;
   const myAttended = meetingsData.filter(m => (m.attendees || []).includes(user.id)).length;
   const myScore = calculateScore({ completedTasks: myCompletedTasks, likesReceived: myLikesReceived, connectionCount: myConnections, meetingsAttended: myAttended, tagsCount: (me?.pinnedTags || []).length });
-  const myRank = getRank(myScore);
   const unlockedTags = getUnlockedTags(myScore);
-  const nextTag = getNextTag(myScore);
   const pinnedTags = me?.pinnedTags || [];
   const pinnedPosts = me?.pinnedPosts || [];
 
@@ -181,7 +179,6 @@ export default function SciCommProfile() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <h1 style={{ margin: '0', fontSize: '22px' }}>{me?.name || user.name}</h1>
-                <span style={{ background: myRank.color + '20', color: myRank.color, padding: '3px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 700 }}>{myRank.icon} {myRank.rank}</span>
               </div>
               <p style={{ margin: '4px 0 6px', fontSize: '15px' }}>{me?.department || 'Science Communicator'}</p>
               <p style={{ margin: 0, fontSize: '14px', color: 'rgba(0,0,0,0.6)' }}>{me?.bio || 'Passionate about science communication.'}</p>
@@ -236,7 +233,7 @@ export default function SciCommProfile() {
 
           <div className="scicomm-card scicomm-card-padding" style={{ marginBottom: '8px' }}>
             <h2 style={{ fontSize: '18px', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}><Award size={20} color="#10b981" /> Achievement Tags</h2>
-            <p style={{ margin: '0 0 12px', fontSize: '12px', color: 'rgba(0,0,0,0.5)' }}>Click to pin (max 5). {nextTag ? `Next unlock: ${nextTag.tag} at ${nextTag.threshold} pts` : 'All unlocked!'}</p>
+            <p style={{ margin: '0 0 12px', fontSize: '12px', color: 'rgba(0,0,0,0.5)' }}>Click to pin (max 5). Keep participating to unlock more mystery tags!</p>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               {unlockedTags.map((t, i) => {
                 const isPinned = pinnedTags.includes(t);
@@ -246,8 +243,8 @@ export default function SciCommProfile() {
                   </button>
                 );
               })}
-              {AUTO_TAGS.filter(t => !unlockedTags.includes(t.tag)).slice(0, 3).map((t, i) => (
-                <span key={'locked' + i} style={{ background: '#f3f2ef', color: '#ccc', padding: '5px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600, border: '1px dashed #ddd' }}>🔒 {t.tag}</span>
+              {AUTO_TAGS.filter(t => !unlockedTags.includes(t.tag)).slice(0, 1).map((t, i) => (
+                <span key={'locked' + i} style={{ background: '#f3f2ef', color: '#ccc', padding: '5px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600, border: '1px dashed #ddd' }}>🔒 Mystery Tag Unlocked Soon...</span>
               ))}
             </div>
           </div>

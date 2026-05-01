@@ -97,9 +97,24 @@ export default function SciCommMeetings() {
         {m.description && <p style={{ margin: '8px 0', fontSize: '14px', color: 'rgba(0,0,0,0.7)' }}>{m.description}</p>}
         <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
           {m.link && <a href={m.link} target="_blank" rel="noopener noreferrer" className="scicomm-btn-primary" style={{ textDecoration: 'none', padding: '6px 16px', fontSize: '13px' }}><Link2 size={14} /> Join Meeting</a>}
-          {iAmInvited && !iAmAttending && !isPast && <button className="scicomm-btn-secondary" style={{ padding: '6px 16px', fontSize: '13px' }} onClick={() => handleConfirmAttendance(m.id)}><CheckCircle size={14} /> Confirm Attendance</button>}
-          {iAmAttending && <span style={{ color: '#10b981', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={14} /> Attending</span>}
-          {isAdmin && <button onClick={() => handleDelete(m.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px' }}>Delete</button>}
+          {isAdmin && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600 }}>Mark Attendance:</span>
+              <select onChange={(e) => {
+                const userId = e.target.value;
+                if (!userId) return;
+                const att = m.attendees || [];
+                if (!att.includes(userId)) {
+                  db.scicomm_meetings.update(m.id, { attendees: [...att, userId] });
+                }
+                e.target.value = "";
+              }} style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '13px' }}>
+                <option value="">Select Member...</option>
+                {activeMembers.map(s => <option key={s.id} value={s.id}>{s.name} {(m.attendees||[]).includes(s.id)? '✅' : ''}</option>)}
+              </select>
+            </div>
+          )}
+          {isAdmin && <button onClick={() => handleDelete(m.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', marginLeft: 'auto' }}>Delete</button>}
         </div>
       </div>
     );

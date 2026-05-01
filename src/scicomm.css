@@ -332,6 +332,7 @@
   position: relative;
   gap: 2px;
   -webkit-tap-highlight-color: transparent;
+  min-width: 64px;
 }
 
 .scicomm-mobile-item.active {

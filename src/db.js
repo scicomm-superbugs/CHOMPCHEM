@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { initializeFirestore, doc, setDoc, deleteDoc, getDoc, getDocs, collection, query, where, addDoc, updateDoc, onSnapshot } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useState, useEffect } from "react";
 
 const firebaseConfig = {
@@ -14,6 +15,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const firestore = initializeFirestore(app, {});
+export const storage = getStorage(app);
+
+export const uploadFile = async (file, path) => {
+  const storageRef = ref(storage, path);
+  await uploadBytes(storageRef, file);
+  return await getDownloadURL(storageRef);
+};
 
 export const getCollectionName = (baseName) => {
   const ws = localStorage.getItem('workspaceId');

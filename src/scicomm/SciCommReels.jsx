@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useLiveCollection, db } from '../db';
-import { Heart, MessageCircle, Share2, Bookmark, Play, Plus, UserCircle, Star } from 'lucide-react';
+import { useLiveCollection, db, uploadFile } from '../db';
+import { Heart, MessageCircle, Share2, Bookmark, Play, Plus, UserCircle, Star, Upload } from 'lucide-react';
 import { AVATARS } from './scicommConstants';
 
 export default function SciCommReels() {
@@ -11,7 +11,10 @@ export default function SciCommReels() {
   const recognitions = useLiveCollection('scicomm_recognitions') || [];
   
   const [showUpload, setShowUpload] = useState(false);
-  const [newReel, setNewReel] = useState({ videoUrl: '', caption: '', tags: '' });
+  const [newReel, setNewReel] = useState({ caption: '', tags: '' });
+  const [videoFile, setVideoFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [activeReelIndex, setActiveReelIndex] = useState(0);
   const containerRef = useRef(null);
 
@@ -48,18 +51,35 @@ export default function SciCommReels() {
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!newReel.videoUrl) return;
-    await db.scicomm_reels.add({
-      ...newReel,
-      authorId: user.id,
-      authorName: user.name,
-      createdAt: new Date().toISOString(),
-      likes: [],
-      saves: [],
-      comments: []
-    });
-    setShowUpload(false);
-    setNewReel({ videoUrl: '', caption: '', tags: '' });
+    if (!videoFile) return;
+    setIsUploading(true);
+    setUploadProgress(10);
+    try {
+      const fileName = `reels/${Date.now()}_${videoFile.name}`;
+      setUploadProgress(40);
+      const videoUrl = await uploadFile(videoFile, fileName);
+      setUploadProgress(90);
+
+      await db.scicomm_reels.add({
+        videoUrl,
+        caption: newReel.caption,
+        tags: newReel.tags,
+        authorId: user.id,
+        authorName: user.name,
+        createdAt: new Date().toISOString(),
+        likes: [],
+        saves: [],
+        comments: []
+      });
+      setShowUpload(false);
+      setNewReel({ caption: '', tags: '' });
+      setVideoFile(null);
+    } catch (err) {
+      console.error(err);
+      alert('Upload failed: ' + err.message);
+    }
+    setIsUploading(false);
+    setUploadProgress(0);
   };
 
   const toggleLike = async (reel) => {
@@ -96,10 +116,25 @@ export default function SciCommReels() {
           <div style={{ background: 'white', padding: '24px', borderRadius: '12px', width: '100%', maxWidth: '400px' }} onClick={e=>e.stopPropagation()}>
             <h2 style={{ margin: '0 0 16px', color: '#111' }}>Upload Science Reel</h2>
             <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <input type="url" placeholder="Video URL (mp4, webm)" value={newReel.videoUrl} onChange={e=>setNewReel({...newReel, videoUrl: e.target.value})} required style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }} />
+              
+              {/* File Input */}
+              <div style={{ border: '2px dashed #ccc', padding: '20px', borderRadius: '8px', textAlign: 'center', cursor: 'pointer', background: '#f9fafb' }} onClick={() => document.getElementById('reel-upload').click()}>
+                <Upload size={24} color="#666" style={{ marginBottom: '8px' }} />
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#333' }}>{videoFile ? videoFile.name : 'Select Video File'}</div>
+                <div style={{ fontSize: '12px', color: '#999' }}>MP4, WebM (Max 50MB)</div>
+                <input id="reel-upload" type="file" accept="video/mp4,video/webm,video/quicktime" onChange={e => setVideoFile(e.target.files[0])} style={{ display: 'none' }} />
+              </div>
+
               <textarea placeholder="Caption your discovery..." value={newReel.caption} onChange={e=>setNewReel({...newReel, caption: e.target.value})} required rows={3} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd', resize: 'vertical' }} />
               <input type="text" placeholder="Tags (e.g. #biology #lab)" value={newReel.tags} onChange={e=>setNewReel({...newReel, tags: e.target.value})} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }} />
-              <button type="submit" className="scicomm-btn-primary" style={{ padding: '12px', justifyContent: 'center' }}>Publish Reel</button>
+              
+              {isUploading ? (
+                <div style={{ background: '#eef3f8', borderRadius: '8px', height: '8px', overflow: 'hidden', marginTop: '8px' }}>
+                  <div style={{ background: '#10b981', height: '100%', width: `${uploadProgress}%`, transition: 'width 0.3s' }} />
+                </div>
+              ) : (
+                <button type="submit" className="scicomm-btn-primary" style={{ padding: '12px', justifyContent: 'center', marginTop: '8px' }} disabled={!videoFile}>Publish Reel</button>
+              )}
             </form>
           </div>
         </div>

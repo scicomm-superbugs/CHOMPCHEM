@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLiveCollection, db } from '../db';
 import { Image, Video, FileText, Send, MessageSquare, Share2, MoreHorizontal, UserCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { REACTIONS, AVATARS, timeAgo, isSpamPost, getRank, calculateScore, getUnlockedTags } from './scicommConstants';
+import { REACTIONS, AVATARS, timeAgo, isSpamPost, calculateScore, getUnlockedTags } from './scicommConstants';
 
 export default function SciCommFeed() {
   const { user } = useAuth();
@@ -138,7 +138,6 @@ export default function SciCommFeed() {
   const myConnections = connectionsRaw.filter(c => c.status === 'accepted' && (String(c.fromId) === String(user.id) || String(c.toId) === String(user.id))).length;
   const myAttended = meetingsData.filter(m => (m.attendees || []).includes(user.id)).length;
   const myScore = calculateScore({ completedTasks: myCompletedTasks, likesReceived: myLikesReceived, connectionCount: myConnections, meetingsAttended: myAttended, tagsCount: getUnlockedTags(0).length });
-  const myRank = getRank(myScore);
 
   return (
     <div className="scicomm-feed-layout">
@@ -150,7 +149,6 @@ export default function SciCommFeed() {
           <div style={{ padding: '8px 12px 12px' }}>
             <h3 style={{ margin: '4px 0 2px', fontSize: '15px' }}>{user.name}</h3>
             <p style={{ color: 'rgba(0,0,0,0.6)', fontSize: '12px', margin: '0 0 8px' }}>{currentUserData?.department || 'Science Communicator'}</p>
-            <div style={{ background: myRank.color + '20', color: myRank.color, padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 700, display: 'inline-block' }}>{myRank.icon} {myRank.rank}</div>
             <div style={{ borderTop: '1px solid #e0dfdc', marginTop: '10px', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
               <span style={{ color: 'rgba(0,0,0,0.6)' }}>Score</span>
               <strong style={{ color: '#10b981' }}>{myScore}</strong>
@@ -308,7 +306,7 @@ export default function SciCommFeed() {
           <h3 style={{ margin: '0 0 10px', fontSize: '15px' }}>📌 Quick Links</h3>
           <Link to="/tasks" style={{ display: 'block', color: '#10b981', fontSize: '13px', marginBottom: '6px', textDecoration: 'none', fontWeight: 600 }}>📋 My Tasks</Link>
           <Link to="/leaderboard" style={{ display: 'block', color: '#10b981', fontSize: '13px', marginBottom: '6px', textDecoration: 'none', fontWeight: 600 }}>🏆 Leaderboard</Link>
-          <Link to="/meetings" style={{ display: 'block', color: '#10b981', fontSize: '13px', marginBottom: '6px', textDecoration: 'none', fontWeight: 600 }}>📅 Meetings</Link>
+          <Link to="/calendar" style={{ display: 'block', color: '#10b981', fontSize: '13px', marginBottom: '6px', textDecoration: 'none', fontWeight: 600 }}>📅 Calendar</Link>
           <Link to="/chat" style={{ display: 'block', color: '#10b981', fontSize: '13px', textDecoration: 'none', fontWeight: 600 }}>💬 Chat</Link>
         </div>
         

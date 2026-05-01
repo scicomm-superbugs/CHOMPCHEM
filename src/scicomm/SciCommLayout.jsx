@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Users, Briefcase, Bell, UserCircle, Search, Trophy, Shield, MessageCircle, Calendar, Play } from 'lucide-react';
+import { Home, Users, Briefcase, Bell, UserCircle, Search, Trophy, Shield, MessageCircle, Calendar, Play, Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection } from '../db';
 import { useEffect, useRef } from 'react';
@@ -18,12 +18,18 @@ export default function SciCommLayout() {
   const warningsData = useLiveCollection('scicomm_warnings') || [];
   const pendingAccounts = (scientists || []).filter(s => s.accountStatus === 'pending');
   const chatMessages = useLiveCollection('scicomm_chat_messages') || [];
-
+  const meetingsData = useLiveCollection('scicomm_meetings') || [];
+  
   const myPendingTasks = tasksData.filter(t => String(t.assignedTo) === String(user.id) && t.status !== 'Completed');
   const myWarnings = warningsData.filter(w => String(w.userId) === String(user.id) && !w.seen);
+  
+  const upcomingMeetings = meetingsData.filter(m => (m.attendees || []).includes(user.id) && new Date(m.date) >= new Date());
+  
   const isAdmin = user.role === 'admin' || user.role === 'master';
 
-  const notifCount = myPendingTasks.length + myWarnings.length + (isAdmin ? pendingAccounts.length : 0);
+  const notifCount = myWarnings.length + (isAdmin ? pendingAccounts.length : 0);
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Push notifications
   const prevTaskCount = useRef(myPendingTasks.length);
@@ -66,11 +72,11 @@ export default function SciCommLayout() {
           <nav className="scicomm-nav">
             <Link to="/" className={`scicomm-nav-item ${isActive('/') ? 'active' : ''}`}><Home size={20} /><span className="nav-text">Home</span></Link>
             <Link to="/network" className={`scicomm-nav-item ${isActive('/network') ? 'active' : ''}`}><Users size={20} /><span className="nav-text">Network</span></Link>
-            <Link to="/tasks" className={`scicomm-nav-item ${isActive('/tasks') ? 'active' : ''}`}><Briefcase size={20} /><span className="nav-text">Tasks</span></Link>
-            <Link to="/meetings" className={`scicomm-nav-item ${isActive('/meetings') ? 'active' : ''}`}><Calendar size={20} /><span className="nav-text">Meetings</span></Link>
+            <Link to="/tasks" className={`scicomm-nav-item ${isActive('/tasks') ? 'active' : ''}`} style={{position:'relative'}}><Briefcase size={20} />{myPendingTasks.length > 0 && <span className="scicomm-notif-badge">{myPendingTasks.length}</span>}<span className="nav-text">Tasks</span></Link>
+            <Link to="/calendar" className={`scicomm-nav-item ${isActive('/calendar') ? 'active' : ''}`} style={{position:'relative'}}><Calendar size={20} />{upcomingMeetings.length > 0 && <span className="scicomm-notif-badge">{upcomingMeetings.length}</span>}<span className="nav-text">Calendar</span></Link>
             <Link to="/chat" className={`scicomm-nav-item ${isActive('/chat') ? 'active' : ''}`}><MessageCircle size={20} /><span className="nav-text">Chat</span></Link>
             <Link to="/reels" className={`scicomm-nav-item ${isActive('/reels') ? 'active' : ''}`}><Play size={20} /><span className="nav-text">Reels</span></Link>
-            <Link to="/leaderboard" className={`scicomm-nav-item ${isActive('/leaderboard') ? 'active' : ''}`}><Trophy size={20} /><span className="nav-text">Ranks</span></Link>
+            <Link to="/leaderboard" className={`scicomm-nav-item ${isActive('/leaderboard') ? 'active' : ''}`}><Trophy size={20} /><span className="nav-text">Leaderboard</span></Link>
             <Link to="/notifications" className={`scicomm-nav-item ${isActive('/notifications') ? 'active' : ''}`} style={{position:'relative'}}><Bell size={20} />{notifCount > 0 && <span className="scicomm-notif-badge">{notifCount}</span>}<span className="nav-text">Alerts</span></Link>
             
             <div className="scicomm-nav-item profile-dropdown-container">
@@ -98,13 +104,17 @@ export default function SciCommLayout() {
 
       <div className="scicomm-page-content"><Outlet /></div>
 
-      <nav className="scicomm-mobile-bar">
+      <nav className="scicomm-mobile-bar" style={{ overflowX: 'auto', justifyContent: 'flex-start', paddingLeft: '8px', paddingRight: '8px' }}>
+        <style>{`.scicomm-mobile-bar::-webkit-scrollbar { display: none; }`}</style>
         <Link to="/" className={`scicomm-mobile-item ${isActive('/') ? 'active' : ''}`}><Home size={20} /><span>Home</span></Link>
-        <Link to="/network" className={`scicomm-mobile-item ${isActive('/network') ? 'active' : ''}`}><Users size={20} /><span>Network</span></Link>
+        <Link to="/calendar" className={`scicomm-mobile-item ${isActive('/calendar') ? 'active' : ''}`} style={{position:'relative'}}><Calendar size={20} />{upcomingMeetings.length > 0 && <span className="scicomm-notif-badge">{upcomingMeetings.length}</span>}<span>Calendar</span></Link>
+        <Link to="/tasks" className={`scicomm-mobile-item ${isActive('/tasks') ? 'active' : ''}`} style={{position:'relative'}}><Briefcase size={20} />{myPendingTasks.length > 0 && <span className="scicomm-notif-badge">{myPendingTasks.length}</span>}<span>Tasks</span></Link>
         <Link to="/chat" className={`scicomm-mobile-item ${isActive('/chat') ? 'active' : ''}`}><MessageCircle size={20} /><span>Chat</span></Link>
+        <Link to="/network" className={`scicomm-mobile-item ${isActive('/network') ? 'active' : ''}`}><Users size={20} /><span>Network</span></Link>
         <Link to="/reels" className={`scicomm-mobile-item ${isActive('/reels') ? 'active' : ''}`}><Play size={20} /><span>Reels</span></Link>
         <Link to="/notifications" className={`scicomm-mobile-item ${isActive('/notifications') ? 'active' : ''}`} style={{position:'relative'}}><Bell size={20} />{notifCount > 0 && <span className="scicomm-notif-badge">{notifCount}</span>}<span>Alerts</span></Link>
         <Link to="/profile" className={`scicomm-mobile-item ${isActive('/profile') ? 'active' : ''}`}>{renderAvatar(20)}<span>Me</span></Link>
+        {isAdmin && <Link to="/admin" className={`scicomm-mobile-item ${isActive('/admin') ? 'active' : ''}`}><Shield size={20} /><span>Admin</span></Link>}
       </nav>
     </div>
   );

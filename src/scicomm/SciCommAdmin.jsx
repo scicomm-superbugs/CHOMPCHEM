@@ -2,7 +2,7 @@ import { useLiveCollection, db } from '../db';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { Trash2, UserX, UserCheck, Shield, Plus, AlertTriangle, Calendar, CheckCircle, Clock, Award, BarChart3, Image, Link2 } from 'lucide-react';
-import { AVATARS, calculateScore, getRank, getUnlockedTags, REACTIONS } from './scicommConstants';
+import { AVATARS, calculateScore, getUnlockedTags, REACTIONS } from './scicommConstants';
 
 export default function SciCommAdmin() {
   const { user } = useAuth();
@@ -99,8 +99,7 @@ export default function SciCommAdmin() {
     const postCount = posts.filter(p => String(p.authorId) === String(member.id)).length;
     const warnings = warningsData.filter(w => String(w.userId) === String(member.id) && w.status !== 'removed').length;
     const score = calculateScore({ completedTasks, likesReceived, connectionCount, meetingsAttended, tagsCount: (member.pinnedTags || []).length });
-    const rank = getRank(score);
-    return { likesReceived, completedTasks, pendingTasks, connectionCount, meetingsAttended, postCount, warnings, score, rank };
+    return { likesReceived, completedTasks, pendingTasks, connectionCount, meetingsAttended, postCount, warnings, score };
   };
 
   return (
@@ -108,8 +107,35 @@ export default function SciCommAdmin() {
       {msg && <div style={{ background: '#dcfce7', color: '#166534', padding: '12px 16px', borderRadius: '8px', marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>✅ {msg}</div>}
 
       <div className="scicomm-card scicomm-card-padding">
-        <h2 style={{ margin: '0 0 4px', fontSize: '22px' }}>🛡️ Admin Dashboard</h2>
-        <p style={{ margin: 0, color: 'rgba(0,0,0,0.6)', fontSize: '13px' }}>Manage team, tasks, warnings, banners, and analytics.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h2 style={{ margin: '0 0 4px', fontSize: '22px' }}>🛡️ Admin Dashboard</h2>
+            <p style={{ margin: 0, color: 'rgba(0,0,0,0.6)', fontSize: '13px' }}>Manage team, tasks, warnings, banners, and analytics.</p>
+          </div>
+          {isMaster && (
+            <button onClick={async () => {
+              if (window.confirm("⚠️ DANGER: Are you sure you want to FACTORY RESET the entire platform? This will delete all posts, tasks, warnings, messages, and users EXCEPT the Master account. This cannot be undone!")) {
+                if (window.prompt("Type 'CONFIRM' to factory reset") === 'CONFIRM') {
+                  const s = await db.scientists.toArray();
+                  for (const x of s) { if (x.role !== 'master') await db.scientists.delete(x.id); }
+                  await db.tasks.clear();
+                  await db.scicomm_posts.clear();
+                  await db.scicomm_warnings.clear();
+                  await db.scicomm_meetings.clear();
+                  await db.scicomm_chat_messages.clear();
+                  await db.scicomm_reels.clear();
+                  await db.scicomm_banners.clear();
+                  await db.scicomm_connections.clear();
+                  await db.scicomm_recognitions.clear();
+                  flash("Factory reset complete.");
+                  setTimeout(() => window.location.reload(), 1000);
+                }
+              }
+            }} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}>
+              ⚠️ Factory Reset
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="scicomm-card" style={{ display: 'flex', flexWrap: 'wrap', overflow: 'hidden' }}>
@@ -308,7 +334,6 @@ export default function SciCommAdmin() {
               <thead>
                 <tr style={{ borderBottom: '2px solid #e0dfdc', textAlign: 'left' }}>
                   <th style={{ padding: '8px 4px' }}>Member</th>
-                  <th style={{ padding: '8px 4px' }}>Rank</th>
                   <th style={{ padding: '8px 4px' }}>Score</th>
                   <th style={{ padding: '8px 4px' }}>Posts</th>
                   <th style={{ padding: '8px 4px' }}>Reactions</th>
@@ -324,7 +349,6 @@ export default function SciCommAdmin() {
                   return (
                     <tr key={s.id} style={{ borderBottom: '1px solid #eef3f8' }}>
                       <td style={{ padding: '8px 4px', fontWeight: 600 }}>{s.name}</td>
-                      <td style={{ padding: '8px 4px' }}><span style={{ background: a.rank.color + '20', color: a.rank.color, padding: '2px 6px', borderRadius: '8px', fontSize: '11px', fontWeight: 600 }}>{a.rank.icon} {a.rank.rank}</span></td>
                       <td style={{ padding: '8px 4px', fontWeight: 700, color: '#10b981' }}>{a.score}</td>
                       <td style={{ padding: '8px 4px' }}>{a.postCount}</td>
                       <td style={{ padding: '8px 4px' }}>{a.likesReceived}</td>

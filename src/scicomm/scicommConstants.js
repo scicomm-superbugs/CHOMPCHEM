@@ -36,83 +36,25 @@ export const AVATARS = [
 // ===== AUTO-ACHIEVEMENT TAGS =====
 // { threshold: minimum score to unlock, tag: display name }
 export const AUTO_TAGS = [
-  { threshold: 0, tag: '🔰 Rookie Researcher' },
-  { threshold: 25, tag: '🧫 Petri Dish Starter' },
-  { threshold: 50, tag: '🔬 Microscopic Mind' },
-  { threshold: 80, tag: '🧪 Lab Rat' },
-  { threshold: 120, tag: '📢 Outreach Rookie' },
-  { threshold: 160, tag: '📝 Science Scribbler' },
-  { threshold: 200, tag: '💡 Bright Spark' },
-  { threshold: 250, tag: '📊 Data Diver' },
-  { threshold: 300, tag: '🎙️ Mic Dropper' },
-  { threshold: 350, tag: '🧬 Gene Genius' },
-  { threshold: 400, tag: '😂 Science Meme Lord' },
-  { threshold: 460, tag: '🌌 Cosmic Explainer' },
-  { threshold: 520, tag: '📖 Citation Hunter' },
-  { threshold: 580, tag: '🏅 PCR Prophet' },
-  { threshold: 650, tag: '⚗️ Alchemy Apprentice' },
-  { threshold: 720, tag: '🎯 Precision Expert' },
-  { threshold: 800, tag: '🤝 Collaboration Champion' },
-  { threshold: 880, tag: '🎥 Visual Storyteller' },
-  { threshold: 960, tag: '📡 Science Broadcaster' },
-  { threshold: 1050, tag: '🛡️ Fact Checker Supreme' },
-  { threshold: 1150, tag: '🧑‍🔬 Peer Review Survivor' },
-  { threshold: 1250, tag: '🏗️ Event Architect' },
-  { threshold: 1360, tag: '📣 Social Media Slayer' },
-  { threshold: 1480, tag: '🌱 Sustainability Sage' },
-  { threshold: 1600, tag: '🤓 Trivia Titan' },
-  { threshold: 1730, tag: '🧲 Engagement Magnet' },
-  { threshold: 1870, tag: '🪄 Outreach Wizard' },
-  { threshold: 2020, tag: '🔊 Voice of Reason' },
-  { threshold: 2180, tag: '🗺️ Science Explorer' },
-  { threshold: 2350, tag: '🧠 Critical Thinker' },
-  { threshold: 2530, tag: '🎨 Creative Genius' },
-  { threshold: 2720, tag: '📐 Quantum Chatterbox' },
-  { threshold: 2920, tag: '🩺 Health Communicator' },
-  { threshold: 3130, tag: '🎬 SciComm Filmmaker' },
-  { threshold: 3350, tag: '🏆 Award Winner' },
-  { threshold: 3580, tag: '🎭 Science Performer' },
-  { threshold: 3820, tag: '🧑‍🏫 Mentor of the Year' },
-  { threshold: 4070, tag: '🌐 Digital Pioneer' },
-  { threshold: 4330, tag: '🦸 SciComm Superhero' },
-  { threshold: 4600, tag: '☣️ Biohazard Brain' },
-  { threshold: 4880, tag: '🚀 Rising Star' },
-  { threshold: 5170, tag: '📍 Community Leader' },
-  { threshold: 5470, tag: '💎 Diamond Member' },
-  { threshold: 5780, tag: '👑 Science Royalty' },
-  { threshold: 6100, tag: '🏛️ SciComm Legend' },
-  { threshold: 6430, tag: '🌟 Science Titan' },
-  { threshold: 6770, tag: '🎖️ Nobel-ish Candidate' },
-  { threshold: 7120, tag: '🔮 Oracle of Science' },
-  { threshold: 7480, tag: '⭐ Constellation Class' },
-  { threshold: 8000, tag: '🌠 Immortal Contributor' },
-];
-
-// ===== RANK PROGRESSION =====
-export const RANKS = [
-  { minScore: 0, rank: 'Intern', color: '#94a3b8', icon: '🔰' },
-  { minScore: 100, rank: 'Junior Member', color: '#60a5fa', icon: '🔵' },
-  { minScore: 300, rank: 'Member', color: '#34d399', icon: '🟢' },
-  { minScore: 600, rank: 'Senior Member', color: '#a78bfa', icon: '🟣' },
-  { minScore: 1000, rank: 'Lead Communicator', color: '#f59e0b', icon: '🟡' },
-  { minScore: 1500, rank: 'Expert', color: '#f97316', icon: '🟠' },
-  { minScore: 2500, rank: 'Master Communicator', color: '#ef4444', icon: '🔴' },
-  { minScore: 4000, rank: 'Elite', color: '#ec4899', icon: '💎' },
-  { minScore: 6000, rank: 'Legend', color: '#8b5cf6', icon: '👑' },
-  { minScore: 8000, rank: 'Immortal', color: '#fbbf24', icon: '🌟' },
+  { threshold: 50, tag: '🧬 PCR Addict' },
+  { threshold: 100, tag: '🧫 Cell Division Survivor' },
+  { threshold: 150, tag: '☕ Caffeine Catalyst' },
+  { threshold: 220, tag: '⚛️ Periodic Table Menace' },
+  { threshold: 300, tag: '🌌 Quantum Confused' },
+  { threshold: 400, tag: '☣️ Biohazard Baby' },
+  { threshold: 550, tag: '🔬 Microscopy Maniac' },
+  { threshold: 750, tag: '🏅 Nobel? Maybe.' },
+  { threshold: 1000, tag: '👻 Lab Coat Ghost' },
+  { threshold: 1300, tag: '🧟 Data Zombie' },
+  { threshold: 1700, tag: '🧠 Neuron on Fire' },
+  { threshold: 2200, tag: '⏳ Mutation Loading' },
+  { threshold: 2800, tag: '👺 Citation Goblin' },
+  { threshold: 3500, tag: '🍎 Gravity Denier' },
 ];
 
 // ===== SCORE CALCULATOR =====
 export function calculateScore({ completedTasks = 0, likesReceived = 0, meetingsAttended = 0, tagsCount = 0, connectionCount = 0, reputationBonus = 0 }) {
   return (completedTasks * 25) + (likesReceived * 5) + (meetingsAttended * 15) + (tagsCount * 15) + (connectionCount * 2) + reputationBonus;
-}
-
-export function getRank(score) {
-  let current = RANKS[0];
-  for (const r of RANKS) {
-    if (score >= r.minScore) current = r;
-  }
-  return current;
 }
 
 export function getUnlockedTags(score) {
