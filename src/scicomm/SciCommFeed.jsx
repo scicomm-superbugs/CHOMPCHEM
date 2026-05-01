@@ -239,10 +239,9 @@ export default function SciCommFeed() {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-              <label className="scicomm-feed-action" style={{ cursor: 'pointer' }}><Image size={18} color="#70b5f9" /> <span>Photo</span><input type="file" accept="image/*" onChange={e => setPostImage(e.target.files[0])} style={{ display: 'none' }} /></label>
+              <label className="scicomm-feed-action" style={{ cursor: 'pointer' }}><Image size={18} color="#70b5f9" /> <span>Photo/GIF</span><input type="file" accept="image/*" onChange={e => setPostImage(e.target.files[0])} style={{ display: 'none' }} /></label>
               <label className="scicomm-feed-action" style={{ cursor: 'pointer' }}><Video size={18} color="#7fc15e" /> <span>Video</span><input type="file" accept="video/*" onChange={e => setPostVideo(e.target.files[0])} style={{ display: 'none' }} /></label>
               <button className="scicomm-feed-action" onClick={() => setShowArticle(!showArticle)} style={{ color: showArticle ? '#e7a33e' : undefined }}><FileText size={18} color="#e7a33e" /> <span>Article</span></button>
-              <button className="scicomm-feed-action" onClick={() => { const gifs = ['🧪','🔬','🧬','⚗️','🧫','🔭','🌡️','💊','🧲','⚡','🌋','🦠','🧠','💉','🔋']; setNewPost(prev => prev + gifs[Math.floor(Math.random()*gifs.length)]); }}><span style={{ fontSize: '16px' }}>GIF</span></button>
               <label className="scicomm-feed-action" style={{ cursor: 'pointer' }}><span style={{ fontSize: '14px' }}>📎</span> <span>File</span><input type="file" onChange={e => setPostFile(e.target.files[0])} style={{ display: 'none' }} /></label>
             </div>
             {(newPost.trim() || postImage || postVideo || postFile || (showArticle && articleTitle.trim())) && <button className="scicomm-btn-primary" onClick={handlePostSubmit} disabled={isPostingMedia} style={{ padding: '6px 20px' }}>{isPostingMedia ? 'Posting...' : <><Send size={14} /> Post</>}</button>}

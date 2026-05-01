@@ -14,6 +14,8 @@ export default function SciCommAdmin() {
   const connectionsData = useLiveCollection('scicomm_connections') || [];
   const bannersData = useLiveCollection('scicomm_banners') || [];
   const recognitionsData = useLiveCollection('scicomm_recognitions') || [];
+  const chatRooms = useLiveCollection('scicomm_chat_rooms') || [];
+  const chatMessages = useLiveCollection('scicomm_chat_messages') || [];
   const isMaster = user.role === 'master';
 
   const [activeTab, setActiveTab] = useState('pending');
@@ -126,6 +128,8 @@ export default function SciCommAdmin() {
                   for (const b of bannersData) await db.scicomm_banners.delete(b.id);
                   for (const c of connectionsData) await db.scicomm_connections.delete(c.id);
                   for (const r of recognitionsData) await db.scicomm_recognitions.delete(r.id);
+                  for (const cr of chatRooms) await db.scicomm_chat_rooms.delete(cr.id);
+                  for (const cm of chatMessages) await db.scicomm_chat_messages.delete(cm.id);
                   flash("Factory reset complete.");
                   setTimeout(() => window.location.reload(), 1000);
                 }

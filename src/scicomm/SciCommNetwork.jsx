@@ -154,6 +154,11 @@ export default function SciCommNetwork() {
                     <button className="scicomm-btn-secondary" onClick={() => handleConnect(s.id)} style={{ width: '100%', justifyContent: 'center' }}><UserPlus size={16} /> Connect</button>
                   ) : cs.status === 'accepted' ? (
                     <button className="scicomm-btn-primary" onClick={() => navigate('/chat?with=' + s.id)} style={{ width: '100%', justifyContent: 'center' }}><MessageCircle size={16} /> Message</button>
+                  ) : (cs.status === 'pending' && String(cs.conn?.toId) === String(user.id)) ? (
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <button className="scicomm-btn-primary" onClick={() => handleAccept(cs.conn.id)} style={{ flex: 1, padding: '6px', fontSize: '12px', justifyContent: 'center' }}>Accept</button>
+                      <button onClick={() => handleReject(cs.conn.id)} style={{ flex: 1, padding: '6px', fontSize: '12px', border: '1px solid #e0dfdc', borderRadius: '24px', background: 'transparent', cursor: 'pointer' }}>Ignore</button>
+                    </div>
                   ) : (
                     <button className="scicomm-btn-secondary" disabled style={{ width: '100%', justifyContent: 'center', opacity: 0.6 }}>⏳ Pending</button>
                   )}

@@ -16,9 +16,12 @@ export default function SciCommMeetings() {
   const activeMembers = scientists.filter(s => s.accountStatus !== 'pending');
   const now = new Date();
 
-  const upcomingMeetings = meetings.filter(m => new Date(m.date + 'T' + (m.time || '23:59')) > now).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  const pastMeetings = meetings.filter(m => new Date(m.date + 'T' + (m.time || '23:59')) <= now).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  // Admin sees all, normal user sees only what they're invited to
+  const visibleMeetings = isAdmin ? meetings : meetings.filter(m => (m.members || []).includes(user.id) || m.allMembers);
   const myMeetings = meetings.filter(m => (m.members || []).includes(user.id) || m.allMembers);
+
+  const upcomingMeetings = visibleMeetings.filter(m => new Date(m.date + 'T' + (m.time || '23:59')) > now).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const pastMeetings = visibleMeetings.filter(m => new Date(m.date + 'T' + (m.time || '23:59')) <= now).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const renderAvatar = (member, size = 28) => {
     if (!member) return null;
