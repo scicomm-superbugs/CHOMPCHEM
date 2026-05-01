@@ -432,3 +432,37 @@
   }
 }
 
+/* === MOBILE GENERAL POLISH === */
+@media (max-width: 480px) {
+  .scicomm-card-padding {
+    padding: 12px !important;
+  }
+  .scicomm-feed-main {
+    padding: 0 4px !important;
+  }
+  .scicomm-btn-primary,
+  .scicomm-btn-secondary {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    min-height: 38px;
+  }
+  .scicomm-feed-action span {
+    display: none;
+  }
+  .scicomm-mobile-bar {
+    gap: 0 !important;
+  }
+  .scicomm-mobile-item {
+    min-width: 48px !important;
+    padding: 6px 4px !important;
+    font-size: 9px !important;
+  }
+  .scicomm-header-left {
+    gap: 6px !important;
+  }
+  .scicomm-logo {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+

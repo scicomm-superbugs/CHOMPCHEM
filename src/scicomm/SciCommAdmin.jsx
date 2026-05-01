@@ -166,30 +166,63 @@ export default function SciCommAdmin() {
         </div>
       )}
 
-      {/* USERS */}
+      {/* USERS - Intelligence Panel */}
       {activeTab === 'users' && (
         <div className="scicomm-card scicomm-card-padding">
-          <h3 style={{ margin: '0 0 12px', fontSize: '18px' }}>👥 All Members ({activeAccounts.length})</h3>
-          {activeAccounts.map(s => (
-            <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #eef3f8', flexWrap: 'wrap', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#eef3f8' }}></div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: '14px' }}>{s.name}</div>
-                  <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.5)' }}>{s.email || s.username}</div>
+          <h3 style={{ margin: '0 0 12px', fontSize: '18px' }}>👥 Member Management ({activeAccounts.length})</h3>
+          {activeAccounts.map(s => {
+            const analytics = getAnalytics(s);
+            const memberWarnings = warningsData.filter(w => String(w.userId) === String(s.id) && w.status !== 'removed');
+            return (
+              <div key={s.id} style={{ padding: '14px', borderBottom: '1px solid #eef3f8', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#eef3f8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                      {s.avatar ? <img src={s.avatar} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} /> : '👤'}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '14px' }}>{s.name} <span style={{ background: s.role === 'master' ? '#fef08a' : s.role === 'admin' ? '#bbf7d0' : '#eef3f8', padding: '2px 6px', borderRadius: '8px', fontSize: '10px', fontWeight: 600, marginLeft: '4px' }}>{s.role}</span></div>
+                      <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.5)' }}>@{s.username} • {s.email || 'No email'} • {s.department || 'No department'}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    {s.role !== 'master' && (
+                      <>
+                        {s.role === 'scientist' ? <button onClick={() => handlePromote(s.id)} className="scicomm-btn-secondary" style={{ padding: '4px 10px', fontSize: '11px' }}>Promote</button> : isMaster && <button onClick={() => handleDemote(s.id)} style={{ padding: '4px 10px', fontSize: '11px', border: '1px solid #e0dfdc', borderRadius: '24px', background: 'transparent', cursor: 'pointer' }}>Demote</button>}
+                        <button onClick={async () => {
+                          const bcrypt = (await import('bcryptjs')).default;
+                          const newPass = window.prompt('Enter new password for ' + s.name);
+                          if (newPass && newPass.length >= 4) {
+                            const salt = await bcrypt.genSalt(4);
+                            const hash = await bcrypt.hash(newPass, salt);
+                            await db.scientists.update(s.id, { passwordHash: hash });
+                            flash('Password reset for ' + s.name);
+                          }
+                        }} style={{ padding: '4px 10px', fontSize: '11px', border: '1px solid #f59e0b', borderRadius: '24px', background: '#fef3c7', cursor: 'pointer', color: '#92400e' }}>Reset Password</button>
+                        <button onClick={() => handleRemoveUser(s.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><UserX size={16} /></button>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {/* Stats Row */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {[
+                    { label: 'Score', val: analytics.score === Infinity ? '∞' : analytics.score, color: '#10b981' },
+                    { label: 'Posts', val: analytics.postCount, color: '#3b82f6' },
+                    { label: 'Tasks Done', val: analytics.completedTasks, color: '#f59e0b' },
+                    { label: 'Pending', val: analytics.pendingTasks, color: '#8b5cf6' },
+                    { label: 'Warnings', val: memberWarnings.length, color: memberWarnings.length > 0 ? '#ef4444' : '#10b981' },
+                    { label: 'Connections', val: analytics.connectionCount, color: '#06b6d4' },
+                  ].map((stat, i) => (
+                    <div key={i} style={{ background: '#f9fafb', borderRadius: '6px', padding: '6px 10px', textAlign: 'center', minWidth: '60px', flex: '1 1 auto' }}>
+                      <div style={{ fontWeight: 700, fontSize: '14px', color: stat.color }}>{stat.val}</div>
+                      <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.5)' }}>{stat.label}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ background: s.role === 'master' ? '#fef08a' : s.role === 'admin' ? '#bbf7d0' : '#eef3f8', padding: '3px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 600 }}>{s.role}</span>
-                {s.role !== 'master' && (
-                  <>
-                    {s.role === 'scientist' ? <button onClick={() => handlePromote(s.id)} className="scicomm-btn-secondary" style={{ padding: '3px 8px', fontSize: '11px' }}>Promote</button> : isMaster && <button onClick={() => handleDemote(s.id)} style={{ padding: '3px 8px', fontSize: '11px', border: '1px solid #e0dfdc', borderRadius: '24px', background: 'transparent', cursor: 'pointer' }}>Demote</button>}
-                    <button onClick={() => handleRemoveUser(s.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><UserX size={16} /></button>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
