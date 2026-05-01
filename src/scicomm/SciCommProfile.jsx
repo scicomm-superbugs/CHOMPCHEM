@@ -66,17 +66,16 @@ export default function SciCommProfile() {
   // Score calculation
   const myPosts = postsData.filter(p => String(p.authorId) === String(user.id));
   const myLikesReceived = myPosts.reduce((s, p) => s + Object.values(p.reactions || {}).reduce((ss, arr) => ss + arr.length, 0), 0);
-  const myCompletedTasks = tasksData.filter(t => String(t.assignedTo) === String(user.id) && t.status === 'Completed').length;
+  const myCompletedTasks = tasksData.filter(t => String(t.assignedTo) === String(user.id) && (t.status === 'Completed' || t.status === 'Approved')).length;
   const myConnections = connectionsData.filter(c => c.status === 'accepted' && (String(c.fromId) === String(user.id) || String(c.toId) === String(user.id))).length;
   const myAttended = meetingsData.filter(m => (m.attendees || []).includes(user.id)).length;
-  const myScore = calculateScore({ completedTasks: myCompletedTasks, likesReceived: myLikesReceived, connectionCount: myConnections, meetingsAttended: myAttended, tagsCount: (me?.pinnedTags || []).length });
+  const myScore = calculateScore({ completedTasks: myCompletedTasks, likesReceived: myLikesReceived, connectionCount: myConnections, meetingsAttended: myAttended });
   const unlockedTags = getUnlockedTags(myScore);
   const pinnedTags = me?.pinnedTags || [];
   const pinnedPosts = me?.pinnedPosts || [];
 
   // Warnings
-  const myWarnings = warningsData.filter(w => String(w.userId) === String(user.id) && w.status !== 'removed');
-  const activeWarnings = myWarnings.filter(w => w.status !== 'removed');
+  const activeWarnings = warningsData.filter(w => String(w.userId) === String(user.id) && w.status !== 'removed');
   const isSuspended = activeWarnings.length >= 3;
 
   // Portfolio Readiness Calculation

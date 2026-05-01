@@ -241,17 +241,7 @@ export const db = {
       await deleteDoc(doc(firestore, getCollectionName('scicomm_banners'), String(id)));
     }
   },
-  scicomm_reels: {
-    add: async (reel) => {
-      await addDoc(collection(firestore, getCollectionName('scicomm_reels')), reel);
-    },
-    update: async (id, data) => {
-      await updateDoc(doc(firestore, getCollectionName('scicomm_reels'), String(id)), data);
-    },
-    delete: async (id) => {
-      await deleteDoc(doc(firestore, getCollectionName('scicomm_reels'), String(id)));
-    }
-  },
+
   scicomm_recognitions: {
     add: async (recognition) => {
       await addDoc(collection(firestore, getCollectionName('scicomm_recognitions')), recognition);

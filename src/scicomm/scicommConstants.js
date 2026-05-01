@@ -53,8 +53,8 @@ export const AUTO_TAGS = [
 ];
 
 // ===== SCORE CALCULATOR =====
-export function calculateScore({ completedTasks = 0, likesReceived = 0, meetingsAttended = 0, tagsCount = 0, connectionCount = 0, reputationBonus = 0 }) {
-  return (completedTasks * 25) + (likesReceived * 5) + (meetingsAttended * 15) + (tagsCount * 15) + (connectionCount * 2) + reputationBonus;
+export function calculateScore({ completedTasks = 0, likesReceived = 0, meetingsAttended = 0, connectionCount = 0, reputationBonus = 0 }) {
+  return (completedTasks * 25) + (likesReceived * 5) + (meetingsAttended * 15) + (connectionCount * 2) + reputationBonus;
 }
 
 export function getUnlockedTags(score) {

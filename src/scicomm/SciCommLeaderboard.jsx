@@ -47,7 +47,7 @@ export default function SciCommLeaderboard() {
     const meetingsAttended = meetingsData.filter(m => (m.attendees || []).includes(s.id) && inRange(m.date)).length;
     const tagsCount = (s.pinnedTags || []).length;
 
-    return calculateScore({ completedTasks, likesReceived, connectionCount, meetingsAttended, tagsCount });
+    return calculateScore({ completedTasks, likesReceived, connectionCount, meetingsAttended });
   };
 
   const leaderboard = activeMembers
@@ -71,9 +71,7 @@ export default function SciCommLeaderboard() {
             <div>✅ Task completed = <strong>25 pts</strong></div>
             <div>❤️ Reaction received = <strong>5 pts</strong></div>
             <div>📅 Meeting attended = <strong>15 pts</strong></div>
-            <div>🏅 Pinned tag = <strong>15 pts</strong></div>
             <div>🤝 Connection = <strong>2 pts</strong></div>
-            <div style={{ borderTop: '1px solid #e0dfdc', marginTop: '8px', paddingTop: '8px', color: '#ef4444' }}>❌ Posts = <strong>0 pts</strong></div>
             <div style={{ color: 'rgba(0,0,0,0.4)', fontSize: '11px' }}>Posts don't generate points to prevent spam.</div>
           </div>
         </div>

@@ -20,10 +20,10 @@ export default function SciCommLayout() {
   const chatMessages = useLiveCollection('scicomm_chat_messages') || [];
   const meetingsData = useLiveCollection('scicomm_meetings') || [];
   
-  const myPendingTasks = tasksData.filter(t => String(t.assignedTo) === String(user.id) && t.status !== 'Completed');
+  const myPendingTasks = tasksData.filter(t => String(t.assignedTo) === String(user.id) && t.status !== 'Completed' && t.status !== 'Approved');
   const myWarnings = warningsData.filter(w => String(w.userId) === String(user.id) && !w.seen);
   
-  const upcomingMeetings = meetingsData.filter(m => (m.attendees || []).includes(user.id) && new Date(m.date) >= new Date());
+  const upcomingMeetings = meetingsData.filter(m => ((m.members || []).includes(user.id) || m.allMembers) && new Date(m.date) >= new Date(new Date().toDateString()));
   
   const isAdmin = user.role === 'admin' || user.role === 'master';
 

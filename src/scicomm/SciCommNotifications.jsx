@@ -14,7 +14,7 @@ export default function SciCommNotifications() {
   const connectionsData = useLiveCollection('scicomm_connections') || [];
   const meetingsData = useLiveCollection('scicomm_meetings') || [];
 
-  const myTasks = tasksData.filter(t => String(t.assignedTo) === String(user.id) && t.status !== 'Completed');
+  const myTasks = tasksData.filter(t => String(t.assignedTo) === String(user.id) && t.status !== 'Completed' && t.status !== 'Approved');
   const myWarnings = warningsData.filter(w => String(w.userId) === String(user.id));
   const pendingAccounts = isAdmin ? scientists.filter(s => s.accountStatus === 'pending') : [];
   const pendingConnections = connectionsData.filter(c => c.status === 'pending' && String(c.toId) === String(user.id));
@@ -35,7 +35,7 @@ export default function SciCommNotifications() {
   }, []);
 
   const notifications = [
-    ...myTasks.map(t => ({ type: 'task', icon: <Briefcase size={18} color="#10b981" />, bg: '#ecfdf5', title: `📋 New task: ${t.title}`, sub: `Due: ${t.dueDate ? new Date(t.dueDate).toLocaleDateString() : 'TBD'} • Priority: ${t.priority || 'Medium'}`, time: t.createdAt, id: 't_' + t.id })),
+    ...myTasks.map(t => ({ type: 'task', icon: <Briefcase size={18} color="#10b981" />, bg: '#ecfdf5', title: `📋 New task: ${t.title}`, sub: `Due: ${t.dueDate ? new Date(t.dueDate).toLocaleDateString() : 'TBD'} • Priority: ${t.priority || 'Medium'}`, time: t.createdAt, id: 't_' + t.id, link: '/tasks' })),
     ...myWarnings.filter(w => w.status !== 'removed').map(w => ({ type: 'warning', icon: <AlertTriangle size={18} color="#ef4444" />, bg: '#fee2e2', title: `⚠️ Warning ${w.warningNumber}/3 from ${w.issuedBy}`, sub: w.message, time: w.issuedAt, id: 'w_' + w.id, link: '/profile' })),
     ...pendingAccounts.map(s => ({ type: 'pending', icon: <UserCheck size={18} color="#f59e0b" />, bg: '#fef3c7', title: `👤 New account: ${s.name}`, sub: `@${s.username} — Awaiting approval`, time: '', id: 'p_' + s.id, link: '/admin' })),
     ...pendingConnections.map(c => ({ type: 'connection', icon: <UserCheck size={18} color="#3b82f6" />, bg: '#dbeafe', title: `🤝 ${c.fromName} wants to connect`, sub: 'Accept or ignore in Network tab', time: c.createdAt, id: 'c_' + c.id, link: '/network' })),
