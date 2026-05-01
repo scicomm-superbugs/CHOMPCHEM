@@ -21,16 +21,16 @@ export default function Register() {
   const { user } = useAuth();
   const { workspace } = useParams();
 
-  const mappedWorkspace = (workspace === 'aiu' || workspace === 'Alamein International University' || workspace === 'alamein') ? 'alamein' : workspace;
+  const mappedWorkspace = (workspace === 'aiu' || workspace === 'Alamein International University' || workspace === 'alamein') ? 'alamein' : (workspace === 'aiuscicomm' ? 'aiuscicomm' : workspace);
 
-  if (mappedWorkspace && (mappedWorkspace === 'alamein' || mappedWorkspace === 'compchem')) {
+  if (mappedWorkspace && (mappedWorkspace === 'alamein' || mappedWorkspace === 'compchem' || mappedWorkspace === 'aiuscicomm')) {
     localStorage.setItem('workspaceId', mappedWorkspace);
   }
 
   const workspaceId = localStorage.getItem('workspaceId') || 'compchem';
 
   useEffect(() => {
-    document.title = workspaceId === 'alamein' ? 'Alamein International University' : 'COMPCHEM Laboratory';
+    document.title = workspaceId === 'alamein' ? 'Alamein International University' : (workspaceId === 'aiuscicomm' ? 'AIU SciComm Team' : 'COMPCHEM Laboratory');
   }, [workspaceId]);
 
   // If already logged in, redirect
@@ -96,6 +96,12 @@ export default function Register() {
             <>
               <img src="./alamein_logo_2.png" alt="Alamein University" style={{ height: '50px', marginBottom: '1rem', objectFit: 'contain' }} onError={e => e.target.style.display='none'}/>
               <h2>🎓 Faculty Registration</h2>
+              <p style={{ color: 'var(--text-muted)' }}>Create a new account</p>
+            </>
+          ) : workspaceId === 'aiuscicomm' ? (
+            <>
+              <img src="./aiu_scicomm_logo.png" alt="AIU SciComm" style={{ height: '50px', marginBottom: '1rem', objectFit: 'contain' }} onError={e => e.target.style.display='none'}/>
+              <h2>📢 SciComm Registration</h2>
               <p style={{ color: 'var(--text-muted)' }}>Create a new account</p>
             </>
           ) : (

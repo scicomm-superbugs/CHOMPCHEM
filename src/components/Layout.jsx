@@ -77,6 +77,10 @@ export default function Layout() {
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <img src="./alamein_logo_2.png" alt="Alamein Logo" style={{ height: '48px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
               </div>
+            ) : localStorage.getItem('workspaceId') === 'aiuscicomm' ? (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <img src="./aiu_scicomm_logo.png" alt="AIU SciComm Logo" style={{ height: '48px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
+              </div>
             ) : (
               <img src="./compchem_logo_2.png" alt="COMPCHEM Logo" className="logo-image" style={{ objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
             )}

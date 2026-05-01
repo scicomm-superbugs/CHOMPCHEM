@@ -595,6 +595,21 @@ export default function Portal() {
             ]}
           />
 
+          <GlassCard 
+            title="AIU SciComm Team"
+            subtitle="Science Communication Team"
+            description="The dedicated platform for the Science Communication Team at Alamein International University. Fostering outreach, collaboration, and scientific dialogue."
+            logoSrc="./aiu_scicomm_logo.png"
+            accentColor="#10b981"
+            delay="0.6s"
+            onClick={() => handleSelectWorkspace('aiuscicomm')}
+            tags={[
+              { icon: <Users size={12}/>, label: 'Outreach' },
+              { icon: <Network size={12}/>, label: 'Communication' },
+              { icon: <BookOpen size={12}/>, label: 'Science' }
+            ]}
+          />
+
         </div>
         
       </div>

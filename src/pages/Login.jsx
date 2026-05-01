@@ -13,9 +13,9 @@ export default function Login() {
   const navigate = useNavigate();
   const { workspace } = useParams();
 
-  const mappedWorkspace = (workspace === 'aiu' || workspace === 'Alamein International University' || workspace === 'alamein') ? 'alamein' : workspace;
+  const mappedWorkspace = (workspace === 'aiu' || workspace === 'Alamein International University' || workspace === 'alamein') ? 'alamein' : (workspace === 'aiuscicomm' ? 'aiuscicomm' : workspace);
 
-  if (mappedWorkspace && (mappedWorkspace === 'alamein' || mappedWorkspace === 'compchem')) {
+  if (mappedWorkspace && (mappedWorkspace === 'alamein' || mappedWorkspace === 'compchem' || mappedWorkspace === 'aiuscicomm')) {
     localStorage.setItem('workspaceId', mappedWorkspace);
   }
 
@@ -30,7 +30,7 @@ export default function Login() {
   }
 
   useEffect(() => {
-    document.title = workspaceId === 'alamein' ? 'Alamein International University' : 'COMPCHEM Laboratory';
+    document.title = workspaceId === 'alamein' ? 'Alamein International University' : (workspaceId === 'aiuscicomm' ? 'AIU SciComm Team' : 'COMPCHEM Laboratory');
   }, [workspaceId]);
 
   const handleSubmit = async (e) => {
@@ -55,6 +55,12 @@ export default function Login() {
               <img src="./alamein_logo_2.png" alt="Alamein University" style={{ height: '80px', marginBottom: '1rem', objectFit: 'contain' }} onError={e => e.target.style.display='none'}/>
               <h2 style={{ fontSize: '1.5rem', color: '#805AD5', marginBottom: '0.25rem', textAlign: 'center' }}>Alamein International University</h2>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Faculty of Science</div>
+            </div>
+          ) : workspaceId === 'aiuscicomm' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <img src="./aiu_scicomm_logo.png" alt="AIU SciComm" style={{ height: '80px', marginBottom: '1rem', objectFit: 'contain' }} onError={e => e.target.style.display='none'}/>
+              <h2 style={{ fontSize: '1.5rem', color: '#10b981', marginBottom: '0.25rem', textAlign: 'center' }}>AIU SciComm Team</h2>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Science Communication Team</div>
             </div>
           ) : (
             <>
