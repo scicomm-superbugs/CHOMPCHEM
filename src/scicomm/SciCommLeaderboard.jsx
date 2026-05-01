@@ -1,5 +1,6 @@
 import { useLiveCollection } from '../db';
 import { useAuth } from '../context/AuthContext';
+import { useState } from 'react';
 import { Trophy, UserCircle, TrendingUp } from 'lucide-react';
 import { AVATARS, AUTO_TAGS, calculateScore, getUnlockedTags, REACTIONS } from './scicommConstants';
 
@@ -12,6 +13,8 @@ export default function SciCommLeaderboard() {
   const meetingsData = useLiveCollection('scicomm_meetings') || [];
   const warningsData = useLiveCollection('scicomm_warnings') || [];
 
+  const [timeframe, setTimeframe] = useState('all'); // all | monthly | weekly | daily
+
   const activeMembers = scientists.filter(s => s.accountStatus !== 'pending');
 
   const renderAvatar = (member, size = 48) => {
@@ -21,16 +24,26 @@ export default function SciCommLeaderboard() {
     return <div style={{ width: size, height: size, borderRadius: '50%', background: '#eef3f8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><UserCircle size={size * 0.55} color="#666" /></div>;
   };
 
+  const getTimeframeStart = () => {
+    const now = new Date();
+    if (timeframe === 'daily') return new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    if (timeframe === 'weekly') { const d = new Date(now); d.setDate(d.getDate() - 7); return d.toISOString(); }
+    if (timeframe === 'monthly') { const d = new Date(now); d.setMonth(d.getMonth() - 1); return d.toISOString(); }
+    return null; // all time
+  };
+
   const getMemberScore = (s) => {
-    // Suspended members (3+ active warnings) don't appear
     const warnings = warningsData.filter(w => String(w.userId) === String(s.id) && w.status !== 'removed');
     if (warnings.length >= 3) return -1;
     if (s.role === 'master') return Infinity;
 
-    const likesReceived = postsData.filter(p => String(p.authorId) === String(s.id)).reduce((sum, p) => sum + Object.values(p.reactions || {}).reduce((ss, arr) => ss + arr.length, 0), 0);
-    const completedTasks = tasksData.filter(t => String(t.assignedTo) === String(s.id) && t.status === 'Completed').length;
-    const connectionCount = connectionsData.filter(c => c.status === 'accepted' && (String(c.fromId) === String(s.id) || String(c.toId) === String(s.id))).length;
-    const meetingsAttended = meetingsData.filter(m => (m.attendees || []).includes(s.id)).length;
+    const start = getTimeframeStart();
+    const inRange = (dateStr) => !start || (dateStr && dateStr >= start);
+
+    const likesReceived = postsData.filter(p => String(p.authorId) === String(s.id) && inRange(p.createdAt)).reduce((sum, p) => sum + Object.values(p.reactions || {}).reduce((ss, arr) => ss + arr.length, 0), 0);
+    const completedTasks = tasksData.filter(t => String(t.assignedTo) === String(s.id) && (t.status === 'Completed' || t.status === 'Approved') && inRange(t.approvedAt || t.createdAt)).length;
+    const connectionCount = connectionsData.filter(c => c.status === 'accepted' && (String(c.fromId) === String(s.id) || String(c.toId) === String(s.id)) && inRange(c.acceptedAt || c.createdAt)).length;
+    const meetingsAttended = meetingsData.filter(m => (m.attendees || []).includes(s.id) && inRange(m.date)).length;
     const tagsCount = (s.pinnedTags || []).length;
 
     return calculateScore({ completedTasks, likesReceived, connectionCount, meetingsAttended, tagsCount });
@@ -68,7 +81,12 @@ export default function SciCommLeaderboard() {
       <div className="scicomm-feed-main">
         {/* Top 3 Podium */}
         <div className="scicomm-card scicomm-card-padding">
-          <h2 style={{ margin: '0 0 24px', fontSize: '22px', textAlign: 'center' }}>🏆 SciComm Leaderboard</h2>
+          <h2 style={{ margin: '0 0 16px', fontSize: '22px', textAlign: 'center' }}>🏆 SciComm Leaderboard</h2>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '20px', flexWrap: 'wrap' }}>
+            {[{id:'all',label:'All Time'},{id:'monthly',label:'Monthly'},{id:'weekly',label:'Weekly'},{id:'daily',label:'Daily'}].map(t => (
+              <button key={t.id} onClick={() => setTimeframe(t.id)} style={{ padding: '6px 16px', borderRadius: '20px', border: timeframe === t.id ? 'none' : '1px solid #e0dfdc', background: timeframe === t.id ? '#10b981' : 'transparent', color: timeframe === t.id ? 'white' : 'rgba(0,0,0,0.6)', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>{t.label}</button>
+            ))}
+          </div>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
             {[1, 0, 2].map(idx => {
               const person = leaderboard[idx];

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useLiveCollection, db } from '../db';
+import { useLiveCollection, db, uploadFile } from '../db';
 import { Image, Video, FileText, Send, MessageSquare, Share2, MoreHorizontal, UserCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { REACTIONS, AVATARS, timeAgo, isSpamPost, calculateScore, getUnlockedTags } from './scicommConstants';
@@ -23,6 +23,10 @@ export default function SciCommFeed() {
   const [activeReactionPicker, setActiveReactionPicker] = useState(null);
   const [bannerIdx, setBannerIdx] = useState(0);
   const [postError, setPostError] = useState('');
+  const [postImage, setPostImage] = useState(null);
+  const [postVideo, setPostVideo] = useState(null);
+  const [isPostingMedia, setIsPostingMedia] = useState(false);
+  const isAdmin = user.role === 'admin' || user.role === 'master';
 
   const banners = [...bannersRaw].sort((a,b) => (a.order||0) - (b.order||0));
   const posts = [...postsRaw].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -60,8 +64,18 @@ export default function SciCommFeed() {
       return;
     }
     try {
+      setIsPostingMedia(true);
+      let imageUrl = null, videoUrl = null;
+      if (postImage) {
+        imageUrl = await uploadFile(postImage, `posts/${user.id}_${Date.now()}_${postImage.name}`);
+      }
+      if (postVideo) {
+        videoUrl = await uploadFile(postVideo, `posts/${user.id}_${Date.now()}_${postVideo.name}`);
+      }
       await db.scicomm_posts.add({
         content: newPost,
+        imageUrl,
+        videoUrl,
         authorId: user.id,
         authorName: user.name,
         createdAt: new Date().toISOString(),
@@ -70,9 +84,12 @@ export default function SciCommFeed() {
         pinned: false
       });
       setNewPost('');
+      setPostImage(null);
+      setPostVideo(null);
     } catch (err) {
       console.error("Failed to post", err);
     }
+    setIsPostingMedia(false);
   };
 
   // Multi-reaction toggle
@@ -195,13 +212,18 @@ export default function SciCommFeed() {
               style={{ flex: 1, border: '1px solid #e0dfdc', borderRadius: '24px', padding: '0 16px', fontSize: '14px', outline: 'none', minHeight: '40px' }} />
           </div>
           {postError && <div style={{ color: '#ef4444', fontSize: '12px', marginBottom: '8px', padding: '6px 10px', background: '#fee2e2', borderRadius: '8px' }}>{postError}</div>}
+
+          {/* Media Preview */}
+          {postImage && <div style={{ marginBottom: '8px', position: 'relative' }}><img src={URL.createObjectURL(postImage)} alt="" style={{ maxHeight: '200px', borderRadius: '8px' }} /><button onClick={() => setPostImage(null)} style={{ position: 'absolute', top: 4, right: 4, background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer' }}>×</button></div>}
+          {postVideo && <div style={{ marginBottom: '8px', position: 'relative' }}><video src={URL.createObjectURL(postVideo)} style={{ maxHeight: '200px', borderRadius: '8px' }} controls /><button onClick={() => setPostVideo(null)} style={{ position: 'absolute', top: 4, right: 4, background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer' }}>×</button></div>}
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex' }}>
-              <button className="scicomm-feed-action"><Image size={18} color="#70b5f9" /> <span>Photo</span></button>
-              <button className="scicomm-feed-action"><Video size={18} color="#7fc15e" /> <span>Video</span></button>
+              <label className="scicomm-feed-action" style={{ cursor: 'pointer' }}><Image size={18} color="#70b5f9" /> <span>Photo</span><input type="file" accept="image/*" onChange={e => setPostImage(e.target.files[0])} style={{ display: 'none' }} /></label>
+              <label className="scicomm-feed-action" style={{ cursor: 'pointer' }}><Video size={18} color="#7fc15e" /> <span>Video</span><input type="file" accept="video/*" onChange={e => setPostVideo(e.target.files[0])} style={{ display: 'none' }} /></label>
               <button className="scicomm-feed-action"><FileText size={18} color="#e7a33e" /> <span>Article</span></button>
             </div>
-            {newPost.trim() && <button className="scicomm-btn-primary" onClick={handlePostSubmit} style={{ padding: '6px 20px' }}><Send size={14} /> Post</button>}
+            {(newPost.trim() || postImage || postVideo) && <button className="scicomm-btn-primary" onClick={handlePostSubmit} disabled={isPostingMedia} style={{ padding: '6px 20px' }}>{isPostingMedia ? 'Posting...' : <><Send size={14} /> Post</>}</button>}
           </div>
         </div>
 
@@ -229,10 +251,23 @@ export default function SciCommFeed() {
                   <div style={{ flex: 1 }}>
                     <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>{post.authorName}</h4>
                     <div style={{ color: 'rgba(0,0,0,0.6)', fontSize: '12px' }}>{author?.department || 'Member'}</div>
-                    <div style={{ color: 'rgba(0,0,0,0.5)', fontSize: '11px' }}>{timeAgo(post.createdAt)} • 🌐</div>
+                    <div style={{ color: 'rgba(0,0,0,0.5)', fontSize: '11px' }}>{timeAgo(post.createdAt)} • 🌐{post.recognized && ' ⭐ Master Recognized'}</div>
                   </div>
+                  {isAdmin && (
+                    <div style={{ position: 'relative' }}>
+                      <button onClick={() => setActiveReactionPicker(activeReactionPicker === 'menu_'+post.id ? null : 'menu_'+post.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}><MoreHorizontal size={18} /></button>
+                      {activeReactionPicker === 'menu_'+post.id && (
+                        <div style={{ position: 'absolute', right: 0, top: '100%', background: 'white', border: '1px solid #e0dfdc', borderRadius: '8px', padding: '4px 0', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 10, minWidth: '180px' }}>
+                          <button onClick={async () => { await db.scicomm_posts.update(post.id, { recognized: true, recognizedBy: user.name, recognizedAt: new Date().toISOString() }); setActiveReactionPicker(null); }} style={{ display: 'block', width: '100%', padding: '8px 14px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '13px', textAlign: 'left' }}>⭐ Recognize Contribution</button>
+                          <button onClick={async () => { if(window.confirm('Delete this post?')) await db.scicomm_posts.delete(post.id); setActiveReactionPicker(null); }} style={{ display: 'block', width: '100%', padding: '8px 14px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '13px', textAlign: 'left', color: '#ef4444' }}>🗑️ Delete Post</button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <p style={{ margin: '0 0 8px', fontSize: '14px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{post.content}</p>
+                {post.imageUrl && <img src={post.imageUrl} alt="" style={{ width: '100%', borderRadius: '8px', marginBottom: '8px', maxHeight: '500px', objectFit: 'cover' }} />}
+                {post.videoUrl && <video src={post.videoUrl} controls playsInline style={{ width: '100%', borderRadius: '8px', marginBottom: '8px', maxHeight: '500px' }} />}
               </div>
 
               {/* Reaction summary + comment count */}
