@@ -29,24 +29,38 @@ export const uploadFile = async (file, path, onProgress) => {
     // Resumable upload with progress
     return new Promise((resolve, reject) => {
       const task = uploadBytesResumable(storageRef, file);
-      const timeout = setTimeout(() => { task.cancel(); reject(new Error('Upload timed out after 2 minutes')); }, 120000);
+      const timeout = setTimeout(() => { 
+        task.cancel(); 
+        reject(new Error('Upload timed out. Check your Firebase Storage CORS and Rules configuration.')); 
+      }, 30000); // 30 second strict timeout
+      
       task.on('state_changed',
         (snapshot) => {
           const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-          onProgress(pct);
+          if (onProgress) onProgress(pct);
         },
-        (error) => { clearTimeout(timeout); reject(error); },
+        (error) => { clearTimeout(timeout); reject(new Error('Firebase Storage Error: ' + error.message)); },
         async () => {
           clearTimeout(timeout);
           try { const url = await getDownloadURL(task.snapshot.ref); resolve(url); }
-          catch (e) { reject(e); }
+          catch (e) { reject(new Error('Failed to get download URL: ' + e.message)); }
         }
       );
     });
   } else {
-    // Simple upload for small files
-    await uploadBytes(storageRef, file);
-    return await getDownloadURL(storageRef);
+    // Simple upload for small files with timeout wrapper
+    return new Promise(async (resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error('Upload timed out. Check Firebase Storage CORS and Rules.')), 30000);
+      try {
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        clearTimeout(timeout);
+        resolve(url);
+      } catch (err) {
+        clearTimeout(timeout);
+        reject(new Error('Firebase Storage Error: ' + err.message));
+      }
+    });
   }
 };
 

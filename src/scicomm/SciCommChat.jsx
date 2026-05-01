@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection, db, uploadFile } from '../db';
 import { Send, Plus, UserCircle, Users, Search, Smile, Paperclip, ArrowLeft, Image as ImageIcon } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { AVATARS, timeAgo } from './scicommConstants';
 
 export default function SciCommChat() {
@@ -41,6 +41,21 @@ export default function SciCommChat() {
     const av = AVATARS.find(a => a.id === member.avatarId);
     if (av) return <div style={{ width: size, height: size, borderRadius: '50%', background: av.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.45, flexShrink: 0 }}>{av.svg}</div>;
     return <div style={{ width: size, height: size, borderRadius: '50%', background: '#eef3f8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><UserCircle size={size * 0.6} color="#666" /></div>;
+  };
+
+  const renderMessageText = (text, isMe) => {
+    if (!text) return null;
+    const parts = text.split(/(#\w+|@\w+)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('#')) return <Link key={i} to={`/network?q=${encodeURIComponent(part.slice(1))}`} style={{ color: isMe ? '#e0f2fe' : '#0a66c2', fontWeight: 600, textDecoration: 'none' }}>{part}</Link>;
+      if (part.startsWith('@')) {
+        const username = part.slice(1).toLowerCase();
+        const userMatch = scientists.find(s => (s.username || '').toLowerCase() === username || s.name.replace(/\s+/g, '').toLowerCase() === username);
+        if (userMatch) return <Link key={i} to={`/member/${userMatch.id}`} style={{ background: isMe ? 'rgba(255,255,255,0.2)' : '#eef3f8', color: isMe ? '#fff' : '#0a66c2', padding: '2px 4px', borderRadius: '4px', fontWeight: 600, textDecoration: 'none' }}>{part}</Link>;
+        return <span key={i} style={{ color: isMe ? '#e0f2fe' : '#0a66c2', fontWeight: 600 }}>{part}</span>;
+      }
+      return <span key={i}>{part}</span>;
+    });
   };
 
   // Rooms I'm in
@@ -218,7 +233,7 @@ export default function SciCommChat() {
                       {!isMe && activeRoom.type === 'group' && <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#10b981' }}>{m.senderName}</div>}
                       {m.type === 'image' && m.fileUrl && <img src={m.fileUrl} alt="" style={{ maxWidth: '100%', borderRadius: '8px', marginBottom: '4px' }} />}
                       {m.type === 'file' && m.fileUrl && <a href={m.fileUrl} target="_blank" rel="noreferrer" style={{ color: isMe ? 'white' : '#2563eb', textDecoration: 'underline' }}>📎 {m.fileName || 'File'}</a>}
-                      {m.content && <div>{m.content}</div>}
+                      {m.content && <div>{renderMessageText(m.content, isMe)}</div>}
                       <div style={{ fontSize: '10px', marginTop: '4px', opacity: 0.7, textAlign: 'right' }}>{timeAgo(m.createdAt)}</div>
                     </div>
                   </div>

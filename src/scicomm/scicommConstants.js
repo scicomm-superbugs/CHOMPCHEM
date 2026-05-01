@@ -65,6 +65,35 @@ export function getNextTag(score) {
   return AUTO_TAGS.find(t => t.threshold > score) || null;
 }
 
+// ===== USER LEVELS =====
+export const USER_LEVELS = [
+  { threshold: 0, level: 1, title: 'Novice', color: '#6b7280', bg: '#f3f4f6' },
+  { threshold: 150, level: 2, title: 'Apprentice', color: '#10b981', bg: '#ecfdf5' },
+  { threshold: 300, level: 3, title: 'Explorer', color: '#0ea5e9', bg: '#e0f2fe' },
+  { threshold: 500, level: 4, title: 'Analyst', color: '#8b5cf6', bg: '#ede9fe' },
+  { threshold: 800, level: 5, title: 'Researcher', color: '#ec4899', bg: '#fce7f3' },
+  { threshold: 1200, level: 6, title: 'Scholar', color: '#f43f5e', bg: '#ffe4e6' },
+  { threshold: 2000, level: 7, title: 'Innovator', color: '#d946ef', bg: '#fae8ff' },
+  { threshold: 3000, level: 8, title: 'Luminary', color: '#f59e0b', bg: '#fef3c7' },
+  { threshold: 5000, level: 9, title: 'Visionary', color: '#14b8a6', bg: '#ccfbf1' },
+  { threshold: 8000, level: 10, title: 'Master', color: '#ef4444', bg: '#fee2e2' }
+];
+
+export function getUserLevel(score) {
+  if (score === Infinity) return { level: 99, title: 'Grandmaster', color: '#000000', bg: '#f3f4f6' };
+  let current = USER_LEVELS[0];
+  for (const l of USER_LEVELS) {
+    if (score >= l.threshold) current = l;
+    else break;
+  }
+  const next = USER_LEVELS.find(l => l.threshold > score) || null;
+  let progress = 100;
+  if (next) {
+    progress = Math.min(100, Math.max(0, ((score - current.threshold) / (next.threshold - current.threshold)) * 100));
+  }
+  return { ...current, next, progress };
+}
+
 // ===== SPAM DETECTION =====
 export function isSpamPost(content, recentPosts) {
   if (!content || content.trim().length < 10) return true;

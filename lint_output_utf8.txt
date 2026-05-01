@@ -1,0 +1,238 @@
+﻿
+> compchem@0.0.0 lint
+> eslint .
+
+
+D:\Ai Projects\compchem\src\App.jsx
+  2:10  error  'useEffect' is defined but never used  no-unused-vars
+
+D:\Ai Projects\compchem\src\components\Layout.jsx
+  3:127  error  'Settings' is defined but never used   no-unused-vars
+  3:157  error  'Building2' is defined but never used  no-unused-vars
+
+D:\Ai Projects\compchem\src\context\AuthContext.jsx
+   43:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  41 |     } else {
+  42 |       clearTimeout(timeoutId);
+> 43 |       setLoading(false);
+     |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  44 |     }
+  45 |   }, []);
+  46 |  react-hooks/set-state-in-effect
+  125:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                react-refresh/only-export-components
+
+D:\Ai Projects\compchem\src\pages\Chat.jsx
+  21:9  warning  The 'filteredMessages' conditional could make the dependencies of useEffect Hook (at line 42) change on every render. To fix this, wrap the initialization of 'filteredMessages' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+D:\Ai Projects\compchem\src\pages\Dashboard.jsx
+  2:10  error  'Beaker' is defined but never used  no-unused-vars
+
+D:\Ai Projects\compchem\src\pages\Login.jsx
+   4:22  error  'Building2' is defined but never used                                                                                                                                                        no-unused-vars
+  32:3   error  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+
+D:\Ai Projects\compchem\src\pages\Portal.jsx
+   94:9   error  'navigate' is assigned a value but never used                              no-unused-vars
+  215:11  error  The value assigned to 'opacityValue' is not used in subsequent statements  no-useless-assignment
+
+D:\Ai Projects\compchem\src\pages\Profile.jsx
+    4:16  error    'Key' is defined but never used                                                                                     no-unused-vars
+    4:21  error    'Trash2' is defined but never used                                                                                  no-unused-vars
+    4:37  error    'Activity' is defined but never used                                                                                no-unused-vars
+   11:9   error    'navigate' is assigned a value but never used                                                                       no-unused-vars
+   37:6   warning  React Hook useEffect has a missing dependency: 'currentUserData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  114:16  error    'err' is defined but never used                                                                                     no-unused-vars
+
+D:\Ai Projects\compchem\src\pages\Register.jsx
+   6:10  error  'Building2' is defined but never used          no-unused-vars
+  20:9   error  'navigate' is assigned a value but never used  no-unused-vars
+
+D:\Ai Projects\compchem\src\pages\TeamSearch.jsx
+  1:20  error  'useEffect' is defined but never used  no-unused-vars
+  3:24  error  'Shield' is defined but never used     no-unused-vars
+  3:32  error  'Crown' is defined but never used      no-unused-vars
+
+D:\Ai Projects\compchem\src\pages\UsageTracking.jsx
+  3:48  error  'Upload' is defined but never used          no-unused-vars
+  5:23  error  'parseCSV' is defined but never used        no-unused-vars
+  5:33  error  'readFileAsText' is defined but never used  no-unused-vars
+
+D:\Ai Projects\compchem\src\scicomm\SciCommAdmin.jsx
+  4:44   error  'Plus' is defined but never used             no-unused-vars
+  4:75   error  'CheckCircle' is defined but never used      no-unused-vars
+  4:120  error  'Link2' is defined but never used            no-unused-vars
+  5:10   error  'AVATARS' is defined but never used          no-unused-vars
+  5:35   error  'getUnlockedTags' is defined but never used  no-unused-vars
+  5:52   error  'REACTIONS' is defined but never used        no-unused-vars
+
+D:\Ai Projects\compchem\src\scicomm\SciCommCalendar.jsx
+  21:10  error  'viewMode' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      no-unused-vars
+  21:20  error  'setViewMode' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   no-unused-vars
+  49:86  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  47 |     e.preventDefault();
+  48 |     if (!newEvent.date || !newEvent.title) return;
+> 49 |     const updatedEvents = [...(targetUser?.personalEvents || []), { ...newEvent, id: Date.now() }];
+     |                                                                                      ^^^^^^^^^^ Cannot call impure function
+  50 |     await db.scientists.update(selectedUserId, { personalEvents: updatedEvents });
+  51 |     setShowAddEvent(false);
+  52 |     setNewEvent({ date: '', title: '', type: 'personal', startTime: '', endTime: '' });  react-hooks/purity
+
+D:\Ai Projects\compchem\src\scicomm\SciCommChat.jsx
+    4:41  error    'Search' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   no-unused-vars
+    4:87  error    'ImageIcon' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+   28:21  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  26 |     if (withId && rooms.length > 0) {
+  27 |       const existing = rooms.find(r => r.type === 'private' && r.members?.includes(user.id) && r.members?.includes(withId));
+> 28 |       if (existing) setSelectedRoom(existing.id);
+     |                     ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  29 |       else {
+  30 |         const other = scientists.find(s => String(s.id) === String(withId));
+  31 |         if (other) {                                                                                                                                                                                                                                                                                                                                                                       react-hooks/set-state-in-effect
+   32:11  error    Error: Cannot access variable before it is declared
+
+`createPrivateRoom` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  30 |         const other = scientists.find(s => String(s.id) === String(withId));
+  31 |         if (other) {
+> 32 |           createPrivateRoom(withId, other.name);
+     |           ^^^^^^^^^^^^^^^^^ `createPrivateRoom` accessed before it is declared
+  33 |         }
+  34 |       }
+  35 |     }
+
+  69 |   }, [roomMessages.length, selectedRoom]);
+  70 |
+> 71 |   const createPrivateRoom = async (otherId, otherName) => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 72 |     const existing = rooms.find(r => r.type === 'private' && r.members?.includes(user.id) && r.members?.includes(otherId));
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 73 |     if (existing) { setSelectedRoom(existing.id); return; }
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 82 |     setShowNewChat(false);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 83 |   };
+     | ^^^^^ `createPrivateRoom` is declared here
+  84 |
+  85 |   const createGroupRoom = async () => {
+  86 |     if (!newGroupName.trim() || selectedMembers.length === 0) return;  react-hooks/immutability
+   36:6   warning  React Hook useEffect has missing dependencies: 'createPrivateRoom', 'rooms', 'scientists', 'searchParams', and 'user.id'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+   36:7   warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
+  133:14  error    'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      no-unused-vars
+
+D:\Ai Projects\compchem\src\scicomm\SciCommFeed.jsx
+    1:31  error  'useRef' is defined but never used           no-unused-vars
+    6:67  error  'getUnlockedTags' is defined but never used  no-unused-vars
+  245:32  error  'i' is defined but never used                no-unused-vars
+
+D:\Ai Projects\compchem\src\scicomm\SciCommLayout.jsx
+   2:101  error    'AlertTriangle' is defined but never used                                                                          no-unused-vars
+   2:116  error    'Menu' is defined but never used                                                                                   no-unused-vars
+  20:9    error    'chatMessages' is assigned a value but never used                                                                  no-unused-vars
+  32:10   error    'mobileMenuOpen' is assigned a value but never used                                                                no-unused-vars
+  32:26   error    'setMobileMenuOpen' is assigned a value but never used                                                             no-unused-vars
+  48:6    warning  React Hook useEffect has a missing dependency: 'myPendingTasks'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  56:6    warning  React Hook useEffect has a missing dependency: 'myWarnings'. Either include it or remove the dependency array      react-hooks/exhaustive-deps
+
+D:\Ai Projects\compchem\src\scicomm\SciCommLeaderboard.jsx
+    4:30  error  'TrendingUp' is defined but never used          no-unused-vars
+    6:19  error  'AUTO_TAGS' is defined but never used           no-unused-vars
+    6:63  error  'REACTIONS' is defined but never used           no-unused-vars
+   48:11  error  'tagsCount' is assigned a value but never used  no-unused-vars
+  116:19  error  'tags' is assigned a value but never used       no-unused-vars
+
+D:\Ai Projects\compchem\src\scicomm\SciCommMeetings.jsx
+   4:34  error  'Users' is defined but never used                             no-unused-vars
+   4:41  error  'CheckCircle' is defined but never used                       no-unused-vars
+   5:19  error  'timeAgo' is defined but never used                           no-unused-vars
+  26:9   error  'renderAvatar' is assigned a value but never used             no-unused-vars
+  59:9   error  'handleConfirmAttendance' is assigned a value but never used  no-unused-vars
+  82:11  error  'iAmAttending' is assigned a value but never used             no-unused-vars
+  83:11  error  'iAmInvited' is assigned a value but never used               no-unused-vars
+
+D:\Ai Projects\compchem\src\scicomm\SciCommMemberProfile.jsx
+  4:47  error  'UserCheck' is defined but never used  no-unused-vars
+
+D:\Ai Projects\compchem\src\scicomm\SciCommNetwork.jsx
+   4:20  error    'UserCheck' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              no-unused-vars
+   4:73  error    'ShieldOff' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              no-unused-vars
+  19:14  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  17 |   useEffect(() => {
+  18 |     const q = searchParams.get('q');
+> 19 |     if (q) { setSearchTerm(q); setTab('discover'); }
+     |              ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  20 |   }, [searchParams.get('q')]);
+  21 |
+  22 |   const activeMembers = scientists.filter(s => s.accountStatus !== 'pending' && String(s.id) !== String(user.id));  react-hooks/set-state-in-effect
+  20:6   warning  React Hook useEffect has a missing dependency: 'searchParams'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/exhaustive-deps
+  20:7   warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+
+D:\Ai Projects\compchem\src\scicomm\SciCommNotifications.jsx
+   3:10  error    'Bell' is defined but never used                                                                               no-unused-vars
+   3:63  error    'MessageCircle' is defined but never used                                                                      no-unused-vars
+  29:78  error    'e' is defined but never used                                                                                  no-unused-vars
+  29:81  error    Empty block statement                                                                                          no-empty
+  31:6   warning  React Hook useEffect has a missing dependency: 'myWarnings'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\Ai Projects\compchem\src\scicomm\SciCommProfile.jsx
+   5:18  error    'Edit2' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    no-unused-vars
+   5:98  error    'CheckCircle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              no-unused-vars
+  45:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  43 |   useEffect(() => { 
+  44 |     if (me) {
+> 45 |       setSettingsForm({ 
+     |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  46 |         name: me.name || user.name, 
+  47 |         bio: me.bio || '', 
+  48 |         department: me.department || '',   react-hooks/set-state-in-effect
+  62:6   warning  React Hook useEffect has missing dependencies: 'me' and 'user.name'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react-hooks/exhaustive-deps
+
+D:\Ai Projects\compchem\src\scicomm\SciCommTasks.jsx
+   4:41  error  'AlertCircle' is defined but never used  no-unused-vars
+   4:54  error  'FileText' is defined but never used     no-unused-vars
+   4:64  error  'Upload' is defined but never used       no-unused-vars
+   4:80  error  'LinkIcon' is defined but never used     no-unused-vars
+  36:16  error  'err' is defined but never used          no-unused-vars
+
+D:\Ai Projects\compchem\test-browser-fast.js
+  28:3  error  'process' is not defined  no-undef
+
+D:\Ai Projects\compchem\test-browser-fast2.js
+  24:3  error  'process' is not defined  no-undef
+
+D:\Ai Projects\compchem\test-live.js
+  24:3  error  'process' is not defined  no-undef
+
+Γ£û 86 problems (76 errors, 10 warnings)
+

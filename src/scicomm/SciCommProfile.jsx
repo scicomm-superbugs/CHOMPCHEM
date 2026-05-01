@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { db, useLiveCollection, uploadFile } from '../db';
 import bcrypt from 'bcryptjs';
 import { Camera, Edit2, Award, Pin, AlertTriangle, UserCircle, X, Settings, Briefcase, FileText, CheckCircle, GraduationCap, Upload, Lock } from 'lucide-react';
-import { AVATARS, AUTO_TAGS, calculateScore, getUnlockedTags, timeAgo } from './scicommConstants';
+import { AVATARS, AUTO_TAGS, calculateScore, getUnlockedTags, timeAgo, getUserLevel } from './scicommConstants';
 
 export default function SciCommProfile() {
   const { user } = useAuth();
@@ -70,6 +70,7 @@ export default function SciCommProfile() {
   const myConnections = connectionsData.filter(c => c.status === 'accepted' && (String(c.fromId) === String(user.id) || String(c.toId) === String(user.id))).length;
   const myAttended = meetingsData.filter(m => (m.attendees || []).includes(user.id)).length;
   const myScore = calculateScore({ completedTasks: myCompletedTasks, likesReceived: myLikesReceived, connectionCount: myConnections, meetingsAttended: myAttended });
+  const myLevel = getUserLevel(myScore);
   const unlockedTags = getUnlockedTags(myScore);
   const pinnedTags = me?.pinnedTags || [];
   const pinnedPosts = me?.pinnedPosts || [];
@@ -242,12 +243,29 @@ export default function SciCommProfile() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <h1 style={{ margin: '0', fontSize: '22px' }}>{me?.name || user.name}</h1>
+                <span style={{ background: myLevel.bg, color: myLevel.color, padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 700, border: `1px solid ${myLevel.color}40` }}>
+                  Lv. {myLevel.level} {myLevel.title}
+                </span>
               </div>
               <p style={{ margin: '4px 0 6px', fontSize: '15px' }}>{me?.department || 'Science Communicator'}</p>
               <p style={{ margin: 0, fontSize: '14px', color: 'rgba(0,0,0,0.6)' }}>{me?.bio || 'Passionate about science communication.'}</p>
               {pinnedTags.length > 0 && (
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '10px' }}>
                   {pinnedTags.map((t, i) => <span key={i} style={{ background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)', color: '#065f46', padding: '4px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600, border: '1px solid #a7f3d0' }}>{t}</span>)}
+                </div>
+              )}
+              {myLevel.next && (
+                <div style={{ marginTop: '12px', width: '250px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'rgba(0,0,0,0.6)', marginBottom: '4px' }}>
+                    <span>{myScore} pts</span>
+                    <span>{myLevel.next.threshold} pts</span>
+                  </div>
+                  <div style={{ width: '100%', height: '6px', background: '#eef3f8', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: `${myLevel.progress}%`, height: '100%', background: `linear-gradient(90deg, ${myLevel.color}, ${myLevel.next.color})`, borderRadius: '4px', transition: 'width 0.5s ease' }} />
+                  </div>
+                  <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.5)', marginTop: '4px', textAlign: 'right' }}>
+                    Next: {myLevel.next.title}
+                  </div>
                 </div>
               )}
             </div>

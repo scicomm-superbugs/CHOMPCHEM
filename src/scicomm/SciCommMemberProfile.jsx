@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection, db } from '../db';
 import { UserCircle, MessageCircle, UserPlus, UserCheck, Award, Pin } from 'lucide-react';
-import { AVATARS, calculateScore, getUnlockedTags, timeAgo } from './scicommConstants';
+import { AVATARS, calculateScore, getUnlockedTags, timeAgo, getUserLevel } from './scicommConstants';
 
 export default function SciCommMemberProfile() {
   const { memberId } = useParams();
@@ -26,6 +26,7 @@ export default function SciCommMemberProfile() {
   const connectionCount = connectionsData.filter(c => c.status === 'accepted' && (String(c.fromId) === String(memberId) || String(c.toId) === String(memberId))).length;
   const meetingsAttended = meetingsData.filter(m => (m.attendees || []).includes(memberId)).length;
   const score = calculateScore({ completedTasks, likesReceived, connectionCount, meetingsAttended });
+  const memberLevel = getUserLevel(score);
   const unlockedTags = getUnlockedTags(score);
   const pinnedTags = member.pinnedTags || [];
 
@@ -66,7 +67,12 @@ export default function SciCommMemberProfile() {
           <div style={{ marginTop: '-60px', marginBottom: '12px' }}>{renderAvatar(120)}</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <h1 style={{ margin: '0', fontSize: '22px' }}>{member.name}</h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h1 style={{ margin: '0', fontSize: '22px' }}>{member.name}</h1>
+                <span style={{ background: memberLevel.bg, color: memberLevel.color, padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 700, border: `1px solid ${memberLevel.color}40` }}>
+                  Lv. {memberLevel.level} {memberLevel.title}
+                </span>
+              </div>
               <p style={{ margin: '4px 0 6px', fontSize: '15px' }}>{member.department || 'Science Communicator'}</p>
               <p style={{ margin: 0, fontSize: '14px', color: 'rgba(0,0,0,0.6)' }}>{member.bio || 'Passionate about science communication.'}</p>
               {pinnedTags.length > 0 && (

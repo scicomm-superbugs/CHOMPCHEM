@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLiveCollection, db, uploadFile } from '../db';
 import { Image, Video, FileText, Send, MessageSquare, Share2, MoreHorizontal, UserCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { REACTIONS, AVATARS, timeAgo, isSpamPost, calculateScore, getUnlockedTags } from './scicommConstants';
+import { REACTIONS, AVATARS, timeAgo, isSpamPost, calculateScore, getUnlockedTags, getUserLevel } from './scicommConstants';
 
 export default function SciCommFeed() {
   const { user } = useAuth();
@@ -28,6 +28,9 @@ export default function SciCommFeed() {
   const [showArticle, setShowArticle] = useState(false);
   const [articleTitle, setArticleTitle] = useState('');
   const [postFile, setPostFile] = useState(null);
+  const [showPoll, setShowPoll] = useState(false);
+  const [pollQuestion, setPollQuestion] = useState('');
+  const [pollOptions, setPollOptions] = useState([{id:1, text:''}, {id:2, text:''}]);
   const isAdmin = user.role === 'admin' || user.role === 'master';
 
   const banners = [...bannersRaw].sort((a,b) => (a.order||0) - (b.order||0));
@@ -58,7 +61,7 @@ export default function SciCommFeed() {
   // Post submission with spam check
   const handlePostSubmit = async (e) => {
     e?.preventDefault();
-    if (!newPost.trim()) return;
+    if (!newPost.trim() && (!showPoll || !pollQuestion.trim())) return;
     setPostError('');
     const myRecentPosts = posts.filter(p => String(p.authorId) === String(user.id)).slice(0, 5);
     if (isSpamPost(newPost, myRecentPosts)) {
@@ -85,6 +88,7 @@ export default function SciCommFeed() {
         fileUrl,
         fileName,
         articleTitle: showArticle ? articleTitle : null,
+        poll: showPoll ? { question: pollQuestion, options: pollOptions.filter(o => o.text.trim()), votes: {} } : null,
         authorId: user.id,
         authorName: user.name,
         createdAt: new Date().toISOString(),
@@ -98,6 +102,9 @@ export default function SciCommFeed() {
       setPostFile(null);
       setShowArticle(false);
       setArticleTitle('');
+      setShowPoll(false);
+      setPollQuestion('');
+      setPollOptions([{id:1, text:''}, {id:2, text:''}]);
     } catch (err) {
       console.error("Failed to post", err);
     }
@@ -141,6 +148,30 @@ export default function SciCommFeed() {
     return Object.values(r).reduce((s, arr) => s + arr.length, 0);
   };
 
+  const handleVote = async (post, optionId) => {
+    if (!post.poll) return;
+    const votes = { ...(post.poll.votes || {}) };
+    votes[user.id] = optionId;
+    try {
+      await db.scicomm_posts.update(post.id, { poll: { ...post.poll, votes } });
+    } catch(err) { console.error(err); }
+  };
+
+  const renderPostText = (text) => {
+    if (!text) return null;
+    const parts = text.split(/(#\w+|@\w+)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('#')) return <Link key={i} to={`/network?q=${encodeURIComponent(part.slice(1))}`} style={{ color: '#0a66c2', fontWeight: 600, textDecoration: 'none' }}>{part}</Link>;
+      if (part.startsWith('@')) {
+        const username = part.slice(1).toLowerCase();
+        const userMatch = scientists.find(s => (s.username || '').toLowerCase() === username || s.name.replace(/\s+/g, '').toLowerCase() === username);
+        if (userMatch) return <Link key={i} to={`/member/${userMatch.id}`} style={{ background: '#eef3f8', color: '#0a66c2', padding: '2px 4px', borderRadius: '4px', fontWeight: 600, textDecoration: 'none' }}>{part}</Link>;
+        return <span key={i} style={{ color: '#0a66c2', fontWeight: 600 }}>{part}</span>;
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
   const getMyReaction = (post) => {
     const r = post.reactions || {};
     for (const [key, arr] of Object.entries(r)) {
@@ -167,6 +198,7 @@ export default function SciCommFeed() {
   const myConnections = connectionsRaw.filter(c => c.status === 'accepted' && (String(c.fromId) === String(user.id) || String(c.toId) === String(user.id))).length;
   const myAttended = meetingsData.filter(m => (m.attendees || []).includes(user.id)).length;
   const myScore = calculateScore({ completedTasks: myCompletedTasks, likesReceived: myLikesReceived, connectionCount: myConnections, meetingsAttended: myAttended });
+  const myLevel = getUserLevel(myScore);
 
   return (
     <div className="scicomm-feed-layout">
@@ -178,7 +210,20 @@ export default function SciCommFeed() {
           <div style={{ padding: '8px 12px 12px' }}>
             <h3 style={{ margin: '4px 0 2px', fontSize: '15px' }}>{user.name}</h3>
             <p style={{ color: 'rgba(0,0,0,0.6)', fontSize: '12px', margin: '0 0 8px' }}>{currentUserData?.department || 'Science Communicator'}</p>
-            <div style={{ borderTop: '1px solid #e0dfdc', marginTop: '10px', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+            <div style={{ background: myLevel.bg, color: myLevel.color, padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 600, display: 'inline-block', marginBottom: '8px', border: `1px solid ${myLevel.color}40` }}>
+              Lv. {myLevel.level} {myLevel.title}
+            </div>
+            {myLevel.next && (
+              <div style={{ marginBottom: '12px' }}>
+                <div style={{ width: '100%', height: '6px', background: '#eef3f8', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${myLevel.progress}%`, height: '100%', background: `linear-gradient(90deg, ${myLevel.color}, ${myLevel.next.color})`, borderRadius: '4px' }} />
+                </div>
+                <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.5)', marginTop: '4px' }}>
+                  {myScore} / {myLevel.next.threshold} to {myLevel.next.title}
+                </div>
+              </div>
+            )}
+            <div style={{ borderTop: '1px solid #e0dfdc', marginTop: '4px', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
               <span style={{ color: 'rgba(0,0,0,0.6)' }}>Score</span>
               <strong style={{ color: '#10b981' }}>{myScore}</strong>
             </div>
@@ -237,14 +282,33 @@ export default function SciCommFeed() {
             </div>
           )}
 
+          {/* Poll Builder */}
+          {showPoll && (
+            <div style={{ marginBottom: '12px', border: '1px solid #e0dfdc', borderRadius: '8px', padding: '12px' }}>
+              <input type="text" placeholder="Poll question..." value={pollQuestion} onChange={e => setPollQuestion(e.target.value)} style={{ width: '100%', padding: '8px 12px', border: '1px solid #e0dfdc', borderRadius: '4px', fontSize: '14px', outline: 'none', boxSizing: 'border-box', marginBottom: '8px' }} />
+              {pollOptions.map((opt, i) => (
+                <div key={opt.id} style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
+                  <input type="text" placeholder={`Option ${i+1}`} value={opt.text} onChange={e => {
+                    const newOpts = [...pollOptions];
+                    newOpts[i].text = e.target.value;
+                    setPollOptions(newOpts);
+                  }} style={{ flex: 1, padding: '6px 10px', border: '1px solid #e0dfdc', borderRadius: '4px', fontSize: '13px', outline: 'none' }} />
+                  {pollOptions.length > 2 && <button onClick={() => setPollOptions(pollOptions.filter(o => o.id !== opt.id))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '16px' }}>×</button>}
+                </div>
+              ))}
+              {pollOptions.length < 5 && <button onClick={() => setPollOptions([...pollOptions, {id: Date.now(), text: ''}])} style={{ background: 'none', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>+ Add Option</button>}
+            </div>
+          )}
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
               <label className="scicomm-feed-action" style={{ cursor: 'pointer' }}><Image size={18} color="#70b5f9" /> <span>Photo/GIF</span><input type="file" accept="image/*" onChange={e => setPostImage(e.target.files[0])} style={{ display: 'none' }} /></label>
               <label className="scicomm-feed-action" style={{ cursor: 'pointer' }}><Video size={18} color="#7fc15e" /> <span>Video</span><input type="file" accept="video/*" onChange={e => setPostVideo(e.target.files[0])} style={{ display: 'none' }} /></label>
               <button className="scicomm-feed-action" onClick={() => setShowArticle(!showArticle)} style={{ color: showArticle ? '#e7a33e' : undefined }}><FileText size={18} color="#e7a33e" /> <span>Article</span></button>
+              <button className="scicomm-feed-action" onClick={() => setShowPoll(!showPoll)} style={{ color: showPoll ? '#8b5cf6' : undefined }}><span>📊</span> <span>Poll</span></button>
               <label className="scicomm-feed-action" style={{ cursor: 'pointer' }}><span style={{ fontSize: '14px' }}>📎</span> <span>File</span><input type="file" onChange={e => setPostFile(e.target.files[0])} style={{ display: 'none' }} /></label>
             </div>
-            {(newPost.trim() || postImage || postVideo || postFile || (showArticle && articleTitle.trim())) && <button className="scicomm-btn-primary" onClick={handlePostSubmit} disabled={isPostingMedia} style={{ padding: '6px 20px' }}>{isPostingMedia ? 'Posting...' : <><Send size={14} /> Post</>}</button>}
+            {(newPost.trim() || postImage || postVideo || postFile || (showArticle && articleTitle.trim()) || (showPoll && pollQuestion.trim())) && <button className="scicomm-btn-primary" onClick={handlePostSubmit} disabled={isPostingMedia} style={{ padding: '6px 20px' }}>{isPostingMedia ? 'Posting...' : <><Send size={14} /> Post</>}</button>}
           </div>
         </div>
 
@@ -286,11 +350,34 @@ export default function SciCommFeed() {
                     </div>
                   )}
                 </div>
-                <p style={{ margin: '0 0 8px', fontSize: '14px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{post.content}</p>
+                <p style={{ margin: '0 0 8px', fontSize: '14px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{renderPostText(post.content)}</p>
                 {post.articleTitle && <div style={{ padding: '10px 14px', background: 'linear-gradient(135deg, #fef3c7, #fde68a)', borderRadius: '8px', marginBottom: '8px', fontWeight: 700, fontSize: '16px', color: '#92400e' }}>📝 {post.articleTitle}</div>}
                 {post.imageUrl && <img src={post.imageUrl} alt="" style={{ width: '100%', borderRadius: '8px', marginBottom: '8px', maxHeight: '500px', objectFit: 'cover' }} />}
                 {post.videoUrl && <video src={post.videoUrl} controls playsInline style={{ width: '100%', borderRadius: '8px', marginBottom: '8px', maxHeight: '500px' }} />}
                 {post.fileUrl && <a href={post.fileUrl} target="_blank" rel="noreferrer" style={{ display: 'block', padding: '10px 14px', background: '#eef3f8', borderRadius: '8px', marginBottom: '8px', color: '#2563eb', textDecoration: 'none', fontWeight: 600, fontSize: '13px' }}>📎 {post.fileName || 'Download Attachment'}</a>}
+                
+                {post.poll && (
+                  <div style={{ border: '1px solid #e0dfdc', borderRadius: '8px', padding: '16px', marginBottom: '12px' }}>
+                    <div style={{ fontWeight: 600, fontSize: '15px', marginBottom: '12px' }}>📊 {post.poll.question}</div>
+                    {post.poll.options.map(opt => {
+                      const votes = post.poll.votes || {};
+                      const totalVotes = Object.keys(votes).length;
+                      const optVotes = Object.values(votes).filter(v => v === opt.id).length;
+                      const percent = totalVotes === 0 ? 0 : Math.round((optVotes / totalVotes) * 100);
+                      const myVote = votes[user.id] === opt.id;
+                      return (
+                        <div key={opt.id} onClick={() => handleVote(post, opt.id)} style={{ position: 'relative', background: myVote ? '#ecfdf5' : '#f3f2ef', border: myVote ? '1px solid #10b981' : '1px solid transparent', borderRadius: '4px', padding: '8px 12px', marginBottom: '6px', cursor: 'pointer', overflow: 'hidden' }}>
+                          <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: `${percent}%`, background: myVote ? '#a7f3d0' : '#e0dfdc', opacity: 0.5, zIndex: 0 }}></div>
+                          <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                            <span style={{ fontWeight: myVote ? 700 : 400 }}>{opt.text}</span>
+                            <span style={{ fontWeight: myVote ? 700 : 400 }}>{percent}%</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.5)', marginTop: '8px' }}>{Object.keys(post.poll.votes || {}).length} votes</div>
+                  </div>
+                )}
               </div>
 
               {/* Reaction summary + comment count */}

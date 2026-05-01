@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Users, Briefcase, Bell, UserCircle, Search, Trophy, Shield, MessageCircle, Calendar, AlertTriangle, Menu } from 'lucide-react';
+import { Home, Users, Briefcase, Bell, UserCircle, Search, Trophy, Shield, MessageCircle, Calendar, AlertTriangle, Menu, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection } from '../db';
 import { useState, useEffect, useRef } from 'react';
@@ -31,6 +31,7 @@ export default function SciCommLayout() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('scicommDarkMode') === 'true');
   const connectionsData = useLiveCollection('scicomm_connections') || [];
   const pendingConnections = connectionsData.filter(c => c.status === 'pending' && String(c.toId) === String(user.id));
 
@@ -54,6 +55,12 @@ export default function SciCommLayout() {
     prevWarningCount.current = myWarnings.length;
   }, [myWarnings.length]);
 
+  const toggleDarkMode = () => {
+    const next = !isDarkMode;
+    setIsDarkMode(next);
+    localStorage.setItem('scicommDarkMode', next);
+  };
+
   const handleLogout = () => { logout(); navigate('/login'); };
   const isActive = (path) => location.pathname === path;
 
@@ -64,7 +71,7 @@ export default function SciCommLayout() {
     return <UserCircle size={size} />;
   };
 
-  const PLATFORM_VERSION = 'v3.0.0';
+  const PLATFORM_VERSION = 'v3.1.1';
   const [showChangelog, setShowChangelog] = useState(() => {
     const seen = localStorage.getItem('scicomm_version_seen');
     return seen !== PLATFORM_VERSION;
@@ -75,7 +82,7 @@ export default function SciCommLayout() {
   };
 
   return (
-    <div className="scicomm-app">
+    <div className={`scicomm-app ${isDarkMode ? 'scicomm-dark-mode' : ''}`}>
       <header className="scicomm-header">
         <div className="scicomm-header-content">
           <div className="scicomm-header-left">
@@ -106,6 +113,9 @@ export default function SciCommLayout() {
                   <Link to="/profile" className="scicomm-btn-secondary" style={{marginTop:'8px',display:'block',textAlign:'center',textDecoration:'none',padding:'4px 12px',fontSize:'13px'}}>View Profile</Link>
                 </div>
                 {isAdmin && <Link to="/admin" className="dropdown-item" style={{display:'flex',alignItems:'center',gap:'8px'}}><Shield size={16} /> Admin Dashboard {pendingAccounts.length > 0 && <span className="scicomm-notif-badge" style={{position:'static'}}>{pendingAccounts.length}</span>}</Link>}
+                <button onClick={toggleDarkMode} className="dropdown-item" style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                  {isDarkMode ? <Sun size={16} /> : <Moon size={16} />} {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                </button>
                 <div className="dropdown-divider"></div>
                 <button onClick={handleLogout} className="dropdown-item">Sign Out</button>
               </div>
@@ -139,26 +149,21 @@ export default function SciCommLayout() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
               <div style={{ background: '#ecfdf5', padding: '14px', borderRadius: '10px' }}>
-                <h4 style={{ margin: '0 0 6px', color: '#065f46', fontSize: '14px' }}>✨ New Features</h4>
+                <h4 style={{ margin: '0 0 6px', color: '#065f46', fontSize: '14px' }}>✨ New Major Features</h4>
                 <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#065f46', lineHeight: '1.8' }}>
-                  <li>Clickable member profiles everywhere</li>
-                  <li>Mystery tag auto-unlock system</li>
-                  <li>Pin earned tags to profile</li>
-                  <li>Calendar time slots</li>
-                  <li>Global search (people + posts)</li>
-                  <li>Connection management (remove/block)</li>
-                  <li>Article composer for posts</li>
-                  <li>GIF picker in posts</li>
+                  <li><strong>Gamification Levels:</strong> 10 dynamic tiers (Novice to Master) with progress bars.</li>
+                  <li><strong>Global Dark Mode:</strong> Toggle available in your profile menu!</li>
+                  <li><strong>Live Polls:</strong> Create interactive voting polls directly in the Feed.</li>
+                  <li><strong>@Mentions & #Hashtags:</strong> Tag users and topics in posts and chat.</li>
                 </ul>
               </div>
               <div style={{ background: '#fef3c7', padding: '14px', borderRadius: '10px' }}>
-                <h4 style={{ margin: '0 0 6px', color: '#92400e', fontSize: '14px' }}>🔧 Bugs Fixed</h4>
+                <h4 style={{ margin: '0 0 6px', color: '#92400e', fontSize: '14px' }}>🔧 Critical Logic Fixes</h4>
                 <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#92400e', lineHeight: '1.8' }}>
-                  <li>Upload system fully rebuilt</li>
-                  <li>Tasks only visible to assigned user</li>
-                  <li>Reels module removed (performance)</li>
-                  <li>Tag unlock logic activated</li>
-                  <li>Badge sync across all nav items</li>
+                  <li>Removed circular score dependency (tags no longer inflate score)</li>
+                  <li>Standardized Approved/Completed task tracking</li>
+                  <li>Meeting badges sync strictly to members</li>
+                  <li>Task notifications have proper clickable links</li>
                 </ul>
               </div>
               <div style={{ background: '#dbeafe', padding: '14px', borderRadius: '10px' }}>

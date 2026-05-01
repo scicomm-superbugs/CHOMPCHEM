@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { Trophy, UserCircle, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { AVATARS, AUTO_TAGS, calculateScore, getUnlockedTags, REACTIONS } from './scicommConstants';
+import { AVATARS, AUTO_TAGS, calculateScore, getUnlockedTags, REACTIONS, getUserLevel } from './scicommConstants';
 
 export default function SciCommLeaderboard() {
   const { user } = useAuth();
@@ -112,6 +112,7 @@ export default function SciCommLeaderboard() {
           {leaderboard.map((s, i) => {
             const badge = getRankBadge(i);
             const isMe = String(s.id) === String(user.id);
+            const sLevel = getUserLevel(s.score === Infinity ? 10000 : s.score);
             const tags = getUnlockedTags(s.score === Infinity ? 10000 : s.score);
             const pinned = s.pinnedTags || [];
             return (
@@ -121,6 +122,7 @@ export default function SciCommLeaderboard() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                     <span style={{ fontWeight: 600, fontSize: '14px' }}>{s.name}</span>
+                    <span style={{ background: sLevel.bg, color: sLevel.color, padding: '2px 6px', borderRadius: '8px', fontSize: '10px', fontWeight: 700 }}>Lv. {sLevel.level}</span>
                     {isMe && <span style={{ color: '#10b981', fontSize: '11px' }}>(You)</span>}
                   </div>
                   {pinned.length > 0 && (
