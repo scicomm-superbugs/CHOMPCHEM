@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { db, useLiveCollection } from '../db';
-import { Camera, Edit2, Award, Pin, AlertTriangle, UserCircle, X, Settings, Briefcase, FileText, CheckCircle, GraduationCap } from 'lucide-react';
+import { db, useLiveCollection, uploadFile } from '../db';
+import bcrypt from 'bcryptjs';
+import { Camera, Edit2, Award, Pin, AlertTriangle, UserCircle, X, Settings, Briefcase, FileText, CheckCircle, GraduationCap, Upload, Lock } from 'lucide-react';
 import { AVATARS, AUTO_TAGS, calculateScore, getUnlockedTags, timeAgo } from './scicommConstants';
 
 export default function SciCommProfile() {
@@ -23,6 +24,11 @@ export default function SciCommProfile() {
   // Settings Form
   const [settingsForm, setSettingsForm] = useState({ name: '', bio: '', department: '', email: '', privacyProfile: 'public', privacyNetwork: 'public', notificationsEmail: true });
   const [msg, setMsg] = useState('');
+  const [passwordForm, setPasswordForm] = useState({ current: '', newPass: '', confirm: '' });
+  const [passwordMsg, setPasswordMsg] = useState('');
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isUploadingCV, setIsUploadingCV] = useState(false);
 
   // Portfolio Form
   const [portfolioData, setPortfolioData] = useState({ 
@@ -96,6 +102,59 @@ export default function SciCommProfile() {
     setShowAvatarPicker(false);
   };
 
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingPhoto(true);
+    try {
+      const url = await uploadFile(file, `avatars/${user.id}_${Date.now()}`);
+      await db.scientists.update(user.id, { avatar: url, avatarId: null });
+    } catch (err) { alert('Upload failed: ' + err.message); }
+    setIsUploadingPhoto(false);
+    setShowAvatarPicker(false);
+  };
+
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingCover(true);
+    try {
+      const url = await uploadFile(file, `covers/${user.id}_${Date.now()}`);
+      await db.scientists.update(user.id, { coverPhoto: url });
+      flash('Cover photo updated!');
+    } catch (err) { alert('Upload failed: ' + err.message); }
+    setIsUploadingCover(false);
+  };
+
+  const handleCVUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingCV(true);
+    try {
+      const url = await uploadFile(file, `cvs/${user.id}_${Date.now()}_${file.name}`);
+      await db.scientists.update(user.id, { cvFileUrl: url, cvFileName: file.name });
+      setPortfolioData(prev => ({ ...prev, cvLink: url }));
+      flash('CV uploaded successfully!');
+    } catch (err) { alert('Upload failed: ' + err.message); }
+    setIsUploadingCV(false);
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setPasswordMsg('');
+    if (passwordForm.newPass !== passwordForm.confirm) { setPasswordMsg('❌ Passwords do not match'); return; }
+    if (passwordForm.newPass.length < 4) { setPasswordMsg('❌ Password too short (min 4)'); return; }
+    try {
+      const valid = await bcrypt.compare(passwordForm.current, me?.passwordHash || '');
+      if (!valid) { setPasswordMsg('❌ Current password is incorrect'); return; }
+      const salt = await bcrypt.genSalt(4);
+      const hash = await bcrypt.hash(passwordForm.newPass, salt);
+      await db.scientists.update(user.id, { passwordHash: hash });
+      setPasswordMsg('✅ Password changed successfully!');
+      setPasswordForm({ current: '', newPass: '', confirm: '' });
+    } catch (err) { setPasswordMsg('❌ Error: ' + err.message); }
+  };
+
   const handleSaveSettings = async (e) => {
     e.preventDefault();
     await db.scientists.update(user.id, settingsForm);
@@ -166,7 +225,12 @@ export default function SciCommProfile() {
 
       {/* Profile Header */}
       <div className="scicomm-card" style={{ overflow: 'hidden' }}>
-        <div style={{ height: '180px', background: 'linear-gradient(135deg, #10b981 0%, #047857 50%, #064e3b 100%)' }}></div>
+        <div style={{ height: '180px', background: me?.coverPhoto ? `url(${me.coverPhoto}) center/cover` : 'linear-gradient(135deg, #10b981 0%, #047857 50%, #064e3b 100%)', position: 'relative' }}>
+          <label style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.5)', color: 'white', borderRadius: '20px', padding: '6px 12px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Camera size={14} /> {isUploadingCover ? 'Uploading...' : 'Edit Cover'}
+            <input type="file" accept="image/*" onChange={handleCoverUpload} style={{ display: 'none' }} />
+          </label>
+        </div>
         <div style={{ padding: '0 24px 24px' }}>
           <div style={{ position: 'relative', width: '120px', marginTop: '-60px', marginBottom: '12px' }}>
             {renderAvatar(120)}
@@ -288,11 +352,16 @@ export default function SciCommProfile() {
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '16px', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '6px' }}><FileText size={16} color="#3b82f6" /> CV / Resume Link</h3>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input type="url" placeholder="https://drive.google.com/..." value={portfolioData.cvLink} onChange={e => setPortfolioData({...portfolioData, cvLink: e.target.value})} style={{ flex: 1, padding: '10px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px' }} />
-              <button className="scicomm-btn-primary" onClick={handleSavePortfolio}>Save</button>
+            <h3 style={{ fontSize: '16px', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '6px' }}><FileText size={16} color="#3b82f6" /> CV / Resume</h3>
+            <div style={{ border: '2px dashed #ccc', padding: '20px', borderRadius: '8px', textAlign: 'center', cursor: 'pointer', background: '#f9fafb', marginBottom: '8px' }} onClick={() => document.getElementById('cv-upload-input').click()}>
+              <Upload size={24} color="#666" style={{ marginBottom: '8px' }} />
+              <div style={{ fontSize: '14px', fontWeight: 600, color: '#333' }}>{isUploadingCV ? 'Uploading...' : (me?.cvFileName || 'Upload CV/Resume')}</div>
+              <div style={{ fontSize: '12px', color: '#999' }}>PDF, DOC, DOCX</div>
+              <input id="cv-upload-input" type="file" accept=".pdf,.doc,.docx" onChange={handleCVUpload} style={{ display: 'none' }} />
             </div>
+            {(me?.cvFileUrl || portfolioData.cvLink) && (
+              <a href={me?.cvFileUrl || portfolioData.cvLink} target="_blank" rel="noreferrer" className="scicomm-btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', justifyContent: 'center', width: '100%' }}>📄 View CV</a>
+            )}
           </div>
 
           {/* Builder */}
@@ -381,6 +450,17 @@ export default function SciCommProfile() {
 
             <button type="submit" className="scicomm-btn-primary" style={{ padding: '12px', fontSize: '15px', justifyContent: 'center', marginTop: '12px' }}>Save Changes</button>
           </form>
+
+          <div style={{ borderTop: '1px solid #eef3f8', paddingTop: '20px', marginTop: '20px' }}>
+            <h3 style={{ fontSize: '16px', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: '6px' }}><Lock size={16} /> Change Password</h3>
+            {passwordMsg && <div style={{ padding: '8px 12px', borderRadius: '8px', marginBottom: '12px', fontSize: '13px', fontWeight: 600, background: passwordMsg.startsWith('✅') ? '#dcfce7' : '#fee2e2', color: passwordMsg.startsWith('✅') ? '#166534' : '#991b1b' }}>{passwordMsg}</div>}
+            <form onSubmit={handlePasswordChange} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <input type="password" placeholder="Current Password" value={passwordForm.current} onChange={e => setPasswordForm({...passwordForm, current: e.target.value})} required style={{ padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px' }} />
+              <input type="password" placeholder="New Password" value={passwordForm.newPass} onChange={e => setPasswordForm({...passwordForm, newPass: e.target.value})} required style={{ padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px' }} />
+              <input type="password" placeholder="Confirm New Password" value={passwordForm.confirm} onChange={e => setPasswordForm({...passwordForm, confirm: e.target.value})} required style={{ padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '8px', fontSize: '14px' }} />
+              <button type="submit" className="scicomm-btn-primary" style={{ padding: '10px', justifyContent: 'center' }}>Update Password</button>
+            </form>
+          </div>
         </div>
       )}
 
@@ -389,9 +469,20 @@ export default function SciCommProfile() {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }} onClick={() => setShowAvatarPicker(false)}>
           <div style={{ background: 'white', borderRadius: '12px', padding: '24px', maxWidth: '500px', width: '100%', maxHeight: '80vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <h2 style={{ margin: 0, fontSize: '20px' }}>Choose Your Avatar</h2>
+              <h2 style={{ margin: 0, fontSize: '20px' }}>Profile Picture</h2>
               <button onClick={() => setShowAvatarPicker(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
             </div>
+
+            {/* Custom Photo Upload */}
+            <div style={{ border: '2px dashed #10b981', padding: '20px', borderRadius: '12px', textAlign: 'center', cursor: 'pointer', background: '#ecfdf5', marginBottom: '20px' }} onClick={() => document.getElementById('profile-photo-upload').click()}>
+              <Camera size={28} color="#10b981" style={{ marginBottom: '8px' }} />
+              <div style={{ fontWeight: 600, color: '#065f46' }}>{isUploadingPhoto ? 'Uploading...' : 'Upload Custom Photo'}</div>
+              <div style={{ fontSize: '12px', color: '#059669' }}>JPG, PNG (from your device)</div>
+              <input id="profile-photo-upload" type="file" accept="image/*" onChange={handlePhotoUpload} style={{ display: 'none' }} />
+            </div>
+
+            <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(0,0,0,0.5)', marginBottom: '12px', textAlign: 'center' }}>— or choose a preset avatar —</div>
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '12px' }}>
               {AVATARS.map(av => (
                 <button key={av.id} onClick={() => handleAvatarSelect(av.id)} style={{

@@ -1,8 +1,8 @@
 import { useLiveCollection, db } from '../db';
 import { useAuth } from '../context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UserPlus, UserCheck, MessageCircle, UserCircle, Search } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AVATARS } from './scicommConstants';
 
 export default function SciCommNetwork() {
@@ -12,6 +12,12 @@ export default function SciCommNetwork() {
   const connections = useLiveCollection('scicomm_connections') || [];
   const [searchTerm, setSearchTerm] = useState('');
   const [tab, setTab] = useState('discover'); // discover | connections | pending
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) { setSearchTerm(q); setTab('discover'); }
+  }, [searchParams.get('q')]);
 
   const activeMembers = scientists.filter(s => s.accountStatus !== 'pending' && String(s.id) !== String(user.id));
 

@@ -408,3 +408,27 @@
   }
 }
 
+/* === MOBILE CHAT TOGGLE === */
+@media (max-width: 768px) {
+  .scicomm-chat-sidebar {
+    width: 100% !important;
+  }
+  .chat-hide-mobile {
+    display: none !important;
+  }
+  .chat-show-mobile {
+    display: flex !important;
+    width: 100% !important;
+  }
+  .chat-back-btn {
+    display: flex !important;
+  }
+  .scicomm-search-box {
+    width: 100% !important;
+    flex: 1;
+  }
+  .scicomm-search-box input {
+    font-size: 16px !important;
+  }
+}
+

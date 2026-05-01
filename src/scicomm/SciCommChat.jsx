@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useLiveCollection, db } from '../db';
-import { Send, Plus, UserCircle, Users, Search } from 'lucide-react';
+import { useLiveCollection, db, uploadFile } from '../db';
+import { Send, Plus, UserCircle, Users, Search, Smile, Paperclip, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { AVATARS, timeAgo } from './scicommConstants';
 
@@ -95,11 +95,31 @@ export default function SciCommChat() {
       senderId: user.id,
       senderName: user.name,
       content: msgText,
+      type: 'text',
       createdAt: new Date().toISOString()
     });
     await db.scicomm_chat_rooms.update(selectedRoom, { lastMessageAt: new Date().toISOString(), lastMessage: msgText, lastSender: user.name });
     setMsgText('');
   };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedRoom) return;
+    try {
+      const url = await uploadFile(file, `chat/${selectedRoom}/${Date.now()}_${file.name}`);
+      const isImage = file.type.startsWith('image/');
+      await db.scicomm_chat_messages.add({
+        roomId: selectedRoom, senderId: user.id, senderName: user.name,
+        content: isImage ? '' : file.name, fileUrl: url, fileName: file.name,
+        type: isImage ? 'image' : 'file',
+        createdAt: new Date().toISOString()
+      });
+      await db.scicomm_chat_rooms.update(selectedRoom, { lastMessageAt: new Date().toISOString(), lastMessage: isImage ? '📷 Photo' : `📎 ${file.name}`, lastSender: user.name });
+    } catch (err) { alert('Upload failed'); }
+  };
+
+  const EMOJI_LIST = ['😀','😂','😍','🔥','👍','❤️','🎉','💡','🧪','🔬','🧬','🧲','⚗️','💀','👀','🤯','🙏','✅','❌','🚀'];
+  const [showEmoji, setShowEmoji] = useState(false);
 
   const getRoomTitle = (room) => {
     if (room.type === 'group') return room.name || 'Group Chat';
@@ -126,8 +146,8 @@ export default function SciCommChat() {
 
   return (
     <div style={{ display: 'flex', height: 'calc(100dvh - 100px)', maxWidth: '900px', margin: '0 auto', gap: '0', overflow: 'hidden', borderRadius: '8px', border: '1px solid #e0dfdc', background: 'white' }}>
-      {/* Room List */}
-      <div style={{ width: '280px', borderRight: '1px solid #e0dfdc', display: 'flex', flexDirection: 'column', flexShrink: 0 }} className="scicomm-chat-sidebar">
+      {/* Room List - hidden on mobile when a room is selected */}
+      <div style={{ width: selectedRoom ? undefined : '100%', borderRight: '1px solid #e0dfdc', display: 'flex', flexDirection: 'column', flexShrink: 0 }} className={`scicomm-chat-sidebar ${selectedRoom ? 'chat-hide-mobile' : 'chat-show-mobile'}`}>
         <div style={{ padding: '12px', borderBottom: '1px solid #e0dfdc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ margin: 0, fontSize: '16px' }}>💬 Messaging</h3>
           <button onClick={() => setShowNewChat(!showNewChat)} style={{ background: '#10b981', color: 'white', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus size={16} /></button>
@@ -174,10 +194,11 @@ export default function SciCommChat() {
       </div>
 
       {/* Chat Panel */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }} className={selectedRoom ? 'chat-show-mobile' : 'chat-hide-mobile'}>
         {selectedRoom && activeRoom ? (
           <>
             <div style={{ padding: '12px 16px', borderBottom: '1px solid #e0dfdc', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button onClick={() => setSelectedRoom(null)} className="chat-back-btn" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'none', padding: '4px' }}><ArrowLeft size={20} /></button>
               {activeRoom.type === 'group' ? <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Users size={18} color="#10b981" /></div> : renderAvatar(getRoomOther(activeRoom), 36)}
               <div>
                 <div style={{ fontWeight: 600, fontSize: '15px' }}>{getRoomTitle(activeRoom)}</div>
@@ -195,7 +216,9 @@ export default function SciCommChat() {
                       border: isMe ? 'none' : '1px solid #e0dfdc', fontSize: '14px', lineHeight: '1.4'
                     }}>
                       {!isMe && activeRoom.type === 'group' && <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#10b981' }}>{m.senderName}</div>}
-                      {m.content}
+                      {m.type === 'image' && m.fileUrl && <img src={m.fileUrl} alt="" style={{ maxWidth: '100%', borderRadius: '8px', marginBottom: '4px' }} />}
+                      {m.type === 'file' && m.fileUrl && <a href={m.fileUrl} target="_blank" rel="noreferrer" style={{ color: isMe ? 'white' : '#2563eb', textDecoration: 'underline' }}>📎 {m.fileName || 'File'}</a>}
+                      {m.content && <div>{m.content}</div>}
                       <div style={{ fontSize: '10px', marginTop: '4px', opacity: 0.7, textAlign: 'right' }}>{timeAgo(m.createdAt)}</div>
                     </div>
                   </div>
@@ -203,14 +226,22 @@ export default function SciCommChat() {
               })}
               <div ref={messagesEnd} />
             </div>
-            <div style={{ display: 'flex', gap: '8px', padding: '12px 16px', borderTop: '1px solid #e0dfdc' }}>
+            {/* Emoji Picker */}
+            {showEmoji && (
+              <div style={{ padding: '8px 16px', borderTop: '1px solid #e0dfdc', display: 'flex', flexWrap: 'wrap', gap: '4px', background: '#f9fafb' }}>
+                {EMOJI_LIST.map(e => <button key={e} onClick={() => { setMsgText(prev => prev + e); setShowEmoji(false); }} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', padding: '4px' }}>{e}</button>)}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: '6px', padding: '10px 12px', borderTop: '1px solid #e0dfdc', alignItems: 'center' }}>
+              <button onClick={() => setShowEmoji(!showEmoji)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666', padding: '4px' }}><Smile size={20} /></button>
+              <label style={{ cursor: 'pointer', color: '#666', padding: '4px', display: 'flex' }}><Paperclip size={20} /><input type="file" onChange={handleFileUpload} style={{ display: 'none' }} /></label>
               <input type="text" value={msgText} onChange={e => setMsgText(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()}
-                placeholder="Type a message..." style={{ flex: 1, padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '24px', fontSize: '14px', outline: 'none' }} />
-              <button className="scicomm-btn-primary" onClick={sendMessage} style={{ padding: '10px 16px' }}><Send size={16} /></button>
+                placeholder="Type a message..." style={{ flex: 1, padding: '10px 14px', border: '1px solid #e0dfdc', borderRadius: '24px', fontSize: '14px', outline: 'none', minWidth: 0 }} />
+              <button className="scicomm-btn-primary" onClick={sendMessage} style={{ padding: '10px 14px', flexShrink: 0 }}><Send size={16} /></button>
             </div>
           </>
         ) : (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', color: '#666' }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', color: '#666' }} className="chat-hide-mobile">
             <div style={{ fontSize: '48px', marginBottom: '12px' }}>💬</div>
             <h3 style={{ margin: '0 0 8px' }}>Select a conversation</h3>
             <p style={{ fontSize: '14px' }}>Or start a new chat with the + button</p>
