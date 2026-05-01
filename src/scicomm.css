@@ -1,18 +1,19 @@
-/* LinkedIn-style styling for SciComm Workspace */
-body {
+/* ======================================================
+   AIU SciComm LinkedIn-Style Theme
+   Completely independent from CompChem/Alamein index.css
+   ====================================================== */
+
+/* Reset body styling when in scicomm */
+.scicomm-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
   background-color: #f3f2ef;
-  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: rgba(0,0,0,0.9);
 }
 
-.scicomm-app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: #f3f2ef;
-}
-
+/* ===== HEADER ===== */
 .scicomm-header {
   background-color: #fff;
   border-bottom: 1px solid #e0dfdc;
@@ -60,8 +61,10 @@ body {
   margin-left: 8px;
   width: 100%;
   font-size: 14px;
+  color: rgba(0,0,0,0.9);
 }
 
+/* ===== NAV ===== */
 .scicomm-nav {
   display: flex;
   align-items: center;
@@ -75,13 +78,18 @@ body {
   justify-content: center;
   color: rgba(0,0,0,0.6);
   text-decoration: none;
-  min-width: 80px;
+  min-width: 76px;
   height: 100%;
   cursor: pointer;
   position: relative;
+  transition: color 0.2s;
 }
 
-.scicomm-nav-item:hover, .scicomm-nav-item.active {
+.scicomm-nav-item:hover {
+  color: rgba(0,0,0,0.9);
+}
+
+.scicomm-nav-item.active {
   color: rgba(0,0,0,0.9);
 }
 
@@ -92,16 +100,13 @@ body {
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #10b981; /* Emerald theme for SciComm */
-}
-
-.nav-icon {
-  margin-bottom: 2px;
+  background-color: #10b981;
 }
 
 .nav-text {
   font-size: 12px;
   font-weight: 400;
+  margin-top: 2px;
 }
 
 .nav-avatar {
@@ -111,6 +116,25 @@ body {
   object-fit: cover;
 }
 
+/* Notification Badge */
+.scicomm-notif-badge {
+  position: absolute;
+  top: 4px;
+  right: 12px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Profile Dropdown */
 .profile-dropdown-container {
   position: relative;
 }
@@ -122,10 +146,11 @@ body {
   right: 0;
   background: white;
   border: 1px solid #e0dfdc;
-  border-radius: 8px 0 8px 8px;
+  border-radius: 0 0 8px 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  min-width: 200px;
+  min-width: 260px;
   flex-direction: column;
+  z-index: 200;
 }
 
 .profile-dropdown-container:hover .scicomm-dropdown {
@@ -133,7 +158,7 @@ body {
 }
 
 .dropdown-item {
-  padding: 12px 16px;
+  padding: 10px 16px;
   text-decoration: none;
   color: rgba(0,0,0,0.9);
   font-size: 14px;
@@ -141,10 +166,10 @@ body {
   background: none;
   text-align: left;
   cursor: pointer;
+  width: 100%;
 }
 
 .dropdown-item:hover {
-  text-decoration: underline;
   background-color: #f3f2ef;
 }
 
@@ -154,16 +179,17 @@ body {
   margin: 4px 0;
 }
 
-/* Main Content Area */
-.scicomm-main {
+/* ===== MAIN CONTENT ===== */
+.scicomm-page-content {
   max-width: 1128px;
   margin: 24px auto;
   padding: 0 16px;
   width: 100%;
   box-sizing: border-box;
+  flex: 1;
 }
 
-/* Common Card Style */
+/* ===== CARDS ===== */
 .scicomm-card {
   background: white;
   border-radius: 8px;
@@ -176,20 +202,25 @@ body {
   padding: 16px;
 }
 
-/* Three Column Layout (Home Feed) */
+/* ===== FEED LAYOUT ===== */
 .scicomm-feed-layout {
   display: grid;
-  grid-template-columns: 225px minmax(0, 550px) 300px;
+  grid-template-columns: 225px minmax(0, 1fr) 300px;
   gap: 24px;
-  justify-content: center;
+  align-items: flex-start;
 }
 
-/* Typography & Utility */
+.scicomm-feed-main {
+  min-width: 0;
+}
+
+/* ===== TEXT ===== */
 .scicomm-text-muted {
   color: rgba(0,0,0,0.6);
   font-size: 12px;
 }
 
+/* ===== BUTTONS ===== */
 .scicomm-btn-primary {
   background-color: #10b981;
   color: white;
@@ -199,7 +230,12 @@ body {
   font-weight: 600;
   cursor: pointer;
   font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
 }
+
 .scicomm-btn-primary:hover {
   background-color: #059669;
 }
@@ -213,13 +249,63 @@ body {
   font-weight: 600;
   cursor: pointer;
   font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
 }
+
 .scicomm-btn-secondary:hover {
-  background-color: rgba(16, 185, 129, 0.1);
+  background-color: rgba(16, 185, 129, 0.08);
   box-shadow: inset 0 0 0 1px #10b981;
 }
 
-/* Mobile Bar */
+/* ===== FEED ACTIONS ===== */
+.scicomm-feed-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: rgba(0,0,0,0.6);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.scicomm-feed-action:hover {
+  background: #f3f2ef;
+}
+
+/* Post Action Buttons */
+.scicomm-post-btn {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  border: none;
+  background: none;
+  color: rgba(0,0,0,0.6);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.scicomm-post-btn:hover {
+  background: #f3f2ef;
+}
+
+.scicomm-post-btn.liked {
+  color: #10b981;
+}
+
+/* ===== MOBILE BOTTOM BAR ===== */
 .scicomm-mobile-bar {
   display: none;
   position: fixed;
@@ -242,33 +328,67 @@ body {
   color: rgba(0,0,0,0.6);
   text-decoration: none;
   font-size: 10px;
+  font-weight: 500;
+  position: relative;
+  gap: 2px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .scicomm-mobile-item.active {
   color: rgba(0,0,0,0.9);
 }
 
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1080px) {
+  .scicomm-feed-layout {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+  .scicomm-sidebar-left {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
   .scicomm-header {
     height: 48px;
   }
+
   .scicomm-nav {
     display: none;
   }
+
   .scicomm-mobile-bar {
     display: flex;
   }
+
   .scicomm-search-box {
-    width: 200px;
+    width: 160px;
   }
+
   .scicomm-feed-layout {
     grid-template-columns: 1fr;
   }
-  .scicomm-main {
+
+  .scicomm-page-content {
     margin: 8px auto;
-    padding-bottom: 60px;
+    padding: 0 8px;
+    padding-bottom: 64px;
   }
+
   .hide-on-mobile {
     display: none !important;
+  }
+
+  .scicomm-card-padding {
+    padding: 12px;
+  }
+
+  .scicomm-feed-action span {
+    display: none;
+  }
+
+  .scicomm-post-btn {
+    font-size: 12px;
+    padding: 10px 4px;
   }
 }

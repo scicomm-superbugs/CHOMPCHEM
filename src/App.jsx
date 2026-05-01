@@ -23,6 +23,8 @@ import SciCommTasks from './scicomm/SciCommTasks';
 import SciCommNotifications from './scicomm/SciCommNotifications';
 import SciCommProfile from './scicomm/SciCommProfile';
 import SciCommAdmin from './scicomm/SciCommAdmin';
+import SciCommLeaderboard from './scicomm/SciCommLeaderboard';
+
 function App() {
   return (
     <Router>
@@ -41,6 +43,7 @@ function App() {
               <Route path="tasks" element={<SciCommTasks />} />
               <Route path="notifications" element={<SciCommNotifications />} />
               <Route path="profile" element={<SciCommProfile />} />
+              <Route path="leaderboard" element={<SciCommLeaderboard />} />
               <Route element={<ProtectedRoute requireAdmin={true} />}>
                 <Route path="admin" element={<SciCommAdmin />} />
               </Route>

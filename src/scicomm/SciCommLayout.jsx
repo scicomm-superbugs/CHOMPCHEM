@@ -1,7 +1,8 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Users, Briefcase, Bell, MessageSquare, UserCircle, Search } from 'lucide-react';
+import { Home, Users, Briefcase, Bell, UserCircle, Search, Trophy, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection } from '../db';
+import { useEffect, useRef } from 'react';
 import '../scicomm.css';
 
 export default function SciCommLayout() {
@@ -13,16 +14,56 @@ export default function SciCommLayout() {
   const currentUserData = scientists?.find(s => String(s.id) === String(user.id));
   const avatar = currentUserData?.avatar;
 
+  const tasksData = useLiveCollection('tasks') || [];
+  const warningsData = useLiveCollection('scicomm_warnings') || [];
+  const pendingAccounts = (scientists || []).filter(s => s.accountStatus === 'pending');
+
+  const myPendingTasks = tasksData.filter(t => String(t.assignedTo) === String(user.id) && t.status !== 'Completed');
+  const myWarnings = warningsData.filter(w => String(w.userId) === String(user.id) && !w.seen);
+
+  const notifCount = myPendingTasks.length + myWarnings.length + ((user.role === 'admin' || user.role === 'master') ? pendingAccounts.length : 0);
+
+  // Push notification on new task
+  const prevTaskCount = useRef(myPendingTasks.length);
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (myPendingTasks.length > prevTaskCount.current && Notification.permission === 'granted') {
+      new Notification('New Task Assigned!', {
+        body: `You have a new task: ${myPendingTasks[0]?.title}`,
+        icon: './aiu_scicomm_logo.png'
+      });
+    }
+    prevTaskCount.current = myPendingTasks.length;
+  }, [myPendingTasks.length]);
+
+  // Push notification on new warning
+  const prevWarningCount = useRef(myWarnings.length);
+  useEffect(() => {
+    if (myWarnings.length > prevWarningCount.current && Notification.permission === 'granted') {
+      new Notification('⚠️ You received a warning', {
+        body: myWarnings[0]?.message || 'Check your notifications.',
+        icon: './aiu_scicomm_logo.png'
+      });
+    }
+    prevWarningCount.current = myWarnings.length;
+  }, [myWarnings.length]);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
   const isActive = (path) => location.pathname === path;
+  const isAdmin = user.role === 'admin' || user.role === 'master';
 
   return (
     <div className="scicomm-app">
-      {/* LinkedIn-style Header */}
+      {/* Header */}
       <header className="scicomm-header">
         <div className="scicomm-header-content">
           <div className="scicomm-header-left">
@@ -37,19 +78,24 @@ export default function SciCommLayout() {
 
           <nav className="scicomm-nav">
             <Link to="/" className={`scicomm-nav-item ${isActive('/') ? 'active' : ''}`}>
-              <Home size={24} className="nav-icon" />
+              <Home size={22} />
               <span className="nav-text">Home</span>
             </Link>
             <Link to="/network" className={`scicomm-nav-item ${isActive('/network') ? 'active' : ''}`}>
-              <Users size={24} className="nav-icon" />
+              <Users size={22} />
               <span className="nav-text">My Network</span>
             </Link>
             <Link to="/tasks" className={`scicomm-nav-item ${isActive('/tasks') ? 'active' : ''}`}>
-              <Briefcase size={24} className="nav-icon" />
-              <span className="nav-text">Assigned Tasks</span>
+              <Briefcase size={22} />
+              <span className="nav-text">Tasks</span>
             </Link>
-            <Link to="/notifications" className={`scicomm-nav-item ${isActive('/notifications') ? 'active' : ''}`}>
-              <Bell size={24} className="nav-icon" />
+            <Link to="/leaderboard" className={`scicomm-nav-item ${isActive('/leaderboard') ? 'active' : ''}`}>
+              <Trophy size={22} />
+              <span className="nav-text">Leaderboard</span>
+            </Link>
+            <Link to="/notifications" className={`scicomm-nav-item ${isActive('/notifications') ? 'active' : ''}`} style={{position:'relative'}}>
+              <Bell size={22} />
+              {notifCount > 0 && <span className="scicomm-notif-badge">{notifCount}</span>}
               <span className="nav-text">Notifications</span>
             </Link>
             
@@ -57,13 +103,25 @@ export default function SciCommLayout() {
               {avatar ? (
                 <img src={avatar} alt="Me" className="nav-avatar" />
               ) : (
-                <UserCircle size={24} className="nav-icon" />
+                <UserCircle size={22} />
               )}
               <span className="nav-text">Me ▼</span>
               <div className="scicomm-dropdown">
-                <Link to="/profile" className="dropdown-item">View Profile</Link>
-                {(user.role === 'admin' || user.role === 'master') && (
-                  <Link to="/admin" className="dropdown-item">Admin Dashboard</Link>
+                <div style={{padding:'12px 16px', borderBottom:'1px solid #e0dfdc'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                    {avatar ? <img src={avatar} alt="" style={{width:48,height:48,borderRadius:'50%',objectFit:'cover'}} /> : <UserCircle size={48} />}
+                    <div>
+                      <div style={{fontWeight:600,fontSize:'14px'}}>{user.name}</div>
+                      <div style={{fontSize:'12px',color:'rgba(0,0,0,0.6)'}}>{currentUserData?.department || 'Science Communicator'}</div>
+                    </div>
+                  </div>
+                  <Link to="/profile" className="scicomm-btn-secondary" style={{marginTop:'8px',display:'block',textAlign:'center',textDecoration:'none',padding:'4px 12px',fontSize:'13px'}}>View Profile</Link>
+                </div>
+                {isAdmin && (
+                  <Link to="/admin" className="dropdown-item" style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                    <Shield size={16} /> Admin Dashboard
+                    {pendingAccounts.length > 0 && <span className="scicomm-notif-badge" style={{position:'static'}}>{pendingAccounts.length}</span>}
+                  </Link>
                 )}
                 <div className="dropdown-divider"></div>
                 <button onClick={handleLogout} className="dropdown-item">Sign Out</button>
@@ -74,33 +132,34 @@ export default function SciCommLayout() {
       </header>
 
       {/* Main Content Area */}
-      <main className="scicomm-main">
+      <div className="scicomm-page-content">
         <Outlet />
-      </main>
+      </div>
 
       {/* Mobile Bottom Bar */}
       <nav className="scicomm-mobile-bar">
         <Link to="/" className={`scicomm-mobile-item ${isActive('/') ? 'active' : ''}`}>
-          <Home size={24} />
+          <Home size={22} />
           <span>Home</span>
         </Link>
         <Link to="/network" className={`scicomm-mobile-item ${isActive('/network') ? 'active' : ''}`}>
-          <Users size={24} />
+          <Users size={22} />
           <span>Network</span>
         </Link>
-        <Link to="/tasks" className={`scicomm-mobile-item ${isActive('/tasks') ? 'active' : ''}`}>
-          <Briefcase size={24} />
-          <span>Tasks</span>
+        <Link to="/leaderboard" className={`scicomm-mobile-item ${isActive('/leaderboard') ? 'active' : ''}`}>
+          <Trophy size={22} />
+          <span>Ranks</span>
         </Link>
-        <Link to="/notifications" className={`scicomm-mobile-item ${isActive('/notifications') ? 'active' : ''}`}>
-          <Bell size={24} />
+        <Link to="/notifications" className={`scicomm-mobile-item ${isActive('/notifications') ? 'active' : ''}`} style={{position:'relative'}}>
+          <Bell size={22} />
+          {notifCount > 0 && <span className="scicomm-notif-badge">{notifCount}</span>}
           <span>Alerts</span>
         </Link>
         <Link to="/profile" className={`scicomm-mobile-item ${isActive('/profile') ? 'active' : ''}`}>
           {avatar ? (
-             <img src={avatar} alt="Me" className="nav-avatar" style={{width: 24, height: 24, marginBottom: 2}} />
+            <img src={avatar} alt="Me" style={{width:22, height:22, borderRadius:'50%', objectFit:'cover'}} />
           ) : (
-             <UserCircle size={24} />
+            <UserCircle size={22} />
           )}
           <span>Me</span>
         </Link>
