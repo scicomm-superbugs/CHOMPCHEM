@@ -64,6 +64,16 @@ export default function SciCommLayout() {
     return <UserCircle size={size} />;
   };
 
+  const PLATFORM_VERSION = 'v2.5.0';
+  const [showChangelog, setShowChangelog] = useState(() => {
+    const seen = localStorage.getItem('scicomm_version_seen');
+    return seen !== PLATFORM_VERSION;
+  });
+  const dismissChangelog = () => {
+    localStorage.setItem('scicomm_version_seen', PLATFORM_VERSION);
+    setShowChangelog(false);
+  };
+
   return (
     <div className="scicomm-app">
       <header className="scicomm-header">
@@ -113,12 +123,60 @@ export default function SciCommLayout() {
         <Link to="/calendar" className={`scicomm-mobile-item ${isActive('/calendar') ? 'active' : ''}`} style={{position:'relative'}}><Calendar size={20} />{upcomingMeetings.length > 0 && <span className="scicomm-notif-badge">{upcomingMeetings.length}</span>}<span>Calendar</span></Link>
         <Link to="/tasks" className={`scicomm-mobile-item ${isActive('/tasks') ? 'active' : ''}`} style={{position:'relative'}}><Briefcase size={20} />{myPendingTasks.length > 0 && <span className="scicomm-notif-badge">{myPendingTasks.length}</span>}<span>Tasks</span></Link>
         <Link to="/chat" className={`scicomm-mobile-item ${isActive('/chat') ? 'active' : ''}`}><MessageCircle size={20} /><span>Chat</span></Link>
-        <Link to="/network" className={`scicomm-mobile-item ${isActive('/network') ? 'active' : ''}`}><Users size={20} /><span>Network</span></Link>
+        <Link to="/network" className={`scicomm-mobile-item ${isActive('/network') ? 'active' : ''}`} style={{position:'relative'}}><Users size={20} />{pendingConnections.length > 0 && <span className="scicomm-notif-badge">{pendingConnections.length}</span>}<span>Network</span></Link>
         <Link to="/reels" className={`scicomm-mobile-item ${isActive('/reels') ? 'active' : ''}`}><Play size={20} /><span>Reels</span></Link>
         <Link to="/notifications" className={`scicomm-mobile-item ${isActive('/notifications') ? 'active' : ''}`} style={{position:'relative'}}><Bell size={20} />{notifCount > 0 && <span className="scicomm-notif-badge">{notifCount}</span>}<span>Alerts</span></Link>
         <Link to="/profile" className={`scicomm-mobile-item ${isActive('/profile') ? 'active' : ''}`}>{renderAvatar(20)}<span>Me</span></Link>
         {isAdmin && <Link to="/admin" className={`scicomm-mobile-item ${isActive('/admin') ? 'active' : ''}`}><Shield size={20} /><span>Admin</span></Link>}
       </nav>
+
+      {/* Version Changelog Popup */}
+      {showChangelog && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '28px', maxWidth: '480px', width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '8px' }}>🚀</div>
+              <h2 style={{ margin: '0 0 4px', fontSize: '22px' }}>What's New in {PLATFORM_VERSION}</h2>
+              <p style={{ margin: 0, color: 'rgba(0,0,0,0.5)', fontSize: '13px' }}>SciComm Platform Update</p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ background: '#ecfdf5', padding: '14px', borderRadius: '10px' }}>
+                <h4 style={{ margin: '0 0 6px', color: '#065f46', fontSize: '14px' }}>✨ New Features</h4>
+                <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#065f46', lineHeight: '1.8' }}>
+                  <li>Custom profile photo upload</li>
+                  <li>CV/Resume file upload (PDF)</li>
+                  <li>Cover photo for profiles</li>
+                  <li>Photo & video posts</li>
+                  <li>Emoji & file sharing in chat</li>
+                  <li>Multi-timeframe leaderboard</li>
+                  <li>Interactive calendar day view</li>
+                  <li>Admin recognition on posts</li>
+                </ul>
+              </div>
+              <div style={{ background: '#fef3c7', padding: '14px', borderRadius: '10px' }}>
+                <h4 style={{ margin: '0 0 6px', color: '#92400e', fontSize: '14px' }}>🔧 Bugs Fixed</h4>
+                <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#92400e', lineHeight: '1.8' }}>
+                  <li>White screen crash on iOS/Safari</li>
+                  <li>Mobile chat layout broken</li>
+                  <li>Search bar non-functional</li>
+                  <li>Password change now works</li>
+                  <li>Connection request badges</li>
+                </ul>
+              </div>
+              <div style={{ background: '#dbeafe', padding: '14px', borderRadius: '10px' }}>
+                <h4 style={{ margin: '0 0 6px', color: '#1e3a8a', fontSize: '14px' }}>🎨 UI Improvements</h4>
+                <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#1e3a8a', lineHeight: '1.8' }}>
+                  <li>Mobile chat sidebar/panel toggle</li>
+                  <li>Back button in mobile chat</li>
+                  <li>Larger mobile search bar</li>
+                  <li>Network badge on mobile nav</li>
+                </ul>
+              </div>
+            </div>
+            <button onClick={dismissChangelog} className="scicomm-btn-primary" style={{ width: '100%', padding: '14px', justifyContent: 'center', fontSize: '16px', fontWeight: 700 }}>Got It! 🎉</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
