@@ -152,5 +152,58 @@ export const db = {
     delete: async (id) => {
       await deleteDoc(doc(firestore, getCollectionName('scicomm_warnings'), String(id)));
     }
+  },
+  scicomm_connections: {
+    add: async (conn) => {
+      await addDoc(collection(firestore, getCollectionName('scicomm_connections')), conn);
+    },
+    update: async (id, data) => {
+      await updateDoc(doc(firestore, getCollectionName('scicomm_connections'), String(id)), data);
+    },
+    delete: async (id) => {
+      await deleteDoc(doc(firestore, getCollectionName('scicomm_connections'), String(id)));
+    }
+  },
+  scicomm_meetings: {
+    add: async (meeting) => {
+      await addDoc(collection(firestore, getCollectionName('scicomm_meetings')), meeting);
+    },
+    update: async (id, data) => {
+      await updateDoc(doc(firestore, getCollectionName('scicomm_meetings'), String(id)), data);
+    },
+    delete: async (id) => {
+      await deleteDoc(doc(firestore, getCollectionName('scicomm_meetings'), String(id)));
+    }
+  },
+  scicomm_chat_rooms: {
+    add: async (room) => {
+      const ref = await addDoc(collection(firestore, getCollectionName('scicomm_chat_rooms')), room);
+      return ref.id;
+    },
+    update: async (id, data) => {
+      await updateDoc(doc(firestore, getCollectionName('scicomm_chat_rooms'), String(id)), data);
+    },
+    delete: async (id) => {
+      await deleteDoc(doc(firestore, getCollectionName('scicomm_chat_rooms'), String(id)));
+    }
+  },
+  scicomm_chat_messages: {
+    add: async (msg) => {
+      await addDoc(collection(firestore, getCollectionName('scicomm_chat_messages')), msg);
+    },
+    delete: async (id) => {
+      await deleteDoc(doc(firestore, getCollectionName('scicomm_chat_messages'), String(id)));
+    }
+  },
+  scicomm_banners: {
+    add: async (banner) => {
+      await addDoc(collection(firestore, getCollectionName('scicomm_banners')), banner);
+    },
+    update: async (id, data) => {
+      await updateDoc(doc(firestore, getCollectionName('scicomm_banners'), String(id)), data);
+    },
+    delete: async (id) => {
+      await deleteDoc(doc(firestore, getCollectionName('scicomm_banners'), String(id)));
+    }
   }
 };
