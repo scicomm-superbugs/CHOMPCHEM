@@ -88,9 +88,14 @@ export default function SciCommNetwork() {
 
   const suggestions = activeMembers.filter(m => {
     const cs = getConnectionStatus(m.id);
-    return cs.status === 'none' && (
-      !searchTerm || m.name.toLowerCase().includes(searchTerm.toLowerCase()) || (m.department || '').toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (searchTerm) {
+      // When searching, show ALL members matching the query
+      return m.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+             (m.department || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+             (m.username || '').toLowerCase().includes(searchTerm.toLowerCase());
+    }
+    // Without search, only show non-connected
+    return cs.status === 'none';
   });
 
   const filteredConnections = activeMembers.filter(m => connectedIds.has(String(m.id)));
@@ -136,18 +141,25 @@ export default function SciCommNetwork() {
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
-              {suggestions.map(s => (
+              {suggestions.map(s => {
+                const cs = getConnectionStatus(s.id);
+                return (
                 <div key={s.id} className="scicomm-card" style={{ textAlign: 'center', padding: '16px', border: '1px solid #e0dfdc' }}>
                   <Link to={`/member/${s.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>{renderAvatar(s, 72)}</div>
                     <h4 style={{ margin: '0 0 4px', fontSize: '14px' }}>{s.name}</h4>
                     <p style={{ color: 'rgba(0,0,0,0.6)', margin: '0 0 12px', fontSize: '12px', height: '32px', overflow: 'hidden' }}>{s.department || 'Science Communicator'}</p>
                   </Link>
-                  <button className="scicomm-btn-secondary" onClick={() => handleConnect(s.id)} style={{ width: '100%', justifyContent: 'center' }}>
-                    <UserPlus size={16} /> Connect
-                  </button>
+                  {cs.status === 'none' ? (
+                    <button className="scicomm-btn-secondary" onClick={() => handleConnect(s.id)} style={{ width: '100%', justifyContent: 'center' }}><UserPlus size={16} /> Connect</button>
+                  ) : cs.status === 'accepted' ? (
+                    <button className="scicomm-btn-primary" onClick={() => navigate('/chat?with=' + s.id)} style={{ width: '100%', justifyContent: 'center' }}><MessageCircle size={16} /> Message</button>
+                  ) : (
+                    <button className="scicomm-btn-secondary" disabled style={{ width: '100%', justifyContent: 'center', opacity: 0.6 }}>⏳ Pending</button>
+                  )}
                 </div>
-              ))}
+                );
+              })}
               {suggestions.length === 0 && <p style={{ color: '#666', gridColumn: '1/-1', textAlign: 'center', padding: '20px' }}>No more members to discover.</p>}
             </div>
           </div>
