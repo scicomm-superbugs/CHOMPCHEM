@@ -130,5 +130,16 @@ export const db = {
     add: async (msg) => {
       await addDoc(collection(firestore, getCollectionName('messages')), msg);
     }
+  },
+  scicomm_posts: {
+    add: async (post) => {
+      await addDoc(collection(firestore, getCollectionName('scicomm_posts')), post);
+    },
+    update: async (id, data) => {
+      await updateDoc(doc(firestore, getCollectionName('scicomm_posts'), String(id)), data);
+    },
+    delete: async (id) => {
+      await deleteDoc(doc(firestore, getCollectionName('scicomm_posts'), String(id)));
+    }
   }
 };

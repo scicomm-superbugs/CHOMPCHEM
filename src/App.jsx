@@ -16,6 +16,13 @@ import TeamSearch from './pages/TeamSearch';
 import Portal from './pages/Portal';
 import ProtectedRoute from './components/ProtectedRoute';
 
+import SciCommLayout from './scicomm/SciCommLayout';
+import SciCommFeed from './scicomm/SciCommFeed';
+import SciCommNetwork from './scicomm/SciCommNetwork';
+import SciCommTasks from './scicomm/SciCommTasks';
+import SciCommNotifications from './scicomm/SciCommNotifications';
+import SciCommProfile from './scicomm/SciCommProfile';
+import SciCommAdmin from './scicomm/SciCommAdmin';
 function App() {
   return (
     <Router>
@@ -27,22 +34,35 @@ function App() {
         <Route path="/register" element={<Register />} />
         
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="tracking" element={<UsageTracking />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="tasks" element={<Tasks />} />
-            <Route path="chat" element={<Chat />} />
-            <Route path="team" element={<TeamSearch />} />
-            
-            {/* Admin/Master only routes */}
-            <Route element={<ProtectedRoute requireAdmin={true} />}>
-              <Route path="chemicals" element={<RegisterChemical />} />
-              <Route path="devices" element={<Devices />} />
-              <Route path="equipment" element={<Equipment />} />
-              <Route path="scientists" element={<Scientists />} />
+          {localStorage.getItem('workspaceId') === 'aiuscicomm' ? (
+            <Route path="/" element={<SciCommLayout />}>
+              <Route index element={<SciCommFeed />} />
+              <Route path="network" element={<SciCommNetwork />} />
+              <Route path="tasks" element={<SciCommTasks />} />
+              <Route path="notifications" element={<SciCommNotifications />} />
+              <Route path="profile" element={<SciCommProfile />} />
+              <Route element={<ProtectedRoute requireAdmin={true} />}>
+                <Route path="admin" element={<SciCommAdmin />} />
+              </Route>
             </Route>
-          </Route>
+          ) : (
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="tracking" element={<UsageTracking />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="tasks" element={<Tasks />} />
+              <Route path="chat" element={<Chat />} />
+              <Route path="team" element={<TeamSearch />} />
+              
+              {/* Admin/Master only routes */}
+              <Route element={<ProtectedRoute requireAdmin={true} />}>
+                <Route path="chemicals" element={<RegisterChemical />} />
+                <Route path="devices" element={<Devices />} />
+                <Route path="equipment" element={<Equipment />} />
+                <Route path="scientists" element={<Scientists />} />
+              </Route>
+            </Route>
+          )}
         </Route>
         
         {/* Fallback */}
