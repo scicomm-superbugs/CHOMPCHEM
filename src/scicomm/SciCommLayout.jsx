@@ -2,7 +2,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Users, Briefcase, Bell, UserCircle, Search, Trophy, Shield, MessageCircle, Calendar, Play, Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveCollection } from '../db';
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AVATARS } from './scicommConstants';
 import '../scicomm.css';
 

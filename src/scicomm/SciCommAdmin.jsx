@@ -116,17 +116,16 @@ export default function SciCommAdmin() {
             <button onClick={async () => {
               if (window.confirm("⚠️ DANGER: Are you sure you want to FACTORY RESET the entire platform? This will delete all posts, tasks, warnings, messages, and users EXCEPT the Master account. This cannot be undone!")) {
                 if (window.prompt("Type 'CONFIRM' to factory reset") === 'CONFIRM') {
-                  const s = await db.scientists.toArray();
-                  for (const x of s) { if (x.role !== 'master') await db.scientists.delete(x.id); }
-                  await db.tasks.clear();
-                  await db.scicomm_posts.clear();
-                  await db.scicomm_warnings.clear();
-                  await db.scicomm_meetings.clear();
-                  await db.scicomm_chat_messages.clear();
-                  await db.scicomm_reels.clear();
-                  await db.scicomm_banners.clear();
-                  await db.scicomm_connections.clear();
-                  await db.scicomm_recognitions.clear();
+                  // Delete non-master users
+                  for (const x of scientists) { if (x.role !== 'master') await db.scientists.delete(x.id); }
+                  // Delete from each collection using loaded data
+                  for (const t of tasksData) await db.tasks.delete(t.id);
+                  for (const p of posts) await db.scicomm_posts.delete(p.id);
+                  for (const w of warningsData) await db.scicomm_warnings.delete(w.id);
+                  for (const m of meetingsData) await db.scicomm_meetings.delete(m.id);
+                  for (const b of bannersData) await db.scicomm_banners.delete(b.id);
+                  for (const c of connectionsData) await db.scicomm_connections.delete(c.id);
+                  for (const r of recognitionsData) await db.scicomm_recognitions.delete(r.id);
                   flash("Factory reset complete.");
                   setTimeout(() => window.location.reload(), 1000);
                 }
