@@ -338,9 +338,9 @@ export default function SciCommFeed() {
                     const cAuthor = getAuthor(c.authorId);
                     return (
                       <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                        {renderAvatar(cAuthor, 32)}
+                        <Link to={`/member/${c.authorId}`} style={{ flexShrink: 0 }}>{renderAvatar(cAuthor, 32)}</Link>
                         <div style={{ background: '#f3f2ef', borderRadius: '0 8px 8px 8px', padding: '8px 12px', flex: 1 }}>
-                          <strong style={{ fontSize: '13px' }}>{c.authorName}</strong>
+                          <Link to={`/member/${c.authorId}`} style={{ textDecoration: 'none', color: 'inherit' }}><strong style={{ fontSize: '13px' }}>{c.authorName}</strong></Link>
                           <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.4)', marginLeft: '8px' }}>{timeAgo(c.createdAt)}</span>
                           <p style={{ margin: '4px 0 0', fontSize: '13px' }}>{c.text}</p>
                         </div>
@@ -372,42 +372,21 @@ export default function SciCommFeed() {
         {recognitions.length > 0 && (
           <div className="scicomm-card scicomm-card-padding" style={{ marginTop: '8px' }}>
             <h3 style={{ margin: '0 0 10px', fontSize: '15px' }}>🌟 Spotlights</h3>
-            {recognitions.map(r => {
-              if (r.type === 'featured_reel') {
-                const targetReel = reelsRaw.find(x => x.id === r.targetId);
-                if (!targetReel) return null;
-                return (
-                  <div key={r.id} style={{ marginBottom: '12px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#f59e0b', marginBottom: '4px' }}>REEL OF THE WEEK</div>
-                    <Link to="/reels" style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        {renderAvatar(getAuthor(targetReel.authorId), 32)}
-                        <div>
-                          <div style={{ fontSize: '13px', fontWeight: 600 }}>{targetReel.authorName}</div>
-                          <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>{targetReel.caption.substring(0, 30)}...</div>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
-                );
-              }
-              if (r.type === 'post_of_month') {
-                const targetPost = postsRaw.find(x => x.id === r.targetId);
-                if (!targetPost) return null;
-                return (
-                  <div key={r.id} style={{ marginBottom: '12px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#10b981', marginBottom: '4px' }}>POST OF THE MONTH</div>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      {renderAvatar(getAuthor(targetPost.authorId), 32)}
-                      <div>
-                        <div style={{ fontSize: '13px', fontWeight: 600 }}>{targetPost.authorName}</div>
-                        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>{targetPost.content.substring(0, 30)}...</div>
-                      </div>
+            {recognitions.filter(r => r.type === 'post_of_month').map(r => {
+              const targetPost = postsRaw.find(x => x.id === r.targetId);
+              if (!targetPost) return null;
+              return (
+                <div key={r.id} style={{ marginBottom: '12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 800, color: '#10b981', marginBottom: '4px' }}>POST OF THE MONTH</div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    {renderAvatar(getAuthor(targetPost.authorId), 32)}
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 600 }}>{targetPost.authorName}</div>
+                      <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>{targetPost.content.substring(0, 30)}...</div>
                     </div>
                   </div>
-                );
-              }
-              return null;
+                </div>
+              );
             })}
           </div>
         )}
@@ -415,13 +394,13 @@ export default function SciCommFeed() {
         <div className="scicomm-card scicomm-card-padding" style={{ marginTop: '8px' }}>
           <h3 style={{ margin: '0 0 10px', fontSize: '15px' }}>Team</h3>
           {scientists.filter(s => s.accountStatus !== 'pending').slice(0, 5).map(s => (
-            <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <Link key={s.id} to={`/member/${s.id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', textDecoration: 'none', color: 'inherit' }}>
               {renderAvatar(s, 32)}
               <div>
                 <div style={{ fontWeight: 600, fontSize: '13px' }}>{s.name}</div>
                 <div style={{ color: 'rgba(0,0,0,0.5)', fontSize: '11px' }}>{s.department || 'Member'}</div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
